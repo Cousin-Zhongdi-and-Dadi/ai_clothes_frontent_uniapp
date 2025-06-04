@@ -1,5 +1,16 @@
 <template>
   <view class="content">
+    <!-- BodyDataEdit 弹窗 -->
+    <view
+      v-if="isBodyDataEditVisible"
+      class="popup-overlay"
+    >
+      <BodyDataEdit
+        ref="bodyDataEdit"
+        class="popup-content"
+        @signal="() => closeBodyDataEdit()"
+      />
+    </view>
     <view class="user_info_row">
       <image
         class="user_avatar"
@@ -22,7 +33,10 @@
         <text class="selection_text">{{ item.text }}</text>
       </view>
     </view>
-    <view class="user_data_panel">
+    <view
+      class="user_data_panel"
+      @click="showBodyDataEdit"
+    >
       <view class="percentage_bar_container">
         <text class="explanation_text">身高</text>
         <view class="percentage_bar_wrapper">
@@ -100,10 +114,15 @@
   </view>
 </template>
 
-<script>
+<script scoped>
+import BodyDataEdit from '../../components/body_data_edit/body_data_edit.vue';
+
 export default {
+    components: { BodyDataEdit },
+    name: 'UserInfo',
   data() {
     return {
+      isBodyDataEditVisible: false, // 控制 BodyDataEdit 显示状态
       userName: '用户昵称',
       userHeight: 170,
       userWeight: 60,
@@ -122,6 +141,12 @@ export default {
     };
   },
   methods: {
+    showBodyDataEdit() {
+      this.isBodyDataEditVisible = true; // 显示弹窗
+    },
+    closeBodyDataEdit() {
+      this.isBodyDataEditVisible = false; // 关闭弹窗
+    },
     percentageWidth(min, max, value) {
       const clamped = Math.min(Math.max(value, min), max);
       return ((clamped - min) / (max - min)) * 100;
@@ -148,10 +173,7 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   position: relative;
-  /* 预留底部导航栏空间 */
-  padding-bottom: 100rpx;
   background-color: rgba(247, 247, 247, 1);
 }
 
@@ -250,5 +272,28 @@ export default {
   padding: 20rpx;
   background: #fff;
   border-radius: 20rpx; /* 圆角 */
+  cursor: pointer; /* 鼠标指针样式，提示可点击 */
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 背景灰度 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* 确保浮于其他内容之上 */
+}
+
+.popup-content {
+  padding: 20px;
+  max-width: 400px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1001; /* 确保浮于遮罩层之上 */
 }
 </style>

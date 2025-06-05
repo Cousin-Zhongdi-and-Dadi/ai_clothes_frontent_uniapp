@@ -97,6 +97,10 @@
         </view>
       </view>
     </view>
+    <view class="button_pannel">
+      <button class="add_to_cart">加入购物车</button>
+      <button class="buy_now">立即购买</button>
+    </view>
   </view>
 </template>
 
@@ -318,5 +322,37 @@ export default {
 
 .swiper {
   height: 100%;
+}
+
+.button_pannel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx;
+  background-color: #fff;
+}
+
+.add_to_cart {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  background-color: #c4c4c4;
+  color: #333;
+  margin-right: 20rpx;
+}
+.buy_now {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  background-color: #6753e7;
+  color: #fff;
+  margin-left: 20rpx;
+  margin-right: 40rpx;
 }
 </style>

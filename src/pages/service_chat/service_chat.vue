@@ -16,8 +16,13 @@
         >
           <image
             class="robot-avatar"
-            src="/static/service_avatar.png"
+            :src="robotAvatarSrc"
+            v-if="robotAvatarSrc"
           />
+          <view
+            class="avatar-fallback"
+            v-else
+          ></view>
           <view class="robot-msg">
             <view class="robot-msg-title">{{ msg.content }}</view>
             <view
@@ -49,14 +54,18 @@
           v-else-if="msg.type === 'user'"
           class="chat-row user"
         >
-          <image
-            class="user-avatar"
-            src="/static/service_avatar.png"
-          />
+          <template v-if="userAvatarSrc">
+            <image
+              class="user-avatar"
+              :src="userAvatarSrc"
+            />
+          </template>
+          <template v-else>
+            <view class="avatar-fallback"></view>
+          </template>
           <view class="user-msg-wrap">
             <view class="user-msg">{{ msg.content }}</view>
           </view>
-
         </view>
       </view>
     </scroll-view>
@@ -117,19 +126,11 @@ export default {
           time: '2023-10-01 10:03'
         }
       ],
+      robotAvatarSrc: '/static/icon/icon-04.png',
+      userAvatarSrc: ''
     };
   },
   methods: {
-    // 页面方法
-  },
-  onLoad() {
-    // 页面加载时的逻辑
-  },
-  onShow() {
-    // 页面显示时的逻辑
-  },
-  onHide() {
-    // 页面隐藏时的逻辑
   }
 };
 </script>
@@ -180,19 +181,21 @@ export default {
   margin-bottom: 32rpx;
   padding-left: 24rpx;
 }
-.robot-avatar {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 12rpx;
-  margin-right: 16rpx;
-  background: #6753e7;
-}
+.robot-avatar,
 .user-avatar {
   width: 48rpx;
   height: 48rpx;
   border-radius: 12rpx;
+  object-fit: cover;
+  margin-right: 16rpx;
+}
+.chat-row.user .user-avatar {
   margin-left: 16rpx;
-  background: #6753e7;
+  margin-right: 0;
+}
+.robot-avatar[src=""],
+.user-avatar[src=""] {
+  background: #e0e0e0;
 }
 .robot-msg {
   background: #fff;
@@ -284,5 +287,16 @@ export default {
   margin-left: 18rpx;
   font-weight: bold;
   margin-right: 40rpx;
+}
+
+.avatar-fallback {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16rpx;
 }
 </style>

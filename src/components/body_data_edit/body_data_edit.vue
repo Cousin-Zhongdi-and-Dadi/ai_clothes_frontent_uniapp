@@ -26,15 +26,16 @@
         class="reminder"
         v-if=isReminderVisible
       >
-        <view class="reminder-text-holder">
-          <text class="reminder-text">请填写身高和体重</text>
-        </view>
+        <reminder>
+          身高和体重不能为空
+        </reminder>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import Reminder from '../reminder/reminder.vue';
 export default {
   name: 'BodyDataEdit',
   data() {
@@ -143,30 +144,5 @@ export default {
   font-size: 25rpx;
   color: #5742c8;
   margin-left: 6.667rpx;
-}
-
-.reminder {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* 背景灰度 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; /* 确保浮于其他内容之上 */
-}
-
-.reminder-text-holder {
-  background-color: #666;
-  padding: 10rpx 20rpx;
-  border-radius: 40rpx;
-  text-align: center;
-}
-
-.reminder-text {
-  font-size: 30rpx;
-  color: #fff;
 }
 </style>

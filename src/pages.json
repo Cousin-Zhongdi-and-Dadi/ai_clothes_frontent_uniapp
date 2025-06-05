@@ -1,6 +1,18 @@
 {
 	"pages": [ 
 	    {
+			"path": "pages/goods_detail/goods_detail",
+			"style": {
+				"navigationBarTitleText": "小程序"
+			}
+		},
+        {
+			"path": "pages/userInfo/userInfo",
+			"style": {
+				"navigationBarTitleText": "小程序"
+			}
+		},
+        {
 			"path": "pages/service_chat/service_chat",
 			"style": {
 				"navigationBarTitleText": "小程序"
@@ -13,19 +25,7 @@
 			}
 		},
         {
-			"path": "pages/goods_detail/goods_detail",
-			"style": {
-				"navigationBarTitleText": "小程序"
-			}
-		},
-        {
 			"path": "pages/shop/shop",
-			"style": {
-				"navigationBarTitleText": "小程序"
-			}
-		},
-        {
-			"path": "pages/userInfo/userInfo",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}

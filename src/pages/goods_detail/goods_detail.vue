@@ -164,14 +164,24 @@
         @click="openSkuPopup('buy')"
       >立即购买</button>
     </view>
+    <view
+      class="reminder"
+      v-if=isReminderVisible
+    >
+      <reminder>
+        {{ skuAction === 'cart' ? '已加入购物车' : '已下单成功' }}
+      </reminder>
+    </view>
   </view>
 </template>
 
 <script>
+import Reminder from '../../components/reminder/reminder.vue';
 export default {
   name: 'GoodsDetail',
   data() {
     return {
+      isReminderVisible: false, // 控制提醒信息的显示状态
       images: [
         '/static/example_pictures/sample2.png',
         '/static/example_pictures/sample3.png',
@@ -236,10 +246,14 @@ export default {
     confirmSku() {
       this.showSkuPopup = false;
       if (this.skuAction === 'cart') {
-        uni.showToast({ title: '已加入购物车', icon: 'success' });
+        
       } else {
-        uni.showToast({ title: '下单成功', icon: 'success' });
+
       }
+      this.isReminderVisible = true; // 显示提醒信息
+        setTimeout(() => {
+          this.isReminderVisible = false; // 2秒后隐藏提醒信息
+        }, 2000);
     }
   }
 };

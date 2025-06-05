@@ -124,6 +124,17 @@ export default {
           type: 'user',
           content: '入驻流程咨询',
           time: '2023-10-01 10:03'
+        },
+        {
+          type: 'robot',
+          content: '入驻流程如下：\n1. 提交入驻申请\n2. 审核资料\n3. 签署协议\n4. 完成入驻',
+          time: '2023-10-01 10:04',
+          tip: '如有疑问，请随时咨询我们！'
+        },
+        {
+          type: 'user',
+          content: '好的，谢谢！',
+          time: '2023-10-01 10:05'
         }
       ],
       robotAvatarSrc: '/static/icon/icon-04.png',
@@ -174,6 +185,7 @@ export default {
   flex: 1;
   padding: 24rpx 0 24rpx 0;
   overflow-y: auto;
+  margin-bottom: 90rpx; /* 留出输入栏高度 */
 }
 .chat-row {
   display: flex;
@@ -282,11 +294,21 @@ export default {
   outline: none;
 }
 .chat-input-plus {
-  font-size: 36rpx;
+  font-size: 30rpx;
   color: #6753e7;
   margin-left: 18rpx;
   font-weight: bold;
   margin-right: 40rpx;
+  /* 新增描边样式 */
+  border: 2rpx solid #bbb;
+  border-radius: 50%;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-sizing: border-box;
 }
 
 .avatar-fallback {

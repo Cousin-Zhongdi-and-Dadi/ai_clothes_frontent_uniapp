@@ -164,19 +164,10 @@
         @click="openSkuPopup('buy')"
       >立即购买</button>
     </view>
-    <!-- <view
-      class="reminder"
-      v-if=isReminderVisible
-    >
-      <reminder>
-        {{ skuAction === 'cart' ? '已加入购物车' : '已下单成功' }}
-      </reminder>
-    </view> -->
   </view>
 </template>
 
 <script>
-import Reminder from '../../components/reminder/reminder.vue';
 export default {
   name: 'GoodsDetail',
   data() {

@@ -116,7 +116,7 @@
 </template>
 
 <script scoped>
-import BodyDataEdit from '../../components/body_data_edit/body_data_edit.vue';
+import BodyDataEdit from '../../components/BodyDataEdit/BodyDataEdit.vue';
 
 export default {
     components: { BodyDataEdit },

@@ -1,68 +1,109 @@
 <template>
-  <view class="content">
-    <view class="center_content">
-      <button class="login_button">登录查看更多</button>
-      <text class="slogan">让每个时常成为你的T台</text>
+  <view class="login-page">
+    <!-- logo和slogan -->
+    <view class="login-logo-section">
+      <image
+        class="login-logo"
+        src="/static/icon/icon-04.png"
+      />
+      <view class="login-slogan">让每个时常成为你的T台</view>
     </view>
-    <navbar />
+
+    <!-- 登录按钮 -->
+    <view class="login-btns">
+      <button class="btn-primary">一键登录</button>
+      <button
+        class="btn-secondary"
+        disabled
+      >手机号登录/注册</button>
+    </view>
   </view>
 </template>
 
 <script>
 export default {
-    data() {
-        return {
-            title: 'Helo'
-        }
-    },
-    onLoad() {
-
-    },
-    methods: {
-
-    }
-}
+  name: 'IndexPage'
+};
 </script>
 
-<style>
-.content {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  position: relative;
-  /* 预留底部导航栏空间 */
-  padding-bottom: 100rpx;
+<style scoped>
+.login-page {
+  background: #fff;
+  height: 100vh;
 }
-
-.center_content {
+.login-header {
+  height: 90rpx;
+  background: #fff;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  flex: 1;
-  position: absolute;
-  top: 500rpx;
-  left: 0;
-  right: 0;
-  bottom: 100rpx; /* 预留navbar高度 */
+  justify-content: space-between;
+  padding: 0 24rpx;
+  border-bottom: 1rpx solid #eee;
 }
-
-.login_button {
-  width: 400rpx;
-  height: 100rpx;
-  background-color: rgba(103, 83, 231, 1);
-  color: white;
-  border-radius: 50rpx;
-  font-size: 45rpx;
-  text-align: center;
-  margin-bottom: 20rpx;
+.icon-back {
+  font-size: 36rpx;
+  color: #222;
+}
+.login-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #222;
+}
+.login-header-right {
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 16rpx;
 }
-
-.slogan {
+.icon-more,
+.icon-setting {
   font-size: 28rpx;
-  color: #666;
+  color: #888;
+}
+.login-logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100rpx;
+  margin-bottom: 100rpx;
+}
+.login-logo {
+  width: 96rpx;
+  height: 96rpx;
+  margin-bottom: 24rpx;
+}
+.login-slogan {
+  color: #6753e7;
+  font-size: 28rpx;
+  font-weight: bold;
   text-align: center;
+}
+.login-btns {
+  margin: 0 40rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 50rpx;
+}
+.btn-primary {
+  background: #6753e7;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 8rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border: none;
+  margin-bottom: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+.btn-secondary {
+  background: #c4c4c4;
+  color: #bbb;
+  font-size: 28rpx;
+  border-radius: 8rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border: none;
+  margin-left: 0;
+  margin-right: 0;
 }
 </style>

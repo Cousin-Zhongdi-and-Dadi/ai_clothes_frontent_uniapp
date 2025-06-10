@@ -1,73 +1,67 @@
 {
 	"pages": [ 
-	    {
-			"path": "pages/login/login",
+        {
+            "path": "pages/UserInfoEntry/UserInfoEntry",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+			"path": "pages/UserInfoNotLogin/UserInfoNotLogin",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/goods_detail/goods_detail",
+			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/userInfo/userInfo",
-			"style": {
-				"navigationBarTitleText": "小程序"
-			}
-		},{
-			"path": "pages/login/login",
+			"path": "pages/Login/Login",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/shop/shop",
+			"path": "pages/GoodsDetail/GoodsDetail",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/cart/cart",
+			"path": "pages/UserInfo/UserInfo",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/goods_detail/goods_detail",
+			"path": "pages/Shop/Shop",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/userInfo/userInfo",
+			"path": "pages/Cart/Cart",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/service_chat/service_chat",
+			"path": "pages/ServiceChat/ServiceChat",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},
         {
-			"path": "pages/recommendation/recommendation",
+			"path": "pages/Recommendation/Recommendation",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
 		},    
         {
-			"path": "pages/3d_display/3d_display",
-			"style": {
-				"navigationBarTitleText": "小程序"
-			}
-		},   
-        
-        {
-			"path": "pages/index/index",
+			"path": "pages/3dDisplay/3dDisplay",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}

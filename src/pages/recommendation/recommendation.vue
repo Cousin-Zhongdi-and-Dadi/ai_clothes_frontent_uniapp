@@ -31,9 +31,9 @@
 </template>
 
 <script>
-import Customer_service from '../../components/customer_service/customer_service.vue';
-import display_card from '../../components/display_card/display_card.vue';
-import Navbar from '../../components/navbar/navbar.vue';
+import Customer_service from '../../components/CustomerService/CustomerService.vue';
+import display_card from '../../components/DisplayCard/DisplayCard.vue';
+import Navbar from '../../components/Navbar/Navbar.vue';
 
 export default {
   components: { display_card, Navbar, Customer_service },

@@ -1,14 +1,5 @@
 <template>
   <view class="login-page">
-    <!-- 顶部栏 -->
-    <view class="login-header">
-      <text class="icon-back">&#60;</text>
-      <text class="login-title">手机号登录/注册</text>
-      <view class="login-header-right">
-        <text class="icon-eye">◎</text>
-      </view>
-    </view>
-
     <!-- logo和slogan -->
     <view class="login-logo-section">
       <image
@@ -43,6 +34,12 @@
           class="login-form-code-btn"
           @click="getCode"
         >获取验证码</view>
+      </view>
+      <view class="login-form-row">
+        <botton
+          class="login-form-submit"
+          @click="getCode"
+        >登录/注册</botton>
       </view>
     </view>
   </view>
@@ -162,5 +159,16 @@ export default {
   color: #bbb;
   font-size: 24rpx;
   margin-left: 16rpx;
+}
+.login-form-submit {
+  width: 100%;
+  height: 80rpx;
+  background: #6753e7;
+  color: #fff;
+  font-size: 28rpx;
+  text-align: center;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  margin-top: 40rpx;
 }
 </style>

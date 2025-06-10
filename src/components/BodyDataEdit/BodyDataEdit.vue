@@ -22,20 +22,11 @@
         class="submit-button"
         @click="handleSubmit"
       >确定</button>
-      <!-- <view
-        class="reminder"
-        v-if=isReminderVisible
-      >
-        <reminder>
-          身高和体重不能为空
-        </reminder>
-      </view> -->
     </view>
   </view>
 </template>
 
 <script>
-import Reminder from '../reminder/reminder.vue';
 export default {
   name: 'BodyDataEdit',
   data() {

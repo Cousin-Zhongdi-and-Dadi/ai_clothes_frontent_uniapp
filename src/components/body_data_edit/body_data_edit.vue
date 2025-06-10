@@ -22,14 +22,14 @@
         class="submit-button"
         @click="handleSubmit"
       >确定</button>
-      <view
+      <!-- <view
         class="reminder"
         v-if=isReminderVisible
       >
         <reminder>
           身高和体重不能为空
         </reminder>
-      </view>
+      </view> -->
     </view>
   </view>
 </template>
@@ -74,14 +74,21 @@ export default {
     handleSubmit() {
       console.log(this.formFields[0].value, this.formFields[1].value);
       if(!this.formFields[0].value || !this.formFields[1].value) {
-        this.isReminderVisible = true; // 显示提醒信息
-        setTimeout(() => {
-          this.isReminderVisible = false; // 3秒后隐藏提醒信息
-        }, 2000);
+        // this.isReminderVisible = true; // 显示提醒信息
+        // setTimeout(() => {
+        //   this.isReminderVisible = false; // 3秒后隐藏提醒信息
+        // }, 2000);
+        // uni.showToast({
+        //   title: '身高和体重不能为空',
+        //   duration: 2000,
+        //   icon: 'none'
+        // });
+        console.error('身高和体重不能为空');
+        this.$emit('failed', '身高和体重不能为空'); // 使用 $emit 发送错误事件
         return;
       }
       console.log('提交的数据:', this.formFields);
-      this.$emit('signal'); // 使用 $emit 发送事件
+      this.$emit('success'); // 使用 $emit 发送事件
     }
   }
 };

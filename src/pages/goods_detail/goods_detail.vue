@@ -164,14 +164,14 @@
         @click="openSkuPopup('buy')"
       >立即购买</button>
     </view>
-    <view
+    <!-- <view
       class="reminder"
       v-if=isReminderVisible
     >
       <reminder>
         {{ skuAction === 'cart' ? '已加入购物车' : '已下单成功' }}
       </reminder>
-    </view>
+    </view> -->
   </view>
 </template>
 
@@ -250,10 +250,15 @@ export default {
       } else {
 
       }
-      this.isReminderVisible = true; // 显示提醒信息
-        setTimeout(() => {
-          this.isReminderVisible = false; // 2秒后隐藏提醒信息
-        }, 2000);
+    //   this.isReminderVisible = true; // 显示提醒信息
+    //     setTimeout(() => {
+    //       this.isReminderVisible = false; // 2秒后隐藏提醒信息
+    //     }, 2000);
+    uni.showToast({
+        title: this.skuAction === 'cart' ? '已加入购物车' : '已下单成功',
+        icon: 'success',
+        duration: 2000
+      });
     }
   }
 };

@@ -8,7 +8,8 @@
       <BodyDataEdit
         ref="bodyDataEdit"
         class="popup-content"
-        @signal="() => closeBodyDataEdit()"
+        @success="() => closeBodyDataEdit()"
+        @failed="(error) => showError(error)"
       />
     </view>
     <view class="user_info_row">
@@ -146,10 +147,23 @@ export default {
     },
     closeBodyDataEdit() {
       this.isBodyDataEditVisible = false; // 关闭弹窗
+      // 可以在这里添加其他逻辑，比如更新用户数据等
+      uni.showToast({
+        title: '数据已更新',
+        icon: 'success'
+      });
     },
     percentageWidth(min, max, value) {
       const clamped = Math.min(Math.max(value, min), max);
       return ((clamped - min) / (max - min)) * 100;
+    },
+    showError(error) {
+      console.error(error);
+      uni.showToast({
+        title: '身高和体重不能为空',
+        icon: 'none'
+      });
+      console.log('执行到了这里');
     }
   },
   computed: {
@@ -285,7 +299,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* 确保浮于其他内容之上 */
+  z-index: 20; /* 确保浮于其他内容之上 */
 }
 
 .popup-content {
@@ -294,6 +308,6 @@ export default {
   background-color: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1001; /* 确保浮于遮罩层之上 */
+  z-index: 21; /* 确保浮于遮罩层之上 */
 }
 </style>

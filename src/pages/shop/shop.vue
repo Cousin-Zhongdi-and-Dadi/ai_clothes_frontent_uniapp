@@ -29,9 +29,6 @@
         <text class="goods-price">￥{{ item.price }}</text>
       </view>
     </view>
-    <!-- 底部导航栏占位，可替换为<navbar />组件 -->
-    <view class="shop-navbar-placeholder"></view>
-    <navbar />
   </view>
 </template>
 
@@ -132,8 +129,5 @@ export default {
   font-size: 28rpx;
   font-weight: bold;
   margin-top: 12rpx;
-}
-.shop-navbar-placeholder {
-  height: 100rpx;
 }
 </style>

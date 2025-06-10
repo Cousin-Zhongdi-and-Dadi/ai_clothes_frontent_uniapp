@@ -2,12 +2,10 @@
   <view>
     <user-info v-if="isLogin" />
     <user-info-not-login v-else />
-    <navbar />
   </view>
 </template>
 
 <script>
-import Navbar from '../../components/Navbar/Navbar.vue'
 import UserInfo from '../../pages/UserInfo/UserInfo.vue'
 import UserInfoNotLogin from '../../pages/UserInfoNotLogin/UserInfoNotLogin.vue'
 
@@ -15,7 +13,6 @@ export default {
   components: {
     UserInfo,
     UserInfoNotLogin,
-    Navbar
   },
   data() {
     return {

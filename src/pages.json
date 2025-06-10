@@ -61,12 +61,56 @@
 			}
 		},    
         {
-			"path": "pages/3dDisplay/3dDisplay",
+			"path": "pages/ThreeDimDisplay/ThreeDimDisplay",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
-		}
+		},
+        {
+            "path": "pages/Closet/Closet",
+			"style": {
+				"navigationBarTitleText": "小程序"
+			}
+        }
 	],
+	"tabBar": {
+		"color": "#888",
+		"selectedColor": "#6753e7",
+		"backgroundColor": "#fff",
+		"borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/Recommendation/Recommendation",
+				"iconPath": "static/icon/icon-09.png",
+				"selectedIconPath": "static/icon/icon-10.png",
+				"text": "每日推荐"
+			},
+            {
+				"pagePath": "pages/Closet/Closet",
+				"iconPath": "static/icon/icon-01.png",
+				"selectedIconPath": "static/icon/icon-02.png",
+				"text": "我的衣橱"
+			},
+			{
+				"pagePath": "pages/ThreeDimDisplay/ThreeDimDisplay",
+				"iconPath": "static/icon/icon-03.png",
+				"selectedIconPath": "static/icon/icon-04.png",
+				"text": "试衣搭配"
+			},
+			{
+				"pagePath": "pages/Shop/Shop",
+				"iconPath": "static/icon/icon-05.png",
+				"selectedIconPath": "static/icon/icon-06.png",
+				"text": "我的商城"
+			},
+			{
+				"pagePath": "pages/UserInfoEntry/UserInfoEntry",
+				"iconPath": "static/icon/icon-07.png",
+				"selectedIconPath": "static/icon/icon-08.png",
+				"text": "个人中心"
+			}
+		]
+	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",

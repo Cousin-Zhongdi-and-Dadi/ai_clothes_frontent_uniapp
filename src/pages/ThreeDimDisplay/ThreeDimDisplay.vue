@@ -6,7 +6,7 @@
 
 <script>
 export default {
-    name: '3d_display',
+    name: 'ThreeDimDisplay',
     data() {
         return {
             // Add your data properties here

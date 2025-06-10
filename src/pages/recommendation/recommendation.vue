@@ -26,17 +26,15 @@
         <text>看完啦</text>
       </view>
     </view>
-    <navbar />
   </view>
 </template>
 
 <script>
 import Customer_service from '../../components/CustomerService/CustomerService.vue';
 import display_card from '../../components/DisplayCard/DisplayCard.vue';
-import Navbar from '../../components/Navbar/Navbar.vue';
 
 export default {
-  components: { display_card, Navbar, Customer_service },
+  components: { display_card, Customer_service },
   name: 'Recommendation',
   data() {
     return {

@@ -4,21 +4,11 @@
       <button class="login_button">登录查看更多</button>
       <text class="slogan">让每个时常成为你的T台</text>
     </view>
-    <navbar />
   </view>
 </template>
 
 <script>
 export default {
-    data() {
-        
-    },
-    onLoad() {
-
-    },
-    methods: {
-
-    }
 }
 </script>
 

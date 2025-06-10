@@ -111,7 +111,6 @@
         </view>
       </view>
     </view>
-    <navbar />
   </view>
 </template>
 

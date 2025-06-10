@@ -71,6 +71,7 @@
     "@dcloudio/uni-stacktracey": "^2.0.2-alpha-4060720250515001",
     "@dcloudio/uni-stat": "^2.0.2-alpha-4060720250515001",
     "@vue/shared": "^3.0.0",
+    "axios": "^1.9.0",
     "core-js": "^3.8.3",
     "flyio": "^0.6.2",
     "vue": ">= 2.6.14 < 2.7",
@@ -92,7 +93,7 @@
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "babel-plugin-import": "^1.11.0",
-    "cross-env": "^7.0.2",
+    "cross-env": "^7.0.3",
     "jest": "^25.4.0",
     "postcss-comment": "^2.0.0",
     "vue-template-compiler": ">= 2.6.14 < 2.7"

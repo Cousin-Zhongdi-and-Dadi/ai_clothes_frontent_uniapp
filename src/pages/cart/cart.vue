@@ -52,51 +52,12 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
-      cartList: [
-        {
-          id: 1,
-          image: '/static/example_pictures/sample1.png',
-          color: '黑色',
-          size: 'M',
-          price: 350,
-          selected: true
-        },
-        {
-          id: 2,
-          image: '/static/example_pictures/sample1.png',
-          color: '黑色',
-          size: 'M',
-          price: 350,
-          selected: false
-        },
-        {
-          id: 3,
-          image: '/static/example_pictures/sample1.png',
-          color: '黑色',
-          size: 'M',
-          price: 350,
-          selected: false
-        },
-        {
-          id: 4,
-          image: '/static/example_pictures/sample1.png',
-          color: '黑色',
-          size: 'M',
-          price: 350,
-          selected: false
-        },
-        {
-          id: 5,
-          image: '/static/example_pictures/sample1.png',
-          color: '黑色',
-          size: 'M',
-          price: 350,
-          selected: false
-        }
-      ]
+      cartList: []
     };
   },
   computed: {
@@ -106,7 +67,7 @@ export default {
     totalPrice() {
       return this.cartList
         .filter(item => item.selected)
-        .reduce((sum, item) => sum + item.price, 0);
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
     }
   },
   methods: {
@@ -116,7 +77,29 @@ export default {
     toggleSelectAll() {
       const select = !this.isAllSelected;
       this.cartList.forEach(item => (item.selected = select));
+    },
+    async fetchCartList() {
+      try {
+        const res = await axios.get('/shoppingCart/getProduct');
+        if (res.data && res.data.code === 200 && Array.isArray(res.data.data)) {
+          this.cartList = res.data.data.map(item => ({
+            id: item.id,
+            image: item.imageUrl,
+            color: item.colorName,
+            size: item.sizeName,
+            price: item.price,
+            quantity: item.quantity,
+            productName: item.productName,
+            selected: true
+          }));
+        }
+      } catch (e) {
+        uni.showToast({ title: '加载购物车失败', icon: 'none' });
+      }
     }
+  },
+  onLoad() {
+    this.fetchCartList();
   }
 };
 </script>

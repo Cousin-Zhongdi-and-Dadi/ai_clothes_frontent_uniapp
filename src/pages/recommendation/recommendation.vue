@@ -1,12 +1,13 @@
 <template>
   <view class="container">
-    <customer_service />
+    <customer-service />
+    <cart-icon />
     <!-- 渲染多个 display_card -->
     <view
       class="card-stack"
       ref="cardStack"
     >
-      <display_card
+      <display-card
         v-for="(card, index) in cards"
         :key="index"
         :ref="`card-${index}`"
@@ -30,12 +31,12 @@
 </template>
 
 <script>
-import Customer_service from '../../components/CustomerService/CustomerService.vue';
-import display_card from '../../components/DisplayCard/DisplayCard.vue';
+import CartIcon from '@/components/CartIcon/CartIcon.vue';
+import CustomerService from '@/components/CustomerService/CustomerService.vue';
+import DisplayCard from '@/components/DisplayCard/DisplayCard.vue';
 
 export default {
-  components: { display_card, Customer_service },
-  name: 'Recommendation',
+  components: { DisplayCard, CustomerService, CartIcon },
   data() {
     return {
       cards: [

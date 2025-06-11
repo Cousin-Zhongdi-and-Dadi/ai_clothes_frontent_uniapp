@@ -1,6 +1,9 @@
 <template>
   <view>
-    <view class="icon_panel">
+    <view
+      class="icon_panel"
+      @click="goToChat"
+    >
       <!-- 图标 -->
       <image
         src="/static/icon/icon-12.png"
@@ -20,7 +23,13 @@ export default {
   data() {
     return {};
   },
-  methods: {}
+  methods: {
+    goToChat() {
+      uni.navigateTo({
+        url: '/pages/ServiceChat/ServiceChat'
+      });
+    }
+  }
 };
 </script>
 

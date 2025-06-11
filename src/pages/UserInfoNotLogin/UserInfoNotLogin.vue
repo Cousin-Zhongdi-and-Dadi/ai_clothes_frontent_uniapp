@@ -1,7 +1,10 @@
 <template>
   <view class="content">
     <view class="center_content">
-      <button class="login_button">登录查看更多</button>
+      <button
+        class="login_button"
+        @click="login"
+      >登录查看更多</button>
       <text class="slogan">让每个时常成为你的T台</text>
     </view>
   </view>
@@ -9,6 +12,14 @@
 
 <script>
 export default {
+    methods: {
+        login() {
+            // 跳转到登录页面
+            uni.navigateTo({
+                url: '/pages/LoginSelection/LoginSelection'
+            });
+        }
+    }
 }
 </script>
 

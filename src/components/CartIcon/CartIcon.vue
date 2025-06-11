@@ -1,11 +1,14 @@
 <template>
   <view>
-    <view class="icon_panel">
+    <view
+      class="icon_panel"
+      @click="goToCart"
+    >
       <!-- 图标 -->
       <image
         src="/static/icon/icon-13.png"
         mode="widthFix"
-        class="customer-service-icon"
+        class="cart-icon"
       ></image>
       <!-- 文本 -->
       <view class="icon_panel_text">购物车</view>
@@ -15,12 +18,18 @@
 
 <script>
 export default {
-  name: 'CustomerService',
+  name: 'CartIcon',
   components: {},
   data() {
     return {};
   },
-  methods: {}
+  methods: {
+    goToCart() {
+      uni.navigateTo({
+        url: '/pages/Cart/Cart'
+      });
+    }
+  }
 };
 </script>
 
@@ -28,7 +37,7 @@ export default {
 .icon_panel {
   position: fixed;
   right: 50rpx;
-  bottom: 200rpx;
+  bottom: 350rpx;
   width: 100rpx; /* 调整宽度以适应文本 */
   height: 100rpx; /* 调整高度以适应文本 */
   background-color: #fff; /* 圆形白色底 */
@@ -42,7 +51,7 @@ export default {
   padding: 10rpx; /* 添加内边距以适应文本 */
 }
 
-.customer-service-icon {
+.cart-icon {
   width: 80rpx; /* 图标大小 */
   height: 80rpx;
   margin-bottom: 5rpx; /* 图标和文本之间的间距 */

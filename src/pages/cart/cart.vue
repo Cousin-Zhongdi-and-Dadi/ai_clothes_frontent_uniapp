@@ -57,7 +57,38 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      cartList: []
+      cartList: [
+        {
+            id: 1,
+            image: '/static/goods/goods1.png',
+            color: '红色',
+            size: 'M',
+            price: 350,
+            quantity: 1,
+            productName: 'New Balance NB 530单层',
+            selected: true
+        },
+        {
+            id: 2,
+            image: '/static/goods/goods2.png',
+            color: '蓝色',
+            size: 'L',
+            price: 400,
+            quantity: 1,
+            productName: 'New Balance NB 530单层',
+            selected: true
+        },
+        {
+            id: 3,
+            image: '/static/goods/goods3.png',
+            color: '绿色',
+            size: 'XL',
+            price: 450,
+            quantity: 1,
+            productName: 'New Balance NB 530单层',
+            selected: true
+        }
+      ]
     };
   },
   computed: {

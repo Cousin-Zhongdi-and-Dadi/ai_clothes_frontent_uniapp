@@ -13,7 +13,7 @@
 			}
 		},
         {
-			"path": "pages/index/index",
+			"path": "pages/LoginSelection/LoginSelection",
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}

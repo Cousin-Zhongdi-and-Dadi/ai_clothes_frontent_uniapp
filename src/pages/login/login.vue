@@ -36,10 +36,10 @@
         >获取验证码</view>
       </view>
       <view class="login-form-row">
-        <botton
+        <button
           class="login-form-submit"
-          @click="getCode"
-        >登录/注册</botton>
+          @click="login"
+        >登录/注册</button>
       </view>
     </view>
   </view>
@@ -71,6 +71,37 @@ export default {
       }
       // 这里可添加获取验证码逻辑
       console.log('获取验证码', this.phone);
+        uni.showToast({
+            title: '验证码已发送',
+            icon: 'success'
+        });
+    },
+    login() {
+      if (!this.phone) {
+        uni.showToast({
+          title: '请输入手机号',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.code) {
+        uni.showToast({
+          title: '请输入验证码',
+          icon: 'none'
+        });
+        return;
+      }
+      // TODO 这里可添加登录逻辑
+      console.log('登录', this.phone, this.code);
+      const userInfo = {
+        phone: this.phone,
+        code: this.code
+      };
+      uni.setStorageSync('userInfo', userInfo);
+      // 跳转到首页或其他页面
+        uni.switchTab({
+            url: '/pages/UserInfoEntry/UserInfoEntry'
+        });
     }
   }
 };

@@ -14,7 +14,7 @@
       <button class="btn-primary">一键登录</button>
       <button
         class="btn-secondary"
-        disabled
+        @click="phoneLogin"
       >手机号登录/注册</button>
     </view>
   </view>
@@ -22,7 +22,20 @@
 
 <script>
 export default {
-  name: 'IndexPage'
+  name: 'LoginSelection',
+    methods: {
+        // 一键登录逻辑
+        oneClickLogin() {
+            // TODO 这里可以添加一键登录的逻辑
+        },
+        // 手机号登录逻辑
+        phoneLogin() {
+            // 跳转到手机号登录页面
+            uni.navigateTo({
+                url: '/pages/Login/Login'
+            });
+        }
+    },
 };
 </script>
 
@@ -97,7 +110,7 @@ export default {
 }
 .btn-secondary {
   background: #c4c4c4;
-  color: #bbb;
+  color: #fff;
   font-size: 28rpx;
   border-radius: 8rpx;
   height: 80rpx;

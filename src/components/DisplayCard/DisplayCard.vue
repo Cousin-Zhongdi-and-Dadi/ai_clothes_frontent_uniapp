@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  name: 'display_card',
+  name: 'DisplayCard',
   props: {
     frontImage: {
       type: String,

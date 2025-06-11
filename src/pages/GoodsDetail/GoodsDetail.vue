@@ -1,5 +1,7 @@
 <template>
   <view class="goods-detail-page">
+    <customer-service />
+    <cart-icon />
     <!-- 商品图片展示 -->
     <view class="goods-image-swiper">
       <swiper
@@ -168,7 +170,10 @@
 </template>
 
 <script>
+import CustomerService from '@/components/CustomerService/CustomerService.vue';
+import CartIcon from '@/components/CartIcon/CartIcon.vue';
 export default {
+  components: { CustomerService, CartIcon },
   name: 'GoodsDetail',
   data() {
     return {

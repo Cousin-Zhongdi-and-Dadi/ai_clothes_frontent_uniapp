@@ -4,13 +4,19 @@
     <view
       v-if="isBodyDataEditVisible"
       class="popup-overlay"
+      @click="closeBodyDataEdit"
     >
-      <BodyDataEdit
-        ref="bodyDataEdit"
-        class="popup-content"
-        @success="() => closeBodyDataEdit()"
-        @failed="(error) => showError(error)"
-      />
+      <view
+        class="popup-background"
+        @click.stop
+      >
+        <BodyDataEdit
+          ref="bodyDataEdit"
+          class="popup-content"
+          @success="() => submitBodyDataEdit()"
+          @failed="(error) => showError(error)"
+        />
+      </view>
     </view>
     <view class="user_info_row">
       <image
@@ -147,22 +153,24 @@ export default {
     closeBodyDataEdit() {
       this.isBodyDataEditVisible = false; // 关闭弹窗
       // 可以在这里添加其他逻辑，比如更新用户数据等
+    },
+    submitBodyDataEdit() {
       uni.showToast({
         title: '数据已更新',
         icon: 'success'
       });
+      closeBodyDataEdit();
     },
     percentageWidth(min, max, value) {
       const clamped = Math.min(Math.max(value, min), max);
       return ((clamped - min) / (max - min)) * 100;
     },
     showError(error) {
-      console.error(error);
+      console.log(error);
       uni.showToast({
-        title: '身高和体重不能为空',
+        title: error,
         icon: 'none'
       });
-      console.log('执行到了这里');
     }
   },
   computed: {

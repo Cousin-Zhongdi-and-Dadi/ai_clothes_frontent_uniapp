@@ -60,7 +60,7 @@ export default {
       cartList: [
         {
             id: 1,
-            image: '/static/goods/goods1.png',
+            image: '/static/example_pictures/sample1.png',
             color: '红色',
             size: 'M',
             price: 350,
@@ -70,7 +70,7 @@ export default {
         },
         {
             id: 2,
-            image: '/static/goods/goods2.png',
+            image: '/static/example_pictures/sample1.png',
             color: '蓝色',
             size: 'L',
             price: 400,
@@ -80,7 +80,7 @@ export default {
         },
         {
             id: 3,
-            image: '/static/goods/goods3.png',
+            image: '/static/example_pictures/sample1.png',
             color: '绿色',
             size: 'XL',
             price: 450,
@@ -108,30 +108,30 @@ export default {
     toggleSelectAll() {
       const select = !this.isAllSelected;
       this.cartList.forEach(item => (item.selected = select));
-    },
-    async fetchCartList() {
-      try {
-        const res = await axios.get('/shoppingCart/getProduct');
-        if (res.data && res.data.code === 200 && Array.isArray(res.data.data)) {
-          this.cartList = res.data.data.map(item => ({
-            id: item.id,
-            image: item.imageUrl,
-            color: item.colorName,
-            size: item.sizeName,
-            price: item.price,
-            quantity: item.quantity,
-            productName: item.productName,
-            selected: true
-          }));
-        }
-      } catch (e) {
-        uni.showToast({ title: '加载购物车失败', icon: 'none' });
-      }
     }
-  },
-  onLoad() {
-    this.fetchCartList();
+    // async fetchCartList() {
+    //   try {
+    //     const res = await axios.get('/shoppingCart/getProduct');
+    //     if (res.data && res.data.code === 200 && Array.isArray(res.data.data)) {
+    //       this.cartList = res.data.data.map(item => ({
+    //         id: item.id,
+    //         image: item.imageUrl,
+    //         color: item.colorName,
+    //         size: item.sizeName,
+    //         price: item.price,
+    //         quantity: item.quantity,
+    //         productName: item.productName,
+    //         selected: true
+    //       }));
+    //     }
+    //   } catch (e) {
+    //     uni.showToast({ title: '加载购物车失败', icon: 'none' });
+    //   }
+    // }
   }
+//   onLoad() {
+//     this.fetchCartList();
+//   }
 };
 </script>
 
@@ -286,5 +286,6 @@ export default {
   height: 64rpx;
   line-height: 64rpx;
   border: none;
+  margin-right: 50rpx;
 }
 </style>

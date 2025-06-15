@@ -256,7 +256,10 @@ export default {
         duration: 2000
       });
     }
-  }
+  },
+  onLoad(options) {
+      const id = options.id
+  },
 };
 </script>
 

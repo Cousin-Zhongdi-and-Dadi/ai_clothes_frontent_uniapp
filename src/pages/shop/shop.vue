@@ -16,6 +16,7 @@
         class="goods-item"
         v-for="item in goods"
         :key="item.id"
+        @click="goToDetail(item.id)"
       >
         <image
           :src="item.image"
@@ -38,15 +39,23 @@ export default {
   data() {
     return {
       goods: [
-        { id: 1, name: 'New Balance NB 530单层', price: 350, image: '/static/goods/goods1.png' },
-        { id: 2, name: 'New Balance NB 530单层', price: 350, image: '/static/goods/goods2.png' },
-        { id: 3, name: 'New Balance NB 530单层', price: 350, image: '/static/goods/goods3.png' },
-        { id: 4, name: 'New Balance NB 530单层', price: 350, image: '/static/goods/goods1.png' },
-        { id: 5, name: 'New Balance NB 530单层', price: 350, image: '/static/goods/goods2.png' },
-        { id: 6, name: 'New Balance NB 530单层', price: 350, image: '/static/goods/goods3.png' }
+        { id: 1, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample1.png' },
+        { id: 2, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample1.png' },
+        { id: 3, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample1.png' },
+        { id: 4, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample1.png' },
+        { id: 5, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample1.png' },
+        { id: 6, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample1.png' }
       ]
     };
-  }
+  },
+  methods: {
+    goToDetail(id) {
+      // 跳转到商品详情页
+      uni.navigateTo({
+        url: `/pages/GoodsDetail/GoodsDetail?id=${id}`
+      });
+    }
+  },
 };
 </script>
 

@@ -71,6 +71,18 @@
 			"style": {
 				"navigationBarTitleText": "小程序"
 			}
+        },
+        {
+            "path": "pages/TryOnContainer/TryOnContainer",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+            "path": "pages/TwoDimDisplay/TwoDimDisplay",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
         }
 	],
 	"tabBar": {
@@ -92,7 +104,7 @@
 				"text": "我的衣橱"
 			},
 			{
-				"pagePath": "pages/ThreeDimDisplay/ThreeDimDisplay",
+				"pagePath": "pages/TryOnContainer/TryOnContainer",
 				"iconPath": "static/icon/icon-03.png",
 				"selectedIconPath": "static/icon/icon-04.png",
 				"text": "试衣搭配"

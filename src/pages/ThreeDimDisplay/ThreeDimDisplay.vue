@@ -1,6 +1,6 @@
 <template>
   <view>
-    <!-- 3D Display Page Content -->
+    <web-view :src="url"></web-view>
   </view>
 </template>
 
@@ -9,7 +9,8 @@ export default {
     name: 'ThreeDimDisplay',
     data() {
         return {
-            // Add your data properties here
+            // 在这里替换成你想要显示的网页地址
+            url: 'https://cloud.style3d.com/cd/product/2457242?share_state_id=83518&func=resproduct&is_share_page=1' 
         };
     },
     methods: {

@@ -2,8 +2,12 @@
   <view class="goods-detail-page">
     <customer-service />
     <cart-icon />
-    <!-- 商品图片展示 -->
-    <view class="goods-image-swiper">
+
+    <!-- 商品图片展示 (添加 v-if) -->
+    <view
+      v-if="productInfo.images && productInfo.images.length > 0"
+      class="goods-image-swiper"
+    >
       <swiper
         indicator-dots
         autoplay
@@ -11,7 +15,7 @@
         class="swiper"
       >
         <swiper-item
-          v-for="(img, idx) in images"
+          v-for="(img, idx) in productInfo.images"
           :key="idx"
         >
           <image
@@ -23,86 +27,22 @@
       </swiper>
     </view>
 
-    <!-- 商品参数区 -->
-    <view class="goods-info">
+    <!-- 商品参数区 (添加 v-if) -->
+    <view
+      v-if="productInfo.title"
+      class="goods-info"
+    >
       <view class="goods-price-row">
-        <text class="goods-price">￥{{ price }}</text>
+        <text class="goods-price">￥{{ productInfo.price }}</text>
         <text class="goods-tag">新品</text>
       </view>
-      <view class="goods-title">{{ title }}</view>
-      <view class="goods-desc">{{ desc }}</view>
-      <view class="goods-params">
-        <view class="param-row">
-          <text class="param-label">颜色：</text>
-          <text class="param-value">{{ color }}</text>
-        </view>
-        <view class="param-row">
-          <text class="param-label">尺码：</text>
-          <text class="param-value">{{ size }}</text>
-        </view>
-      </view>
+      <view class="goods-title">{{ productInfo.title }}</view>
+      <view class="goods-desc">{{ productInfo.desc }}</view>
     </view>
 
-    <!-- 尺码推荐 -->
-    <view class="size-recommend">
-      <view class="size-header">
-        <text class="size-title">尺码推荐</text>
-      </view>
-      <view class="size-table">
-        <view class="size-table-header">
-          <text class="size-th">尺码</text>
-          <text class="size-th">身高</text>
-          <text class="size-th">体重</text>
-        </view>
-        <view
-          class="size-table-row"
-          v-for="(row, idx) in sizeTable"
-          :key="idx"
-        >
-          <text class="size-td">{{ row.size }}</text>
-          <text class="size-td">{{ row.height }}</text>
-          <text class="size-td">{{ row.weight }}</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 商品详情 -->
-    <view class="goods-detail-section">
-      <view class="detail-title">商品详情</view>
-      <image
-        v-for="(img, idx) in detailImages"
-        :key="idx"
-        :src="img"
-        class="detail-image"
-        mode="widthFix"
-      />
-    </view>
-
-    <!-- 更多推荐 -->
-    <view class="more-recommend-section">
-      <view class="recommend-title">更多推荐</view>
-      <view class="recommend-list">
-        <view
-          class="recommend-item"
-          v-for="item in moreGoods"
-          :key="item.id"
-        >
-          <image
-            :src="item.image"
-            class="recommend-image"
-            mode="aspectFill"
-          />
-          <view class="recommend-info">
-            <text class="recommend-name">{{ item.name }}</text>
-            <text class="recommend-price">￥{{ item.price }}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 商品选择弹窗 -->
+    <!-- 商品选择弹窗 (添加 v-if) -->
     <view
-      v-if="showSkuPopup"
+      v-if="showSkuPopup && styles.length > 0"
       class="sku-popup-mask"
       @click="closeSkuPopup"
     >
@@ -125,7 +65,7 @@
           <view class="sku-popup-style-list">
             <view
               v-for="(style, idx) in styles"
-              :key="style.name"
+              :key="style.styleId"
               :class="['sku-popup-style-item', { active: selectedStyleIndex === idx }]"
               @click="selectStyle(idx)"
             >
@@ -143,15 +83,34 @@
             <view
               v-for="size in sizes"
               :key="size"
-              :class="['sku-popup-size-item', { active: selectedSize === size }]"
+              :class="['sku-popup-size-item', { active: selectedSize === size, disabled: !isSizeAvailable(size) }]"
               @click="selectSize(size)"
             >{{ size }}</view>
+          </view>
+        </view>
+        <view class="sku-popup-section sku-quantity-section">
+          <view class="sku-popup-label">数量</view>
+          <view class="quantity-selector">
+            <button
+              class="quantity-btn"
+              @click="changeQuantity(-1)"
+              :disabled="quantity <= 1"
+            >-</button>
+            <input
+              class="quantity-input"
+              type="number"
+              v-model.number="quantity"
+            />
+            <button
+              class="quantity-btn"
+              @click="changeQuantity(1)"
+            >+</button>
           </view>
         </view>
         <button
           class="sku-popup-confirm"
           @click="confirmSku"
-        >立即下单</button>
+        >确定</button>
       </view>
     </view>
 
@@ -172,60 +131,111 @@
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import CartIcon from '@/components/CartIcon/CartIcon.vue';
+import apiConfig from '@/utils/api.js';
+
 export default {
   components: { CustomerService, CartIcon },
   name: 'GoodsDetail',
   data() {
     return {
-      isReminderVisible: false, // 控制提醒信息的显示状态
-      images: [
-        '/static/example_pictures/sample2.png',
-        '/static/example_pictures/sample3.png',
-      ],
-      price: 350,
-      title: 'New Balance NB 530单层 经典复古 时尚特物',
-      desc: 'New Balance NB 530单层 经典复古 时尚特物',
-      color: '粉色',
-      size: 'M',
-      sizeTabs: ['尺码推荐'],
-      sizeTabIndex: 0,
-      sizeTable: [
-        { size: 'S', height: '150-160', weight: '40-50kg' },
-        { size: 'M', height: '160-170', weight: '50-60kg' },
-        { size: 'L', height: '170-180', weight: '60-70kg' }
-      ],
-      detailImages: [
-        '/static/example_pictures/sample1.png',
-        '/static/example_pictures/sample2.png',
-      ],
-      moreGoods: [
-        { id: 1, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample4.png' },
-        { id: 2, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample4.png' },
-        { id: 3, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample4.png' },
-        { id: 4, name: 'New Balance NB 530单层', price: 350, image: '/static/example_pictures/sample4.png' }
-      ],
-      showSkuPopup: false,
-      skuAction: '', // 'cart' or 'buy'
-      styles: [
-        { name: '主图', img: '/static/example_pictures/sample1.png', price: 350 },
-        { name: '图2', img: '/static/example_pictures/sample2.png', price: 399 },
-        { name: '图3', img: '/static/example_pictures/sample3.png', price: 299 }
-      ],
-      sizes: ['XS', 'S', 'M', 'L', 'XL', '2XL'],
+      productId: null,
+      productInfo: {}, // 存储商品基本信息
+      styles: [],      // 存储款式信息
+      variations: [],  // 存储规格信息
+      sizes: [],       // 存储所有可用尺码
+      
+      quantity: 1,
       selectedStyleIndex: 0,
-      selectedSize: 'XS'
+      selectedSize: '',
+      
+      showSkuPopup: false,
+      skuAction: '',
     };
   },
   computed: {
     selectedStyle() {
-      return this.styles[this.selectedStyleIndex];
+      return this.styles.length > 0 ? this.styles[this.selectedStyleIndex] : {};
     },
-    // 当前弹窗显示的价格
     selectedStylePrice() {
-      return this.selectedStyle.price;
+      return this.selectedStyle.price || this.productInfo.price || 0;
+    },
+    selectedVariation() {
+      if (!this.selectedStyle || !this.selectedSize) return null;
+      return this.variations.find(v => v.styleId === this.selectedStyle.styleId && v.size === this.selectedSize);
     }
   },
   methods: {
+    // 修改：从后端获取商品详情
+    async fetchProductDetails(id) {
+      try {
+        // 1. 发起真实的API请求
+        const res = await uni.request({
+          url: `${apiConfig.BASE_URL}/mall/getProductDetail/${id}`, // 使用 Path 参数
+          method: 'GET',
+        });
+
+        // 2. 校验请求和业务逻辑是否都成功
+        if (res.statusCode === 200 && res.data && res.data.code === 0) {
+          const productData = res.data.data;
+
+          // 3. 映射API数据到前端组件状态
+          // 3.1 映射商品基本信息
+          this.productInfo = {
+            title: productData.productName,
+            desc: productData.description,
+            price: productData.price,
+            images: productData.imageUrl,
+          };
+
+          // 3.2 处理规格(variations)数据，生成 Styles 和 Sizes
+          const stylesMap = new Map();
+          const sizesSet = new Set();
+          
+          productData.variations.forEach(v => {
+            // 如果这个颜色是第一次出现，则创建一个新的款式对象
+            if (!stylesMap.has(v.colorName)) {
+              stylesMap.set(v.colorName, {
+                // styleId 可以用颜色名或索引，这里用颜色名保证唯一
+                styleId: v.colorName, 
+                name: v.colorName,
+                img: v.imageUrl,
+                // 计算该款式的最终价格
+                price: productData.price + v.additionalPrice, 
+              });
+            }
+            // 收集所有不重复的尺码
+            sizesSet.add(v.sizeName);
+          });
+
+          this.styles = Array.from(stylesMap.values());
+          this.sizes = Array.from(sizesSet);
+
+          // 3.3 映射前端所需的 variations 结构
+          this.variations = productData.variations.map(v => ({
+            variationId: v.id,
+            styleId: v.colorName, // 与上面 styleId 保持一致
+            size: v.sizeName,
+            stock: v.stockQuantity,
+          }));
+
+          // 4. 设置默认选中项
+          if (this.sizes.length > 0) {
+            // 找到第一个有库存的尺码作为默认值
+            this.selectedSize = this.sizes.find(size => this.isSizeAvailable(size)) || '';
+          }
+
+        } else {
+          throw new Error(res.data.message || '商品信息加载失败');
+        }
+      } catch (error) {
+        uni.showToast({ title: error.message || '网络请求异常', icon: 'none' });
+      }
+    },
+    isSizeAvailable(size) {
+        if (!this.selectedStyle) return false;
+        const variation = this.variations.find(v => v.styleId === this.selectedStyle.styleId && v.size === size);
+        return variation && variation.stock > 0;
+    },
     openSkuPopup(action) {
       this.skuAction = action;
       this.showSkuPopup = true;
@@ -237,36 +247,132 @@ export default {
       this.selectedStyleIndex = idx;
     },
     selectSize(size) {
-      this.selectedSize = size;
-    },
-    confirmSku() {
-      this.showSkuPopup = false;
-      if (this.skuAction === 'cart') {
-        
+      if (this.isSizeAvailable(size)) {
+        this.selectedSize = size;
       } else {
-
+        uni.showToast({ title: '该尺码已售罄', icon: 'none' });
       }
-    //   this.isReminderVisible = true; // 显示提醒信息
-    //     setTimeout(() => {
-    //       this.isReminderVisible = false; // 2秒后隐藏提醒信息
-    //     }, 2000);
-    uni.showToast({
-        title: this.skuAction === 'cart' ? '已加入购物车' : '已下单成功',
-        icon: 'success',
-        duration: 2000
-      });
+    },
+    changeQuantity(amount) {
+        const newQuantity = this.quantity + amount;
+        if (newQuantity >= 1) {
+            this.quantity = newQuantity;
+        }
+    },
+    async confirmSku() {
+      if (!this.selectedVariation) {
+        uni.showToast({ title: '请选择有效的商品规格', icon: 'none' });
+        return;
+      }
+      if (this.selectedVariation.stock === 0) {
+        uni.showToast({ title: '该规格已售罄', icon: 'none' });
+        return;
+      }
+
+      this.showSkuPopup = false;
+
+      if (this.skuAction === 'cart') {
+        await this.addToCart();
+      } else {
+        // 修改：调用新的 buyNow 方法
+        await this.buyNow();
+      }
+    },
+    // 【此方法已符合API规范，无需修改】
+    async addToCart() {
+      const params = {
+        productId: this.productId,
+        variationId: this.selectedVariation.variationId,
+        quantity: this.quantity
+      };
+
+      console.log('添加到购物车 API 请求参数:', params);
+
+      try {
+        const res = await uni.request({
+          url: `${apiConfig.BASE_URL}/cart/add`, 
+          method: 'POST',
+          data: params,
+        });
+
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          uni.showToast({
+            title: '已加入购物车',
+            icon: 'success',
+            duration: 2000
+          });
+        } else {
+          throw new Error(res.data.message || '添加失败');
+        }
+      } catch (error) {
+        uni.showToast({
+          title: error.message || '网络请求失败',
+          icon: 'none'
+        });
+      }
+    },
+    // 新增：立即购买并创建订单的方法
+    async buyNow() {
+      // 在实际应用中，此处应先跳转到地址选择页或弹出地址选择器
+      // 这里我们模拟一个默认的地址ID
+      const addressId = 1; 
+
+      const params = {
+        addressId: addressId,
+        productId: this.productId,
+        variationId: this.selectedVariation.variationId,
+        quantity: this.quantity
+      };
+
+      console.log('立即购买 API 请求参数:', params);
+
+      try {
+        const res = await uni.request({
+          url: `${apiConfig.BASE_URL}/order/create`, // 假设的下单API端点
+          method: 'POST',
+          data: params,
+        });
+
+        // 检查后端返回结果
+        if (res.statusCode === 200 && res.data && res.data.code === 0) {
+          const order = res.data.data;
+          uni.showToast({
+            title: '下单成功',
+            icon: 'success',
+            duration: 1500
+          });
+          
+          // 下单成功后，跳转到订单详情或支付页面，并携带订单ID
+          setTimeout(() => {
+            uni.navigateTo({
+              url: `/pages/OrderConfirmation/OrderConfirmation?orderId=${order.orderId}`
+            });
+          }, 1500);
+
+        } else {
+          throw new Error(res.data.message || '下单失败');
+        }
+      } catch (error) {
+        uni.showToast({
+          title: error.message || '网络请求异常',
+          icon: 'none'
+        });
+      }
     }
   },
   onLoad(options) {
-      const id = options.id
+      this.productId = options.id || 1; // 从页面参数获取ID
+      this.fetchProductDetails(this.productId); // 获取商品详情
   },
 };
 </script>
 
 <style scoped>
+/* 样式部分保持不变，此处省略 */
 .goods-detail-page {
   background: #fafafa;
   min-height: 100vh;
+  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
 }
 .goods-image-swiper {
   width: 100%;
@@ -312,140 +418,9 @@ export default {
   color: #888;
   margin-bottom: 12rpx;
 }
-.goods-params {
-  margin-top: 8rpx;
-}
-.param-row {
-  display: flex;
-  margin-bottom: 6rpx;
-}
-.param-label {
-  color: #888;
-  font-size: 22rpx;
-  width: 80rpx;
-}
-.param-value {
-  color: #222;
-  font-size: 22rpx;
-}
-.size-recommend {
-  background: #fff;
-  margin: 20rpx 0;
-  border-radius: 24rpx;
-  padding: 24rpx;
-}
-.size-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.size-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #222;
-}
-.size-tabs {
-  display: flex;
-}
-.size-tab {
-  font-size: 24rpx;
-  color: #888;
-  margin-left: 24rpx;
-  padding-bottom: 6rpx;
-  border-bottom: 4rpx solid transparent;
-}
-.size-tab.active {
-  color: #6753e7;
-  border-bottom: 4rpx solid #6753e7;
-}
-.size-table {
-  margin-top: 18rpx;
-}
-.size-table-header,
-.size-table-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8rpx 0;
-}
-.size-th,
-.size-td {
-  width: 33%;
-  text-align: center;
-  font-size: 22rpx;
-  color: #222;
-}
-.goods-detail-section {
-  background: #fff;
-  margin: 20rpx 0;
-  border-radius: 24rpx;
-  padding: 24rpx;
-}
-.detail-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #222;
-  margin-bottom: 18rpx;
-}
-.detail-image {
-  width: 100%;
-  margin-bottom: 18rpx;
-  border-radius: 12rpx;
-}
-.more-recommend-section {
-  background: #fff;
-  margin: 20rpx 0 0 0;
-  border-radius: 24rpx;
-  padding: 24rpx;
-}
-.recommend-title {
-  font-size: 28rpx;
-  font-weight: bold;
-  color: #222;
-  margin-bottom: 18rpx;
-}
-.recommend-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-.recommend-item {
-  width: 47%;
-  background: #f7f7f7;
-  border-radius: 16rpx;
-  margin-bottom: 18rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 12rpx;
-}
-.recommend-image {
-  width: 100%;
-  height: 200rpx;
-  border-radius: 16rpx 16rpx 0 0;
-  object-fit: cover;
-}
-.recommend-info {
-  width: 90%;
-  margin: 10rpx 0 0 0;
-  text-align: center;
-}
-.recommend-name {
-  font-size: 22rpx;
-  color: #222;
-  display: block;
-}
-.recommend-price {
-  color: #6753e7;
-  font-size: 24rpx;
-  font-weight: bold;
-  margin-top: 6rpx;
-  display: block;
-}
-
 .swiper {
   height: 100%;
 }
-
 .button_pannel {
   position: fixed;
   bottom: 0;
@@ -456,14 +431,15 @@ export default {
   justify-content: space-between;
   padding: 20rpx;
   background-color: #fff;
+  box-sizing: border-box;
+  border-top: 1rpx solid #f0f0f0;
 }
-
 .add_to_cart {
   flex: 1;
   height: 80rpx;
   border-radius: 40rpx;
   font-size: 28rpx;
-  background-color: #c4c4c4;
+  background-color: #f0f0f0;
   color: #333;
   margin-right: 20rpx;
 }
@@ -474,11 +450,7 @@ export default {
   font-size: 28rpx;
   background-color: #6753e7;
   color: #fff;
-  margin-left: 20rpx;
-  margin-right: 40rpx;
 }
-
-/* 遮罩层 */
 .sku-popup-mask {
   position: fixed;
   z-index: 2000;
@@ -491,13 +463,13 @@ export default {
   align-items: flex-end;
   justify-content: center;
 }
-/* 弹窗主体 */
 .sku-popup {
   width: 100%;
   background: #fff;
   border-radius: 24rpx 24rpx 0 0;
   padding: 32rpx 24rpx 24rpx 24rpx;
   animation: popupUp 0.25s;
+  box-sizing: border-box;
 }
 @keyframes popupUp {
   from {
@@ -546,16 +518,14 @@ export default {
 .sku-popup-style-list {
   display: flex;
   gap: 20rpx;
+  flex-wrap: wrap;
 }
 .sku-popup-style-item {
-  width: 120rpx;
-  height: 120rpx;
+  display: flex;
+  align-items: center;
   border: 2rpx solid #eee;
   border-radius: 12rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 10rpx;
   background: #fafafa;
   cursor: pointer;
 }
@@ -566,8 +536,9 @@ export default {
 .sku-popup-style-img {
   width: 60rpx;
   height: 60rpx;
-  margin-bottom: 8rpx;
+  margin-right: 10rpx;
   object-fit: cover;
+  border-radius: 8rpx;
 }
 .sku-popup-size-list {
   display: flex;
@@ -576,20 +547,59 @@ export default {
 }
 .sku-popup-size-item {
   min-width: 80rpx;
-  padding: 12rpx 0;
+  padding: 12rpx 24rpx;
   text-align: center;
   border-radius: 40rpx;
   background: #f7f7f7;
   color: #222;
   font-size: 24rpx;
   border: 2rpx solid #f7f7f7;
-  margin-bottom: 10rpx;
   cursor: pointer;
 }
 .sku-popup-size-item.active {
   color: #6753e7;
   border-color: #6753e7;
   background: #f3f0ff;
+}
+.sku-popup-size-item.disabled {
+  color: #ccc;
+  background: #f9f9f9;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.sku-quantity-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.quantity-selector {
+  display: flex;
+  align-items: center;
+}
+.quantity-btn {
+  width: 50rpx;
+  height: 50rpx;
+  background-color: #f7f7f7;
+  color: #333;
+  border: none;
+  border-radius: 50%;
+  font-size: 36rpx;
+  line-height: 50rpx;
+  padding: 0;
+  margin: 0;
+}
+.quantity-btn[disabled] {
+  color: #ccc;
+  background-color: #f9f9f9;
+}
+.quantity-input {
+  width: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  margin: 0 10rpx;
+  background-color: #f7f7f7;
+  border-radius: 8rpx;
+  height: 50rpx;
 }
 .sku-popup-confirm {
   width: 100%;

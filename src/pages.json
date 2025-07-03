@@ -83,6 +83,12 @@
             "style": {
                 "navigationBarTitleText": "小程序"
             }
+        },
+        {
+            "path": "pages/UploadCloth/UploadCloth",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
         }
 	],
 	"tabBar": {

@@ -53,6 +53,56 @@
 
     <!-- 悬浮客服按钮 (移到 main-content 外部) -->
     <customer-service />
+
+    <!-- 上传选项弹窗 -->
+    <view
+      v-if="showModal"
+      class="modal-overlay"
+      @click.self="closeModal"
+    >
+      <view class="modal-content">
+        <view
+          class="modal-close-btn"
+          @click="closeModal"
+        >×</view>
+        <view class="modal-body">
+          <button
+            class="modal-btn"
+            @click="uploadFromAlbum"
+          >
+            <image
+              class="modal-btn-icon"
+              src="/static/icon/补充icon0116-05.png"
+              mode="aspectFit"
+            />
+            相册上传
+          </button>
+          <button
+            class="modal-btn"
+            @click="uploadFromCamera"
+          >
+            <image
+              class="modal-btn-icon"
+              src="/static/icon/补充icon0116-06.png"
+              mode="aspectFit"
+            />
+            拍照上传
+          </button>
+          <button
+            class="modal-btn"
+            @click="selectFromLibrary"
+          >
+            <image
+              class="modal-btn-icon"
+              src="/static/icon/补充icon0116-07.png"
+              mode="aspectFit"
+            />
+            素材库选择
+          </button>
+        </view>
+      </view>
+    </view>
+
   </view>
 </template>
 
@@ -74,6 +124,8 @@ export default {
       ],
       // 当前选中的分类
       activeCategory: 1,
+      // 控制弹窗显示
+      showModal: false,
       // 衣橱商品数据
       closetItems: [
         { id: 101, image: '/static/example_pictures/sample2.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
@@ -93,12 +145,28 @@ export default {
     },
     // 点击上传按钮时触发
     handleAdd() {
-      console.log('触发了添加事件');
-      // 在这里可以调用 uni.chooseImage 等API来实现图片上传功能
-      uni.showToast({
-        title: '触发添加事件',
-        icon: 'none'
-      });
+      // 改为打开弹窗
+      this.showModal = true;
+    },
+    // 关闭弹窗
+    closeModal() {
+      this.showModal = false;
+    },
+    // 从相册上传
+    uploadFromAlbum() {
+      console.log('从相册上传');
+      this.closeModal();
+    },
+    // 拍照上传
+    uploadFromCamera() {
+      console.log('拍照上传');
+      this.closeModal();
+    },
+    // 从素材库选择
+    selectFromLibrary() {
+      console.log('从素材库选择');
+      // 在这里可以添加跳转到素材库页面的逻辑
+      this.closeModal();
     }
   }
 };
@@ -210,5 +278,68 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 60rpx 50rpx;
+  border-radius: 24rpx;
+  width: 550rpx;
+  position: relative;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 0;
+  right: 30rpx;
+  font-size: 50rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90rpx;
+  background-color: #6c5ce7;
+  color: white;
+  border-radius: 45rpx; /* half of height for pill shape */
+  font-size: 30rpx;
+  font-weight: bold;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.modal-btn::after {
+  border: none;
+}
+
+.modal-btn-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
 }
 </style>

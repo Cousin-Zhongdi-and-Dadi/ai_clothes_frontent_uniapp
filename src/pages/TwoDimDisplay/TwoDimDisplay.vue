@@ -1,102 +1,213 @@
 <template>
-  <view class="two-dim-page">
-    <!-- 主体内容 -->
-    <view class="main-content">
-      <view class="center-block">
-        <!-- 横向排列：左侧icon，右侧按钮组 -->
-        <view class="center-row">
-          <image
-            class="main-cloth-icon"
-            src="/static/icon/补充icon0116-03.png"
-            mode="widthFix"
-          />
-          <view class="btn-group">
-            <button class="btn btn-disabled">
-              <image
-                class="btn-icon"
-                src="/static/icon/补充icon0116-08.png"
-                mode="widthFix"
-              />
-              更换模特
-            </button>
-            <button class="btn btn-primary">
-              <image
-                class="btn-icon"
-                src="/static/icon/icon-01.png"
-                mode="widthFix"
-              />
-              衣物选择
-            </button>
-            <button class="btn btn-primary">
-              <image
-                class="btn-icon"
-                src="/static/icon/补充icon0116-05.png"
-                mode="widthFix"
-              />
-              相册上传
-            </button>
-            <button class="btn btn-primary">
-              <image
-                class="btn-icon"
-                src="/static/icon/补充icon0116-06.png"
-                mode="widthFix"
-              />
-              拍照上传
-            </button>
-          </view>
-        </view>
-      </view>
-
-      <view class="tips-block">
+  <view class="container">
+    <view class="center-block">
+      <!-- 横向排列：左侧icon，右侧按钮组 -->
+      <view class="center-row">
         <image
-          class="tips-pic"
-          src="/static/icon/补充icon0116_画板 1.png"
+          class="main-man-icon"
+          src="/static/icon/补充icon0116-02.png"
           mode="widthFix"
         />
+        <view class="btn-group">
+          <button class="btn btn-primary">
+            <image
+              class="btn-icon"
+              src="/static/icon/补充icon0116-05.png"
+              mode="widthFix"
+            />
+            相册上传
+          </button>
+          <button class="btn btn-primary">
+            <image
+              class="btn-icon"
+              src="/static/icon/补充icon0116-06.png"
+              mode="widthFix"
+            />
+            拍照上传
+          </button>
+        </view>
       </view>
     </view>
 
-    <!-- 悬浮客服按钮 -->
+    <!-- 提示图片 -->
+    <view class="tips-img-section">
+      <image
+        src="/static/icon/补充icon0116-04.png"
+        class="tips-img"
+        mode="widthFix"
+      />
+    </view>
+
     <customer-service />
   </view>
 </template>
 
 <script>
-import CustomerService from '@/components/CustomerService/CustomerService.vue'
+import CustomerService from '@/components/CustomerService/CustomerService.vue';
 export default {
   components: { CustomerService },
-  name: 'TwoDimDisplay'
+  name: 'TwoDimDisplay',
+  methods: {
+    goBack() {
+      uni.navigateBack();
+    },
+    uploadFromAlbum() {
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['album'],
+        success: (res) => {
+          // 处理图片
+          console.log('从相册选择：', res);
+        }
+      });
+    },
+    uploadFromCamera() {
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['camera'],
+        success: (res) => {
+          // 处理图片
+          console.log('拍照选择：', res);
+        }
+      });
+    }
+  }
 }
 </script>
 
 <style scoped>
-.two-dim-page {
+.container {
   min-height: 100vh;
-  background: #fafbfc;
-  display: flex;
-  flex-direction: column;
-}
-.main-content {
-  flex: 1;
+  background: #fafafa;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30rpx 0 0 0;
+  padding-bottom: 120rpx; /* 为tabbar留出空间 */
+}
+.header {
+  width: 100%;
+  height: 90rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32rpx;
+  background: #fff;
+  box-sizing: border-box;
+  position: relative;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.back-icon {
+  font-size: 40rpx;
+  color: #333;
+  position: absolute;
+  left: 32rpx;
+}
+.title {
+  font-size: 34rpx;
+  font-weight: bold;
+  flex: 1;
+  text-align: center;
+  color: #222;
+}
+.header-actions {
+  display: flex;
+  gap: 20rpx;
+  position: absolute;
+  right: 32rpx;
+}
+.icon-section {
+  margin-top: 80rpx;
+  margin-bottom: 50rpx;
+}
+.person-icon {
+  width: 150rpx;
 }
 .center-block {
+  margin-top: 40rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-/* 新增横向排列样式 */
+.upload-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  align-items: center;
+  margin-bottom: 50rpx;
+}
+.upload-btn {
+  width: 300rpx;
+  height: 80rpx;
+  background: #6c5ce7;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.upload-btn::after {
+  border: none;
+}
+.tips-img-section {
+  margin-top: 40rpx;
+  width: 90vw;
+  display: flex;
+  justify-content: center;
+}
+.tips-img {
+  width: 100%;
+  max-width: 640rpx;
+  border-radius: 16rpx;
+}
+.floating-btn {
+  position: fixed;
+  bottom: 150rpx; /* 调整位置以避开tabbar */
+  right: 40rpx;
+  z-index: 10;
+}
+.help-btn {
+  background: #fff;
+  color: #6c5ce7;
+  border-radius: 50rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  font-size: 26rpx;
+  padding: 18rpx 36rpx;
+  border: none;
+}
+/* 如果你使用的是项目自带的tabBar，这段可以删除 */
+.tabbar {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100rpx;
+  padding-bottom: constant(safe-area-inset-bottom); /* 适配iPhoneX等机型 */
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1rpx solid #eee;
+  z-index: 99;
+}
+.btn-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 16rpx;
+}
 .center-row {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
 }
-.main-cloth-icon {
-  width: 180rpx;
+.main-man-icon {
+  width: 100rpx;
   margin-right: 40rpx;
 }
 .btn-group {
@@ -126,21 +237,5 @@ export default {
   background: #6c5ce7;
   color: #fff;
   margin-bottom: 0;
-}
-.btn-disabled {
-  background: #999;
-  color: #fff;
-}
-.tips-block {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 30rpx;
-  margin-top: 40rpx;
-}
-.fab-chat {
-  position: fixed;
-  right: 40rpx;
-  bottom: 140rpx;
 }
 </style>

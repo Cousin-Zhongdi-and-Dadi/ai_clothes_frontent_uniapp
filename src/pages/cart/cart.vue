@@ -138,7 +138,7 @@ export default {
           });
 
           // 5. 检查后端返回结果
-          if (res.statusCode === 200 && res.data && res.data.code === 0) {
+          if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/) {
             uni.showToast({ title: '删除成功', icon: 'success' });
             // 6. 删除成功后，立即重新获取购物车列表以刷新页面
             this.refresh();
@@ -182,12 +182,13 @@ export default {
             duration: 1500,
           });
 
+          // TODO: 订单确认界面
           // 5. 下单成功后，跳转到订单确认页面
-          setTimeout(() => {
-            uni.navigateTo({
-              url: `/pages/OrderConfirmation/OrderConfirmation?orderId=${order.orderId}`,
-            });
-          }, 1500);
+        //   setTimeout(() => {
+        //     uni.navigateTo({
+        //       url: `/pages/OrderConfirmation/OrderConfirmation?orderId=${order.orderId}`,
+        //     });
+        //   }, 1500);
         } else {
           throw new Error(res.data.message || '下单失败');
         }
@@ -214,7 +215,7 @@ export default {
           },
         });
 
-        if (res.statusCode === 200 && res.data && res.data.code === 0 && Array.isArray(res.data.data)) {
+        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/ && Array.isArray(res.data.data)) {
           const newItems = res.data.data.map(item => ({
             id: item.id,
             image: item.imageUrl,
@@ -424,6 +425,7 @@ export default {
   line-height: 64rpx;
   border: none;
   margin: 0;
+  margin-right: 40rpx;
 }
 /* 新增：删除按钮样式 */
 .footer-delete {

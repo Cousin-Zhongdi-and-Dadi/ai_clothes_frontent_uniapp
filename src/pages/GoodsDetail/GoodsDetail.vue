@@ -175,7 +175,7 @@ export default {
         });
 
         // 2. 校验请求和业务逻辑是否都成功
-        if (res.statusCode === 200 && res.data && res.data.code === 0) {
+        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/) {
           const productData = res.data.data;
 
           // 3. 映射API数据到前端组件状态
@@ -290,7 +290,7 @@ export default {
 
       try {
         const res = await uni.request({
-          url: `${apiConfig.BASE_URL}/cart/add`, 
+          url: `${apiConfig.BASE_URL}/shoppingCart/addProduct`, 
           method: 'POST',
           data: params,
         });
@@ -334,7 +334,7 @@ export default {
         });
 
         // 检查后端返回结果
-        if (res.statusCode === 200 && res.data && res.data.code === 0) {
+        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/) {
           const order = res.data.data;
           uni.showToast({
             title: '下单成功',
@@ -342,12 +342,13 @@ export default {
             duration: 1500
           });
           
+          // TODO: 订单确认界面
           // 下单成功后，跳转到订单详情或支付页面，并携带订单ID
-          setTimeout(() => {
-            uni.navigateTo({
-              url: `/pages/OrderConfirmation/OrderConfirmation?orderId=${order.orderId}`
-            });
-          }, 1500);
+        //   setTimeout(() => {
+        //     uni.navigateTo({
+        //       url: `/pages/OrderConfirmation/OrderConfirmation?orderId=${order.orderId}`
+        //     });
+        //   }, 1500);
 
         } else {
           throw new Error(res.data.message || '下单失败');

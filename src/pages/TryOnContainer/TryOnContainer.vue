@@ -45,7 +45,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
 }
 .tryon-btn-container {
@@ -55,7 +55,6 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 40rpx 0;
-  margin-bottom: 2000rpx;
 }
 .tryon-btn {
   width: 95%;

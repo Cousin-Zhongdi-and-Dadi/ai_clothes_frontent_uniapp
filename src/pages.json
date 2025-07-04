@@ -39,7 +39,7 @@
         {
 			"path": "pages/Shop/Shop",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "商城"
 			}
 		},
         {
@@ -134,5 +134,11 @@
 		"navigationBarTitleText": "uni-app",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+		}
 	}
 }

@@ -14,7 +14,7 @@
         class="display_card"
         :frontImage="card.frontImage"
         :backText="card.backText"
-        :style="getCardStyle(index)"
+        :style="{ top: `${index * 100}rpx`, zIndex: cards.length - index }"
         :canInteract="index === 0"
         @swipeLeft="handleSwipeLeft(index)"
         @swipeRight="handleSwipeRight(index)"
@@ -64,12 +64,6 @@ export default {
     };
   },
   methods: {
-    getCardStyle(index) {
-      return {
-        top: `${index * 100}rpx`,
-        zIndex: this.cards.length - index
-      };
-    },
     handleSwipeLeft(index) {
       if (index === 0) {
         console.log('喜欢当前卡片');

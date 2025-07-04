@@ -33,7 +33,8 @@
       </view>
     </view>
 
-    <!-- 新增：加载状态提示 -->
+    <!-- [删除] 以下是使用了 uni-ui 的加载状态提示，将被移除 -->
+    <!-- 
     <view class="loading-status">
       <uni-load-more
         v-if="isLoading"
@@ -46,6 +47,7 @@
         content-text="没有更多商品了"
       ></uni-load-more>
     </view>
+    -->
   </view>
 </template>
 
@@ -81,7 +83,7 @@ export default {
           method: 'GET',
         });
 
-        if (res.statusCode === 200 && res.data && res.data.code === 0 && Array.isArray(res.data.data)) {
+        if (res.statusCode === 200 && res.data && /*res.data.code === 0 &&*/ Array.isArray(res.data.data)) {
           // 映射API返回的数据到前端需要的格式
           const categories = res.data.data
             .sort((a, b) => a.sortOrder - b.sortOrder) // 根据 sortOrder 排序
@@ -141,7 +143,7 @@ export default {
           data: params,
         });
 
-        if (res.statusCode === 200 && res.data && res.data.code === 0 && Array.isArray(res.data.data)) {
+        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/ && Array.isArray(res.data.data)) {
           // 映射API返回的数据到前端需要的格式
           const newItems = res.data.data.map(item => ({
             id: item.id,
@@ -269,10 +271,12 @@ export default {
   font-weight: bold;
   margin-top: 12rpx;
 }
-/* 新增：加载状态样式 */
+/* [删除] 以下是加载状态的样式，将被移除 */
+/* 
 .loading-status {
   padding: 20rpx 0;
   width: 100%;
   text-align: center;
 }
+*/
 </style>

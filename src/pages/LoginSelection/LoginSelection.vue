@@ -11,7 +11,10 @@
 
     <!-- 登录按钮 -->
     <view class="login-btns">
-      <button class="btn-primary">一键登录</button>
+      <button
+        class="btn-primary"
+        @click="oneClickLogin"
+      >一键登录</button>
       <button
         class="btn-secondary"
         @click="phoneLogin"
@@ -26,7 +29,32 @@ export default {
     methods: {
         // 一键登录逻辑
         oneClickLogin() {
-            // TODO 这里可以添加一键登录的逻辑
+            // 1. 生成一个模拟的用户信息对象
+            const mockUserInfo = {
+                nickname: 'AI虚拟模特',
+                avatarUrl: '/static/icon/icon-04.png', // 使用现有的logo作为模拟头像
+                token: 'mock_token_' + new Date().getTime(), // 创建一个唯一的模拟token
+                gender: 1, // 1=男, 2=女, 0=未知
+                city: '赛博城'
+            };
+
+            // 2. 将用户信息和token保存到小程序的本地缓存中
+            uni.setStorageSync('userInfo', mockUserInfo);
+            uni.setStorageSync('token', mockUserInfo.token);
+
+            // 3. 给出登录成功的提示
+            uni.showToast({
+                title: '登录成功',
+                icon: 'success'
+            });
+
+            // 4. 延迟1.5秒后跳转到“我的”页面，让用户能看到提示
+            setTimeout(() => {
+                // “我的”页面通常是底部导航Tab页，需要使用 switchTab 跳转
+                uni.switchTab({
+                    url: '/pages/UserInfoEntry/UserInfoEntry'
+                });
+            }, 1500);
         },
         // 手机号登录逻辑
         phoneLogin() {

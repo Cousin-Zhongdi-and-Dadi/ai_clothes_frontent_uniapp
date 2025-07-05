@@ -89,6 +89,18 @@
             "style": {
                 "navigationBarTitleText": "小程序"
             }
+        },
+        {
+            "path": "pages/History/History",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+            "path": "pages/Favourite/Favourite",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
         }
 	],
 	"tabBar": {

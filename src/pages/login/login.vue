@@ -46,6 +46,8 @@
 </template>
 
 <script>
+import apiConfig from '../../utils/api.js'; // 1. 导入API配置
+
 export default {
   data() {
     return {
@@ -78,30 +80,51 @@ export default {
     },
     login() {
       if (!this.phone) {
-        uni.showToast({
-          title: '请输入手机号',
-          icon: 'none'
-        });
+        uni.showToast({ title: '请输入手机号', icon: 'none' });
         return;
       }
       if (!this.code) {
-        uni.showToast({
-          title: '请输入验证码',
-          icon: 'none'
-        });
+        uni.showToast({ title: '请输入验证码', icon: 'none' });
         return;
       }
-      // TODO 这里可添加登录逻辑
-      console.log('登录', this.phone, this.code);
-      const userInfo = {
-        phone: this.phone,
-        code: this.code
-      };
-      uni.setStorageSync('userInfo', userInfo);
-      // 跳转到首页或其他页面
-        uni.switchTab({
-            url: '/pages/UserInfoEntry/UserInfoEntry'
-        });
+      
+      uni.showLoading({ title: '正在登录...' });
+
+      // 2. 调用后端API进行登录
+      uni.request({
+        url: `${apiConfig.BASE_URL}/user/loginByPhone`, // 假设的手机号登录API
+        method: 'POST',
+        data: {
+          phone: this.phone,
+          code: this.code
+        },
+        success: (res) => {
+          if (res.data && res.data.code === 0) {
+            // 3. 登录成功，只保存 token
+            uni.setStorageSync('token', res.data.data.token);
+            
+            uni.showToast({ title: '登录成功', icon: 'success' });
+
+            // 4. 跳转到个人中心入口
+            setTimeout(() => {
+              uni.switchTab({
+                url: '/pages/UserInfoEntry/UserInfoEntry'
+              });
+            }, 1500);
+          } else {
+            uni.showToast({
+              title: (res.data && res.data.message) || '登录失败',
+              icon: 'none'
+            });
+          }
+        },
+        fail: () => {
+          uni.showToast({ title: '网络请求失败', icon: 'none' });
+        },
+        complete: () => {
+          uni.hideLoading();
+        }
+      });
     }
   }
 };

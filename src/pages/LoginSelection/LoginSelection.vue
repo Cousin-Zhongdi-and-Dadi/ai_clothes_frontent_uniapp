@@ -24,37 +24,75 @@
 </template>
 
 <script>
+import apiConfig from '../../utils/api.js'; // 1. 导入API配置文件
+
 export default {
   name: 'LoginSelection',
     methods: {
         // 一键登录逻辑
         oneClickLogin() {
-            // 1. 生成一个模拟的用户信息对象
-            const mockUserInfo = {
-                nickname: 'AI虚拟模特',
-                avatarUrl: '/static/icon/icon-04.png', // 使用现有的logo作为模拟头像
-                token: 'mock_token_' + new Date().getTime(), // 创建一个唯一的模拟token
-                gender: 1, // 1=男, 2=女, 0=未知
-                city: '赛博城'
-            };
-
-            // 2. 将用户信息和token保存到小程序的本地缓存中
-            uni.setStorageSync('userInfo', mockUserInfo);
-            uni.setStorageSync('token', mockUserInfo.token);
-
-            // 3. 给出登录成功的提示
-            uni.showToast({
-                title: '登录成功',
-                icon: 'success'
+            uni.showLoading({
+                title: '正在登录...'
             });
 
-            // 4. 延迟1.5秒后跳转到“我的”页面，让用户能看到提示
-            setTimeout(() => {
-                // “我的”页面通常是底部导航Tab页，需要使用 switchTab 跳转
-                uni.switchTab({
-                    url: '/pages/UserInfoEntry/UserInfoEntry'
-                });
-            }, 1500);
+            // 1. 调用 uni.login 获取 code
+            uni.login({
+                provider: 'weixin',
+                success: (loginRes) => {
+                    // 2. 将 code 发送到后端服务器
+                    uni.request({
+                        url: `${apiConfig.BASE_URL}/user/login/${loginRes.code}`, // 假设的API路径，code作为Path参数
+                        method: 'GET',
+                        success: (res) => {
+                            if (res.data && res.data.code === 0) {
+                                // 3. 登录成功，保存token
+                                uni.setStorageSync('token', res.data.data.token);
+
+                                // 4. 给出成功提示
+                                uni.showToast({
+                                    title: '登录成功',
+                                    icon: 'success'
+                                });
+
+                                // 5. 延迟后跳转到“我的”页面
+                                setTimeout(() => {
+                                    uni.switchTab({
+                                        // 修改：跳转到作为 Tab 页的入口页面
+                                        url: '/pages/UserInfoEntry/UserInfoEntry'
+                                    });
+                                }, 1500);
+
+                            } else {
+                                // 后端返回错误
+                                uni.showToast({
+                                    title: (res.data && res.data.message) || '登录失败',
+                                    icon: 'none'
+                                });
+                            }
+                        },
+                        fail: (err) => {
+                            // 网络请求失败
+                            uni.showToast({
+                                title: '网络请求失败，请重试',
+                                icon: 'none'
+                            });
+                            console.error('Login request failed:', err);
+                        },
+                        complete: () => {
+                            uni.hideLoading();
+                        }
+                    });
+                },
+                fail: (err) => {
+                    // uni.login 调用失败
+                    uni.hideLoading();
+                    uni.showToast({
+                        title: '获取登录凭证失败',
+                        icon: 'none'
+                    });
+                    console.error('uni.login failed:', err);
+                }
+            });
         },
         // 手机号登录逻辑
         phoneLogin() {

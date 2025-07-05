@@ -21,7 +21,8 @@ export default {
   },
   methods: {
     updateLoginStatus() {
-      this.isLogin = !!uni.getStorageSync('userInfo') || !!uni.getStorageSync('token');
+      // 修改：只通过是否存在 token 来判断登录状态
+      this.isLogin = !!uni.getStorageSync('token');
     }
   },
   onShow() {

@@ -1,130 +1,134 @@
 <template>
-  <view class="container">
-    <view class="form-container">
-      <view
-        class="form-item"
-        v-for="(item, index) in formFields"
-        :key="index"
-      >
-        <text class="form-label">{{ item.label }}</text>
-        <input
-          class="form-input"
-          type="text"
-          v-model="item.value"
-          :placeholder="'请输入' + item.label"
-        />
-        <text
-          class="form-note"
-          v-if="item.label === '身高' || item.label === '体重'"
-        >必填</text>
-      </view>
-      <button
-        class="submit-button"
-        @click="handleSubmit"
-      >确定</button>
+  <!-- 移除外层的 .container, 直接以表单作为根元素 -->
+  <view class="form-container">
+    <view
+      class="form-item"
+      v-for="(item, index) in formFields"
+      :key="index"
+    >
+      <text class="form-label">{{ item.label }}</text>
+      <input
+        class="form-input"
+        type="text"
+        v-model="item.value"
+        :placeholder="'请输入' + item.label"
+      />
+      <text
+        class="form-note"
+        v-if="item.label === '身高' || item.label === '体重'"
+      >必填</text>
     </view>
+    <button
+      class="submit-button"
+      @click="handleSubmit"
+    >确定</button>
   </view>
 </template>
 
 <script>
 export default {
   name: 'BodyDataEdit',
+  props: {
+    initialData: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data() {
     return {
-      isBodyDataEditVisible: false, // 控制 BodyDataEdit 显示状态
-      isReminderVisible: false, // 控制提醒信息的显示状态
-      userName: '用户昵称',
-      userHeight: 170,
-      userWeight: 60,
-      userWaist: 70,
-      userHip: 90,
-      userShoulder: 40,
-      userArm: 30,
-      userLeg: 80,
-      userNeck: 35,
-      selectionItems: [
-        { icon: '/static/icon/微信图片_20250330204817.png', text: '我的订单' },
-        { icon: '/static/icon/微信图片_20250330204803.png', text: '地址管理' },
-        { icon: '/static/icon/微信图片_20250330204810.png', text: '浏览历史' },
-        { icon: '/static/icon/微信图片_20250330204813.png', text: '收藏穿搭' }
-      ],
       formFields: [
-        { label: '身高', value: '' },
-        { label: '体重', value: '' },
-        { label: '胸围', value: '' },
-        { label: '腰围', value: '' },
-        { label: '臀围', value: '' },
-        { label: '肩宽', value: '' },
-        { label: '臂长', value: '' },
-        { label: '腿长', value: '' },
-        { label: '颈围', value: '' }
+        { key: 'height', label: '身高', value: '' },
+        { key: 'weight', label: '体重', value: '' },
+        { key: 'bust', label: '胸围', value: '' },
+        { key: 'waist', label: '腰围', value: '' },
+        { key: 'hip', label: '臀围', value: '' },
+        { key: 'shoulder', label: '肩宽', value: '' },
+        { key: 'arm', label: '臂长', value: '' },
+        { key: 'leg', label: '腿长', value: '' },
+        { key: 'neck', label: '颈围', value: '' }
       ]
     };
   },
+  watch: {
+    initialData: {
+      handler(newData) {
+        if (newData) {
+          this.formFields.forEach(field => {
+            if (newData[field.key] !== undefined) {
+              field.value = newData[field.key];
+            }
+          });
+        }
+      },
+      immediate: true, // 立即执行一次
+      deep: true
+    }
+  },
   methods: {
     handleSubmit() {
-      console.log(this.formFields[0].value, this.formFields[1].value);
-      if(!this.formFields[0].value || !this.formFields[1].value) {
-        // this.isReminderVisible = true; // 显示提醒信息
-        // setTimeout(() => {
-        //   this.isReminderVisible = false; // 3秒后隐藏提醒信息
-        // }, 2000);
-        // uni.showToast({
-        //   title: '身高和体重不能为空',
-        //   duration: 2000,
-        //   icon: 'none'
-        // });
-        console.error('身高和体重不能为空');
-        this.$emit('failed', '身高和体重不能为空'); // 使用 $emit 发送错误事件
+      const heightField = this.formFields.find(f => f.key === 'height');
+      const weightField = this.formFields.find(f => f.key === 'weight');
+
+      if (!heightField.value || !weightField.value) {
+        this.$emit('failed', '身高和体重为必填项');
         return;
       }
-      console.log('提交的数据:', this.formFields);
-      this.$emit('success'); // 使用 $emit 发送事件
+
+      // 将表单数据转换为父组件需要的格式
+      const submittedData = this.formFields.reduce((acc, field) => {
+        acc[field.key] = field.value;
+        return acc;
+      }, {});
+
+      this.$emit('success', submittedData); // 使用 $emit 发送事件和数据
     }
   }
 };
 </script>
 
 <style scoped>
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f5f5f5;
-}
+/* 移除 .container 样式 */
 
 .form-container {
   width: 100%;
-  max-width: 400rpx;
-  background-color: #fff;
-  border-radius: 13.333rpx;
-  padding: 13.333rpx;
+  /* 从父组件继承背景色和padding, 这里无需设置 */
 }
 
 .form-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10rpx;
+  margin-bottom: 20rpx; /* 增加间距 */
+  padding-bottom: 10rpx; /* 在输入框下加一点空间 */
+  /* border-bottom: 1rpx solid #eee; */ /* 移除这里的整行下划线 */
 }
 
 .form-label {
-  font-size: 30rpx;
+  font-size: 32rpx; /* 调整字体大小 */
   color: #333;
+  width: 100rpx; /* 固定标签宽度，使其对齐 */
 }
 
 .form-input {
   flex: 1;
-  margin-left: 6.667rpx;
-  padding: 10rpx;
-  border: none;
-  border-bottom: 0.667rpx solid #ccc;
-  font-size: 30rpx;
+  margin-left: 20rpx; /* 增加左边距 */
+  padding: 10rpx 0;
+  border: none; /* 移除边框 */
+  border-bottom: 2rpx solid #666; /* 新增：为输入框添加灰色下划线 */
+  font-size: 28rpx;
   outline: none;
+  text-align: left; /* 输入内容右对齐 */
+  transition: border-color 0.3s; /* 新增：为边框颜色变化添加过渡效果 */
+}
+
+/* 新增：输入框获取焦点时的样式 */
+.form-input:focus {
+  border-bottom-color: #6753e7; /* 将下划线颜色变为主题色 */
 }
 
 .submit-button {
-  width: 200rpx;
+  width: 80%;
+  margin: 40rpx auto 0 auto; /* 调整按钮边距 */
   background-color: #6753e7;
   color: #fff;
   border: none;
@@ -132,6 +136,7 @@ export default {
   font-size: 30rpx;
   text-align: center;
   cursor: pointer;
+  padding: 18rpx 0; /* 增加按钮高度 */
 }
 
 .submit-button:hover {
@@ -139,8 +144,10 @@ export default {
 }
 
 .form-note {
-  font-size: 25rpx;
-  color: #5742c8;
-  margin-left: 6.667rpx;
+  font-size: 24rpx; /* 调整字体大小 */
+  color: #6753e7;
+  margin-left: 10rpx;
+  width: 60rpx; /* 固定宽度 */
+  text-align: right;
 }
 </style>

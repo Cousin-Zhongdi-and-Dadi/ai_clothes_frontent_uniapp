@@ -11,7 +11,11 @@
             mode="widthFix"
           />
           <view class="btn-group">
-            <button class="btn btn-disabled">
+            <!-- 1. 绑定 changeModel 事件 -->
+            <button
+              class="btn btn-disabled"
+              @click="changeModel"
+            >
               <image
                 class="btn-icon"
                 src="/static/icon/补充icon0116-08.png"
@@ -19,7 +23,11 @@
               />
               更换模特
             </button>
-            <button class="btn btn-primary">
+            <!-- 2. 绑定 selectFromResources 事件 -->
+            <button
+              class="btn btn-primary"
+              @click="selectFromResources"
+            >
               <image
                 class="btn-icon"
                 src="/static/icon/icon-01.png"
@@ -27,7 +35,11 @@
               />
               衣物选择
             </button>
-            <button class="btn btn-primary">
+            <!-- 3. 绑定 uploadFromAlbum 事件 -->
+            <button
+              class="btn btn-primary"
+              @click="uploadFromAlbum"
+            >
               <image
                 class="btn-icon"
                 src="/static/icon/补充icon0116-05.png"
@@ -35,7 +47,11 @@
               />
               相册上传
             </button>
-            <button class="btn btn-primary">
+            <!-- 4. 绑定 uploadFromCamera 事件 -->
+            <button
+              class="btn btn-primary"
+              @click="uploadFromCamera"
+            >
               <image
                 class="btn-icon"
                 src="/static/icon/补充icon0116-06.png"
@@ -67,13 +83,51 @@ export default {
   components: { CustomerService },
   name: 'UploadTrousers',
   methods: {
+    // 5. 新增：更换模特的方法
+    changeModel() {
+      // 虽然按钮是禁用样式，但仍为其添加跳转逻辑
+      uni.navigateTo({
+        url: '/pages/TwoDimDisplay/TwoDimDisplay'
+      });
+    },
+    // 6. “衣物选择”的方法
     selectFromResources() {
       console.log('触发“衣物选择”');
-      // 修改：跳转到素材库，并传递 type=top 参数
+      // 跳转到素材库，并传递 type=bottom 参数
       uni.navigateTo({
         url: '/pages/ResourcesSelection/ResourcesSelection?type=bottom'
       });
     },
+    // 7. 新增：“相册上传”的方法
+    uploadFromAlbum() {
+      console.log('触发“相册上传”');
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['album'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          // 选择成功后，跳转到确认页面
+          uni.navigateTo({
+            url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
+        }
+      });
+    },
+    // 8. 新增：“拍照上传”的方法
+    uploadFromCamera() {
+      console.log('触发“拍照上传”');
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['camera'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          // 拍摄成功后，跳转到确认页面
+          uni.navigateTo({
+            url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
+        }
+      });
+    }
   }
 }
 </script>

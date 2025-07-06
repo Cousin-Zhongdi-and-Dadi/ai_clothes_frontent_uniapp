@@ -207,7 +207,8 @@ export default {
     confirmSelection() {
       console.log('已确认选择:', this.selectedItem.title);
       const imageUrl = this.selectedItem.img;
-      if(pageType === 'top') {
+      // 修改：使用 this.pageType 来访问 data 中的属性
+      if (this.pageType === 'top') {
         // 如果是上装，跳转到确认上装页面
         uni.navigateTo({
           url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(imageUrl)}`

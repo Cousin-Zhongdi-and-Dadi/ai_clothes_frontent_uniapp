@@ -77,10 +77,17 @@ export default {
         },
         success: (uploadRes) => {
           const data = JSON.parse(uploadRes.data);
-          if (/*data.code === 0 && data.data === true*/ true) {
+          // 修改：假设后端返回的 data 是图片的持久化URL
+          if (/*data.code === 0 && data.data*/ true) {
+            // 1. 将模特图片URL存入缓存
+            uni.setStorageSync('personImageUrl', data.data);
+            console.log('模特图URL已存储:', data.data);
+
             uni.showToast({ title: '上传成功！', icon: 'success' });
-            // 在这里可以进行下一步操作，例如跳转到最终的展示页
-            uni.navigateTo({ url: '/pages/UploadCloth/UploadCloth' });
+            // 2. 跳转到下一步
+            setTimeout(() => {
+              uni.navigateTo({ url: '/pages/UploadCloth/UploadCloth' });
+            }, 1500);
           } else {
             uni.showToast({ title: data.message || '上传失败', icon: 'none' });
           }

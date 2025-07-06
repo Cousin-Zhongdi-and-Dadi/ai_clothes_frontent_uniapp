@@ -91,6 +91,12 @@
             }
         },
         {
+            "path": "pages/UploadTrousers/UploadTrousers",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
             "path": "pages/History/History",
             "style": {
                 "navigationBarTitleText": "小程序"

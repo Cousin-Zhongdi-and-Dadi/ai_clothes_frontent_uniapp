@@ -46,7 +46,9 @@ export default {
   onLoad(options) {
     if (options.imageUrl) {
       this.imageUrl = decodeURIComponent(options.imageUrl);
-      console.log('接收到的下装图片URL:', this.imageUrl);
+      // 4.1 将下装图片URL存入缓存
+      uni.setStorageSync('bottomGarmentUrl', this.imageUrl);
+      console.log('下装URL已存储:', this.imageUrl);
     } else {
       console.error('ConfirmTrousers.vue: 未接收到图片URL');
     }
@@ -63,10 +65,67 @@ export default {
     },
     // 6. “选择完成”按钮的逻辑
     onComplete() {
-      console.log('点击了选择完成');
-      // 跳转到最终的评价/展示页面
-      uni.navigateTo({
-        url: '/pages/TwoDimComment/TwoDimComment'
+      console.log('点击了选择完成（上装+下装）');
+      const personImageUrl = uni.getStorageSync('personImageUrl');
+      const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+      const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl');
+
+      if (!personImageUrl || !topGarmentUrl || !bottomGarmentUrl) {
+        uni.showToast({ title: '缺少必要的图片信息', icon: 'none' });
+        return;
+      }
+      // 6.1 调用提交任务的通用方法
+      this.submitTryOnTask();
+    },
+    // 7. 新增：提交试衣任务的通用方法 (与ConfirmCloth.vue中的方法一致)
+    submitTryOnTask() {
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({ title: '请先登录', icon: 'none' });
+        return;
+      }
+
+      uni.showLoading({ title: '正在提交任务...' });
+
+      const personImageUrl = uni.getStorageSync('personImageUrl');
+      const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+      const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl');
+
+      let requestUrl = `${apiConfig.BASE_URL}/fitting_2d/submit_task?personImageUrl=${encodeURIComponent(personImageUrl)}&topGarmentUrl=${encodeURIComponent(topGarmentUrl)}`;
+      if (bottomGarmentUrl) {
+        requestUrl += `&bottomGarmentUrl=${encodeURIComponent(bottomGarmentUrl)}`;
+      }
+
+      console.log('提交试衣任务, URL:', requestUrl);
+
+      uni.request({
+        url: requestUrl,
+        method: 'GET',
+        header: {
+          'Authorization': `Bearer ${token}`
+        },
+        success: (res) => {
+          // 修改：检查返回的 data 是否为 taskId
+          if (res.data && res.data.code === 0 && res.data.data) {
+            const taskId = res.data.data; // 假设 data 是 taskId
+            uni.showToast({ title: '任务提交成功！', icon: 'success' });
+            // 修改：跳转到最终结果页，并携带 taskId
+            setTimeout(() => {
+              uni.navigateTo({
+                url: `/pages/TwoDimComment/TwoDimComment?taskId=${taskId}`
+              });
+            }, 1500);
+          } else {
+            uni.showToast({ title: (res.data && res.data.message) || '任务提交失败', icon: 'none' });
+          }
+        },
+        fail: (err) => {
+          uni.showToast({ title: '网络请求失败', icon: 'none' });
+          console.error('TryOn request failed:', err);
+        },
+        complete: () => {
+          uni.hideLoading();
+        }
       });
     }
   }

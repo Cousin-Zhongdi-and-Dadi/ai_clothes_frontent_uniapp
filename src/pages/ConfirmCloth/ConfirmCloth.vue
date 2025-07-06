@@ -21,6 +21,8 @@
         class="btn btn-grey"
         @click="onReselect"
       >重新挑选</button>
+    </view>
+    <view class="button-row">
       <button
         class="btn btn-purple"
         @click="onSelectBottoms"
@@ -48,7 +50,9 @@ export default {
   onLoad(options) {
     if (options.imageUrl) {
       this.imageUrl = decodeURIComponent(options.imageUrl);
-      console.log('接收到的图片URL:', this.imageUrl);
+      // 1.1 将上装图片URL存入缓存
+      uni.setStorageSync('topGarmentUrl', this.imageUrl);
+      console.log('上装URL已存储:', this.imageUrl);
     } else {
       console.error('未接收到图片URL');
     }
@@ -70,21 +74,74 @@ export default {
         url: '/pages/UploadTrousers/UploadTrousers'
       });
     },
-    // 4. “选择完成”按钮的逻辑
+    // 4. “选择完成”按钮的逻辑 (只穿上装)
     onComplete() {
-      console.log('点击了选择完成');
-      uni.showToast({
-        title: '搭配已完成！',
-        icon: 'success'
-      });
-      // 这里可以添加跳转到最终结果页的逻辑
+      console.log('点击了选择完成（仅上装）');
+      const personImageUrl = uni.getStorageSync('personImageUrl');
+      const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+
+      if (!personImageUrl || !topGarmentUrl) {
+        uni.showToast({ title: '缺少必要的图片信息', icon: 'none' });
+        return;
+      }
+
+      // 4.1 清空可能存在的下装URL，确保只提交上装
+      uni.removeStorageSync('bottomGarmentUrl');
+
+      // 4.2 调用提交任务的通用方法
+      this.submitTryOnTask();
     },
-    // 5. “AI智能选衣”按钮的逻辑
-    onAiSelect() {
-      console.log('点击了AI智能选衣');
-      uni.showToast({
-        title: 'AI功能开发中',
-        icon: 'none'
+    // 5. 新增：提交试衣任务的通用方法
+    submitTryOnTask() {
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({ title: '请先登录', icon: 'none' });
+        return;
+      }
+
+      uni.showLoading({ title: 'AI搭配生成中...' });
+
+      // 从缓存中获取所有需要的URL
+      const personImageUrl = uni.getStorageSync('personImageUrl');
+      const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+      const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl'); // 可能是空
+
+      // 构建请求URL
+      let requestUrl = `${apiConfig.BASE_URL}/tryOn/submit?personImageUrl=${encodeURIComponent(personImageUrl)}&topGarmentUrl=${encodeURIComponent(topGarmentUrl)}`;
+      if (bottomGarmentUrl) {
+        requestUrl += `&bottomGarmentUrl=${encodeURIComponent(bottomGarmentUrl)}`;
+      }
+
+      console.log('提交试衣任务, URL:', requestUrl);
+
+      uni.request({
+        url: requestUrl,
+        method: 'GET',
+        header: {
+          'Authorization': `Bearer ${token}`
+        },
+        success: (res) => {
+          // 修改：检查返回的 data 是否为 taskId
+          if (res.data /*&& res.data.code === 0*/ && res.data.data) {
+            const taskId = res.data.data; // 假设 data 是 taskId
+            uni.showToast({ title: '任务提交成功！', icon: 'success' });
+            // 修改：跳转到最终结果页，并携带 taskId
+            setTimeout(() => {
+              uni.navigateTo({
+                url: `/pages/TwoDimComment/TwoDimComment?taskId=${taskId}`
+              });
+            }, 1500);
+          } else {
+            uni.showToast({ title: (res.data && res.data.message) || '任务提交失败', icon: 'none' });
+          }
+        },
+        fail: (err) => {
+          uni.showToast({ title: '网络请求失败', icon: 'none' });
+          console.error('TryOn request failed:', err);
+        },
+        complete: () => {
+          uni.hideLoading();
+        }
       });
     }
   }
@@ -132,10 +189,12 @@ export default {
   border: none;
 }
 .btn-grey {
+  width: 80%;
   background: #e5e5e5;
   color: #333; /* 修改颜色，因为按钮已启用 */
 }
 .btn-purple {
+  width: 80%;
   background: #635bff;
   color: #fff;
 }

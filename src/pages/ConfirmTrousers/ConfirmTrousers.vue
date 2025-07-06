@@ -1,22 +1,76 @@
 <template>
   <view class="container">
-    <view class="image-container"></view>
+    <!-- 1. 修改为图片显示区域 -->
+    <view class="image-container">
+      <image
+        v-if="imageUrl"
+        :src="imageUrl"
+        class="preview-img"
+        mode="aspectFit"
+      />
+      <!-- 如果没有图片URL，显示灰色占位符 -->
+      <view
+        v-else
+        class="preview-img placeholder"
+      ></view>
+    </view>
+
+    <!-- 2. 启用按钮并绑定点击事件 -->
     <button
       class="retry-btn"
-      disabled
+      @click="onReselect"
     >重新挑选</button>
     <view class="complete-btn-wrapper">
-      <button class="complete-btn">选择完成</button>
-      <view class="help-btn">
-        <text class="help-icon">💬</text>
-        <text class="help-text">智能客服</text>
-      </view>
+      <button
+        class="complete-btn"
+        @click="onComplete"
+      >选择完成</button>
     </view>
+
+    <customer-service />
   </view>
 </template>
 
-<script setup>
-// 无需逻辑，静态页面
+<script>
+// 3. 改为 Options API 并添加逻辑
+import CustomerService from '@/components/CustomerService/CustomerService.vue';
+
+export default {
+  components: { CustomerService },
+  data() {
+    return {
+      imageUrl: '' // 用于存储从上个页面传来的图片路径
+    };
+  },
+  // 4. 在页面加载时，获取上个页面传递的图片URL
+  onLoad(options) {
+    if (options.imageUrl) {
+      this.imageUrl = decodeURIComponent(options.imageUrl);
+      console.log('接收到的下装图片URL:', this.imageUrl);
+    } else {
+      console.error('ConfirmTrousers.vue: 未接收到图片URL');
+    }
+  },
+  methods: {
+    // 5. “重新挑选”按钮的逻辑
+    onReselect() {
+      console.log('点击了重新挑选');
+      // 流程: UploadTrousers -> ResourcesSelection -> ConfirmTrousers
+      // 因此返回2级即可回到 UploadTrousers
+      uni.navigateBack({
+        delta: 2
+      });
+    },
+    // 6. “选择完成”按钮的逻辑
+    onComplete() {
+      console.log('点击了选择完成');
+      // 跳转到最终的评价/展示页面
+      uni.navigateTo({
+        url: '/pages/TwoDimComment/TwoDimComment'
+      });
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -32,18 +86,33 @@
 .image-container {
   width: 420rpx;
   height: 480rpx;
-  background: #6c5ce7;
+  background: #f0f0f0; /* 修改为占位符背景色 */
   border-radius: 12rpx;
   margin-bottom: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.preview-img {
+  width: 100%;
+  height: 100%;
+}
+.placeholder {
+  background-color: #e0e0e0;
 }
 .retry-btn {
   width: 400rpx;
   height: 60rpx;
-  background: #d8d8d8;
-  color: #fff;
+  background: #e5e5e5; /* 修改为启用的灰色 */
+  color: #333;
   border-radius: 12rpx;
   font-size: 28rpx;
   margin-bottom: 30rpx;
+  border: none;
+  line-height: 60rpx;
+}
+.retry-btn::after {
   border: none;
 }
 .complete-btn-wrapper {
@@ -61,29 +130,9 @@
   border-radius: 12rpx;
   font-size: 28rpx;
   border: none;
+  line-height: 60rpx;
 }
-.help-btn {
-  position: absolute;
-  right: 40rpx;
-  top: -30rpx;
-  background: #fff;
-  border: 2rpx solid #e0e0e0;
-  border-radius: 50%;
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2rpx 8rpx rgba(108, 92, 231, 0.08);
-}
-.help-icon {
-  font-size: 28rpx;
-  color: #6c5ce7;
-}
-.help-text {
-  font-size: 16rpx;
-  color: #6c5ce7;
-  margin-top: 2rpx;
+.complete-btn::after {
+  border: none;
 }
 </style>

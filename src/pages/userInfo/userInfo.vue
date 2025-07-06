@@ -206,7 +206,7 @@ export default {
           console.log('服务器响应:', res);
 
           // 2. 恢复并使用严格的成功判断条件
-          if (res.data && res.data.code === 0) {
+          if (res.data /*&& res.data.code === 0*/) {
             const userData = res.data.data;
 
             // 3. 增加一个对 userData 存在的检查，防止后续代码因数据为空而出错

@@ -9,7 +9,10 @@
           mode="widthFix"
         />
         <view class="btn-group">
-          <button class="btn btn-primary">
+          <button
+            class="btn btn-primary"
+            @click="uploadFromAlbum"
+          >
             <image
               class="btn-icon"
               src="/static/icon/补充icon0116-05.png"
@@ -17,7 +20,10 @@
             />
             相册上传
           </button>
-          <button class="btn btn-primary">
+          <button
+            class="btn btn-primary"
+            @click="uploadFromCamera"
+          >
             <image
               class="btn-icon"
               src="/static/icon/补充icon0116-06.png"
@@ -44,6 +50,8 @@
 
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
+import apiConfig from '@/utils/api.js'; // 1. 导入API配置
+
 export default {
   components: { CustomerService },
   name: 'TwoDimDisplay',
@@ -56,8 +64,11 @@ export default {
         count: 1,
         sourceType: ['album'],
         success: (res) => {
-          // 处理图片
-          console.log('从相册选择：', res);
+          // 修改：不再直接上传，而是将图片路径传递到确认页面
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
         }
       });
     },
@@ -66,8 +77,11 @@ export default {
         count: 1,
         sourceType: ['camera'],
         success: (res) => {
-          // 处理图片
-          console.log('拍照选择：', res);
+          // 修改：不再直接上传，而是将图片路径传递到确认页面
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
         }
       });
     }

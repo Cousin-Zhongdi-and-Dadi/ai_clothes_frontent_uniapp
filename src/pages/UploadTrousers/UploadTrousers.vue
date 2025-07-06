@@ -66,6 +66,15 @@ import CustomerService from '@/components/CustomerService/CustomerService.vue'
 export default {
   components: { CustomerService },
   name: 'UploadTrousers',
+  methods: {
+    selectFromResources() {
+      console.log('触发“衣物选择”');
+      // 修改：跳转到素材库，并传递 type=top 参数
+      uni.navigateTo({
+        url: '/pages/ResourcesSelection/ResourcesSelection?type=bottom'
+      });
+    },
+  }
 }
 </script>
 

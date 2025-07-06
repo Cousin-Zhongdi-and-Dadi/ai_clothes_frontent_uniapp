@@ -101,6 +101,36 @@
             "style": {
                 "navigationBarTitleText": "小程序"
             }
+        },
+        {
+            "path": "pages/ConfirmModel/ConfirmModel",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+            "path": "pages/ConfirmCloth/ConfirmCloth",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+            "path": "pages/ConfirmTrousers/ConfirmTrousers",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+            "path": "pages/ResourcesSelection/ResourcesSelection",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
+        },
+        {
+            "path": "pages/TwoDimComment/TwoDimComment",
+            "style": {
+                "navigationBarTitleText": "小程序"
+            }
         }
 	],
 	"tabBar": {

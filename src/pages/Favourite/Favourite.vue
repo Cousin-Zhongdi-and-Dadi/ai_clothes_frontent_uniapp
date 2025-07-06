@@ -48,6 +48,8 @@
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
 export default {
@@ -79,9 +81,7 @@ export default {
       return 'more';
     }
   },
-  onLoad() {
-    this.getFavorites(true);
-  },
+  // onShow 会在页面每次显示时触发，比 onLoad 更适合刷新数据
   onShow() {
     this.getFavorites(true);
   },
@@ -94,7 +94,8 @@ export default {
     }
   },
   methods: {
-    getFavorites(isRefresh = false) {
+    // 2. 改造 getFavorites 方法
+    async getFavorites(isRefresh = false) {
       if (this.isLoading) return;
       this.isLoading = true;
       if (isRefresh) {
@@ -102,91 +103,69 @@ export default {
         this.images = [];
         this.hasMore = true;
       }
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
+
+      try {
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/collection/getAll`,
+          method: 'GET',
+          data: {
+            page: this.page,
+            pageSize: this.pageSize
+          }
+        });
+
+        const newImages = data.map(item => ({
+          id: item.imageId,
+          img: item.imageUrl
+        }));
+        
+        this.images = isRefresh ? newImages : [...this.images, ...newImages];
+        this.hasMore = newImages.length === this.pageSize;
+        if (this.hasMore) {
+          this.page++;
+        }
+      } catch (error) {
+        console.error("getFavorites failed:", error);
+        this.hasMore = false;
+      } finally {
         this.isLoading = false;
         uni.stopPullDownRefresh();
-        return;
       }
-      const requestUrl = `${apiConfig.BASE_URL}/collection/getAll?page=${this.page}&pageSize=${this.pageSize}`;
-      uni.request({
-        url: requestUrl,
-        method: 'GET',
-        header: { 'Authorization': `Bearer ${token}` },
-        success: (res) => {
-          if (res.data && res.data.code === 0 && res.data.data) {
-            const newImages = res.data.data.map(item => ({
-              id: item.imageId,
-              img: item.imageUrl
-            }));
-            this.images = isRefresh ? newImages : [...this.images, ...newImages];
-            if (newImages.length < this.pageSize) {
-              this.hasMore = false;
-            } else {
-              this.page++;
-            }
-          } else {
-            this.hasMore = false;
-          }
-        },
-        fail: (err) => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-          this.hasMore = false;
-        },
-        complete: () => {
-          this.isLoading = false;
-          uni.stopPullDownRefresh();
-        }
-      });
     },
-    // 5. 新增：处理长按事件，弹出确认框
-    handleLongPress(item) {
-      uni.showModal({
-        title: '删除确认',
-        content: `确定要删除这张收藏吗？`,
-        success: (res) => {
-          if (res.confirm) {
-            this.deleteFavorite(item.id);
-          }
-        }
-      });
-    },
-    // 6. 新增：调用删除API的方法
-    deleteFavorite(imageId) {
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
-        return;
-      }
 
+    // 3. 改造 deleteFavorite 方法
+    async deleteFavorite(imageId) {
       uni.showLoading({ title: '正在删除...' });
+      try {
+        await request({
+          url: `${apiConfig.BASE_URL}/collection/delete/${imageId}`,
+          method: 'DELETE',
+        });
+        uni.showToast({ title: '删除成功', icon: 'success' });
+        // 从UI上直接移除，无需刷新
+        this.images = this.images.filter(img => img.id !== imageId);
+      } catch (error) {
+        console.error("deleteFavorite failed:", error);
+        // 错误提示已由 request 函数统一处理
+      } finally {
+        uni.hideLoading();
+      }
+    },
 
-      // 根据API文档，使用DELETE方法，并将imageId作为Path参数
-      const requestUrl = `${apiConfig.BASE_URL}/collection/delete/${imageId}`;
-
-      uni.request({
-        url: requestUrl,
-        method: 'DELETE',
-        header: { 'Authorization': `Bearer ${token}` },
-        success: (res) => {
-          if (res.data && res.data.code === 0) {
-            uni.showToast({ title: '删除成功', icon: 'success' });
-            // 从当前列表中移除已删除的图片，实现UI无刷新更新
-            this.images = this.images.filter(img => img.id !== imageId);
-          } else {
-            uni.showToast({ title: (res.data && res.data.message) || '删除失败', icon: 'none' });
-          }
-        },
-        fail: (err) => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-          console.error('Delete favorite failed:', err);
-        },
-        complete: () => {
-          uni.hideLoading();
+    // 4. 改造 handleLongPress 方法，使用 async/await
+    async handleLongPress(item) {
+      try {
+        const res = await uni.showModal({
+          title: '删除确认',
+          content: `确定要删除这张收藏吗？`,
+        });
+        if (res.confirm) {
+          this.deleteFavorite(item.id);
         }
-      });
-    }
+      } catch (error) {
+        // 用户点击取消等操作会进入这里，无需处理
+      }
+    },
   }
 };
 </script>

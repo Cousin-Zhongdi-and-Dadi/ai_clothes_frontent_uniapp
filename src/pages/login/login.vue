@@ -46,39 +46,66 @@
 </template>
 
 <script>
-import apiConfig from '../../utils/api.js'; // 1. 导入API配置
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
+import apiConfig from '../../utils/api.js';
 
 export default {
   data() {
     return {
       phone: '',
-      code: ''
+      code: '',
+      isGettingCode: false, // 防止重复点击获取验证码
+      countdown: 0,       // 倒计时秒数
     };
   },
   methods: {
-    getCode() {
+    // 2. 改造 getCode 方法
+    async getCode() {
+      if (this.isGettingCode) return;
+
       if (!this.phone) {
-        uni.showToast({
-          title: '请输入手机号',
-          icon: 'none'
-        });
+        uni.showToast({ title: '请输入手机号', icon: 'none' });
         return;
       }
       if (!/^1[3-9]\d{9}$/.test(this.phone)) {
-        uni.showToast({
-          title: '手机号格式不正确',
-          icon: 'none'
-        });
+        uni.showToast({ title: '手机号格式不正确', icon: 'none' });
         return;
       }
-      // 这里可添加获取验证码逻辑
-      console.log('获取验证码', this.phone);
-        uni.showToast({
-            title: '验证码已发送',
-            icon: 'success'
+
+      this.isGettingCode = true;
+      uni.showLoading({ title: '正在发送...' });
+
+      try {
+        // 假设获取验证码的API
+        await request({
+          url: `${apiConfig.BASE_URL}/user/sendCode`,
+          method: 'POST',
+          data: { phone: this.phone }
         });
+
+        uni.showToast({ title: '验证码已发送', icon: 'success' });
+        
+        // 开始倒计时
+        this.countdown = 60;
+        const timer = setInterval(() => {
+          this.countdown--;
+          if (this.countdown <= 0) {
+            clearInterval(timer);
+            this.isGettingCode = false;
+          }
+        }, 1000);
+
+      } catch (error) {
+        console.error("getCode failed:", error);
+        this.isGettingCode = false; // 失败时允许用户重试
+      } finally {
+        uni.hideLoading();
+      }
     },
-    login() {
+
+    // 3. 改造 login 方法
+    async login() {
       if (!this.phone) {
         uni.showToast({ title: '请输入手机号', icon: 'none' });
         return;
@@ -90,41 +117,34 @@ export default {
       
       uni.showLoading({ title: '正在登录...' });
 
-      // 2. 调用后端API进行登录
-      uni.request({
-        url: `${apiConfig.BASE_URL}/user/loginByPhone`, // 假设的手机号登录API
-        method: 'POST',
-        data: {
-          phone: this.phone,
-          code: this.code
-        },
-        success: (res) => {
-          if (res.data && res.data.code === 0) {
-            // 3. 登录成功，只保存 token
-            uni.setStorageSync('token', res.data.data.token);
-            
-            uni.showToast({ title: '登录成功', icon: 'success' });
+      try {
+        const loginData = await request({
+          url: `${apiConfig.BASE_URL}/user/loginByPhone`,
+          method: 'POST',
+          data: {
+            phone: this.phone,
+            code: this.code
+          },
+        });
 
-            // 4. 跳转到个人中心入口
-            setTimeout(() => {
-              uni.switchTab({
-                url: '/pages/UserInfoEntry/UserInfoEntry'
-              });
-            }, 1500);
-          } else {
-            uni.showToast({
-              title: (res.data && res.data.message) || '登录失败',
-              icon: 'none'
-            });
-          }
-        },
-        fail: () => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-        },
-        complete: () => {
-          uni.hideLoading();
-        }
-      });
+        // 业务成功，request 函数直接返回了包含 token 的对象
+        uni.setStorageSync('token', loginData.token);
+        
+        uni.showToast({ title: '登录成功', icon: 'success' });
+
+        // 跳转到个人中心入口
+        setTimeout(() => {
+          uni.switchTab({
+            url: '/pages/UserInfoEntry/UserInfoEntry'
+          });
+        }, 1500);
+
+      } catch (error) {
+        console.error("login failed:", error);
+        // 错误提示已由 request 函数统一处理
+      } finally {
+        uni.hideLoading();
+      }
     }
   }
 };

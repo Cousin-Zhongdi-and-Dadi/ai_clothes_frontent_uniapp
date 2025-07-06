@@ -1,6 +1,6 @@
 <template>
   <view class="container">
-    <customer-service />
+    <!-- <customer-service /> -->
     <cart-icon />
 
     <!-- 1. 加载状态 -->
@@ -48,10 +48,12 @@
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '@/utils/request.js';
+import apiConfig from '@/utils/api.js';
 import CartIcon from '@/components/CartIcon/CartIcon.vue';
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import DisplayCard from '@/components/DisplayCard/DisplayCard.vue';
-import apiConfig from '@/utils/api.js'; // 导入API配置
 
 export default {
   components: { DisplayCard, CustomerService, CartIcon },
@@ -66,97 +68,78 @@ export default {
     this.loadInitialStack();
   },
   methods: {
-    // 1. 加载初始卡片堆栈
+    // 2. 改造 loadInitialStack 和 fetchRecommendation
     async loadInitialStack() {
       this.isLoading = true;
+      // 并行发起5个请求
       const promises = Array(5).fill(null).map(() => this.fetchRecommendation());
-      const newCards = await Promise.all(promises);
-      this.cards = newCards.filter(card => card !== null);
-      this.isLoading = false;
-      if (this.cards.length === 0) {
-        this.emptyMessage = '加载推荐失败或今日暂无推荐';
+      try {
+        const newCards = await Promise.all(promises);
+        // 过滤掉请求失败的结果 (null)
+        this.cards = newCards.filter(card => card !== null);
+      } catch (error) {
+        console.error("Error loading initial stack:", error);
+        this.cards = [];
+      } finally {
+        this.isLoading = false;
+        if (this.cards.length === 0) {
+          this.emptyMessage = '加载推荐失败或今日暂无推荐';
+        }
       }
     },
-    // 2. 获取单张推荐卡片（返回一个Promise）
-    fetchRecommendation() {
-      return new Promise((resolve) => {
-        const token = uni.getStorageSync('token');
-        if (!token) {
-          resolve(null);
-          return;
-        }
-        const requestUrl = `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`;
-        uni.request({
-          url: requestUrl,
+
+    async fetchRecommendation() {
+      try {
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`,
           method: 'GET',
-          header: { 'Authorization': `Bearer ${token}` },
-          success: (res) => {
-            if (res.data && res.data.data) {
-              resolve({
-                frontImage: res.data.data.imageUrl,
-                backText: res.data.data.description,
-                id: Date.now() + Math.random()
-              });
-            } else {
-              resolve(null);
-            }
-          },
-          fail: () => {
-            resolve(null);
-          }
         });
-      });
+        // 业务成功，request 函数直接返回了 data
+        return {
+          frontImage: data.imageUrl,
+          backText: data.description,
+          // 使用后端返回的ID或一个随机ID作为key
+          id: data.id || Date.now() + Math.random()
+        };
+      } catch (error) {
+        console.error("fetchRecommendation failed:", error);
+        // 任何错误（网络或业务）发生时，返回 null，以便 Promise.all 可以继续
+        return null;
+      }
     },
-    // 3. 修改：处理左滑（喜欢）
+
+    // 3. 改造 addToFavorites 方法
+    async addToFavorites(imageUrl) {
+      if (!imageUrl) {
+        console.error('没有可收藏的图片URL');
+        return;
+      }
+      try {
+        // 根据原代码逻辑，POST方法的参数在URL中
+        await request({
+          url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(imageUrl)}`,
+          method: 'POST',
+        });
+        console.log('收藏成功:', imageUrl);
+        // 成功时静默处理，不打扰用户
+      } catch (error) {
+        console.error('Favorite request failed:', error);
+        // 错误提示已由 request 函数统一处理
+      }
+    },
+
+    // 4. handleSwipeLeft 调用改造后的 addToFavorites
     handleSwipeLeft(index) {
       if (index === 0) {
         const likedCard = this.cards[0];
         if (!likedCard) return;
 
         console.log('喜欢当前卡片');
-        // 调用API将图片添加到收藏
         this.addToFavorites(likedCard.frontImage);
 
-        // 从堆栈中移除卡片
         this.cards.shift();
         this.$nextTick(() => this.resetCardPosition());
       }
-    },
-    // 4. 新增：添加到收藏的方法
-    addToFavorites(imageUrl) {
-      if (!imageUrl) {
-        console.error('没有可收藏的图片URL');
-        return;
-      }
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
-        return;
-      }
-
-      // 根据API文档，使用POST方法，并将imageUrl作为Query参数
-      const requestUrl = `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(imageUrl)}`;
-
-      uni.request({
-        url: requestUrl,
-        method: 'POST',
-        header: {
-          'Authorization': `Bearer ${token}`
-        },
-        success: (res) => {
-          if (res.data && res.data.code === 0) {
-            console.log('收藏成功:', imageUrl);
-            // 为了不打扰用户滑动体验，成功时可以不显示toast
-          } else {
-            // 仅在失败时提示用户
-            uni.showToast({ title: (res.data && res.data.message) || '收藏失败', icon: 'none' });
-          }
-        },
-        fail: (err) => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-          console.error('Favorite request failed:', err);
-        }
-      });
     },
     handleSwipeRight(index) {
       if (index === 0) {

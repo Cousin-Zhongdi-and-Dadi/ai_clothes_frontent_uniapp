@@ -14,25 +14,46 @@
         <text class="tryon-btn-text">2D试衣</text>
       </view>
     </view>
-    <customer-service />
+    <!-- <customer-service /> -->
   </view>
 </template>
 
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
+
 export default {
   components: { CustomerService },
   name: 'TryOnContainer',
   methods: {
+    // 1. 新增：通用的登录检查和跳转方法
+    checkLoginAndNavigate(url) {
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        // 延迟后跳转到登录页
+        setTimeout(() => {
+          uni.navigateTo({
+            url: '/pages/LoginSelection/LoginSelection'
+          });
+        }, 1500);
+        return;
+      }
+      // 如果已登录，则正常跳转
+      uni.navigateTo({ url });
+    },
+
+    // 2. 修改：goTo3D 和 goTo2D 调用通用方法
     goTo3D() {
-      uni.navigateTo({
-        url: '/pages/ThreeDimDisplay/ThreeDimDisplay'
-      });
+      // 假设3D试衣需要一个默认的模型ID，或者跳转到一个选择模型的页面
+      // 这里我们直接跳转，具体的模型ID选择逻辑可以在目标页面处理
+      this.checkLoginAndNavigate('/pages/ThreeDimDisplay/ThreeDimDisplay?styleId=1'); // 示例 styleId
     },
     goTo2D() {
-      uni.navigateTo({
-        url: '/pages/TwoDimDisplay/TwoDimDisplay'
-      });
+      // 2D试衣通常是流程的第一步，让用户上传自己的照片
+      this.checkLoginAndNavigate('/pages/UploadCloth/UploadCloth');
     }
   }
 }

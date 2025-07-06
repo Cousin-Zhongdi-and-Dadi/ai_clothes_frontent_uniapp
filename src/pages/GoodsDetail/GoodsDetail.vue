@@ -1,6 +1,6 @@
 <template>
   <view class="goods-detail-page">
-    <customer-service />
+    <!-- <customer-service /> -->
     <cart-icon />
 
     <!-- 商品图片展示 (添加 v-if) -->
@@ -129,9 +129,11 @@
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '@/utils/request.js';
+import apiConfig from '@/utils/api.js';
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import CartIcon from '@/components/CartIcon/CartIcon.vue';
-import apiConfig from '@/utils/api.js';
 
 export default {
   components: { CustomerService, CartIcon },
@@ -149,7 +151,7 @@ export default {
       selectedSize: '',
       
       showSkuPopup: false,
-      skuAction: '',
+      skuAction: '', // 'cart' or 'buy'
     };
   },
   computed: {
@@ -164,73 +166,119 @@ export default {
       return this.variations.find(v => v.styleId === this.selectedStyle.styleId && v.size === this.selectedSize);
     }
   },
+  onLoad(options) {
+    if (options.id) {
+      this.productId = options.id;
+      this.fetchProductDetails(this.productId);
+    } else {
+      uni.showToast({ title: '商品不存在', icon: 'none' });
+      uni.navigateBack();
+    }
+  },
   methods: {
-    // 修改：从后端获取商品详情
+    // 2. 改造 fetchProductDetails 方法
     async fetchProductDetails(id) {
+      uni.showLoading({ title: '加载中...' });
       try {
-        // 1. 发起真实的API请求
-        const res = await uni.request({
-          url: `${apiConfig.BASE_URL}/mall/getProductDetail/${id}`, // 使用 Path 参数
+        const productData = await request({
+          url: `${apiConfig.BASE_URL}/mall/getProductDetail/${id}`,
           method: 'GET',
         });
 
-        // 2. 校验请求和业务逻辑是否都成功
-        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/) {
-          const productData = res.data.data;
+        // 业务代码变得极其简洁，直接处理成功后的数据
+        this.productInfo = {
+          title: productData.productName,
+          desc: productData.description,
+          price: productData.price,
+          images: productData.imageUrl,
+        };
 
-          // 3. 映射API数据到前端组件状态
-          // 3.1 映射商品基本信息
-          this.productInfo = {
-            title: productData.productName,
-            desc: productData.description,
-            price: productData.price,
-            images: productData.imageUrl,
-          };
-
-          // 3.2 处理规格(variations)数据，生成 Styles 和 Sizes
-          const stylesMap = new Map();
-          const sizesSet = new Set();
-          
-          productData.variations.forEach(v => {
-            // 如果这个颜色是第一次出现，则创建一个新的款式对象
-            if (!stylesMap.has(v.colorName)) {
-              stylesMap.set(v.colorName, {
-                // styleId 可以用颜色名或索引，这里用颜色名保证唯一
-                styleId: v.colorName, 
-                name: v.colorName,
-                img: v.imageUrl,
-                // 计算该款式的最终价格
-                price: productData.price + v.additionalPrice, 
-              });
-            }
-            // 收集所有不重复的尺码
-            sizesSet.add(v.sizeName);
-          });
-
-          this.styles = Array.from(stylesMap.values());
-          this.sizes = Array.from(sizesSet);
-
-          // 3.3 映射前端所需的 variations 结构
-          this.variations = productData.variations.map(v => ({
-            variationId: v.id,
-            styleId: v.colorName, // 与上面 styleId 保持一致
-            size: v.sizeName,
-            stock: v.stockQuantity,
-          }));
-
-          // 4. 设置默认选中项
-          if (this.sizes.length > 0) {
-            // 找到第一个有库存的尺码作为默认值
-            this.selectedSize = this.sizes.find(size => this.isSizeAvailable(size)) || '';
+        const stylesMap = new Map();
+        const sizesSet = new Set();
+        
+        productData.variations.forEach(v => {
+          if (!stylesMap.has(v.colorName)) {
+            stylesMap.set(v.colorName, {
+              styleId: v.styleId, // 假设 styleId 能唯一标识款式
+              name: v.colorName,
+              img: v.imageUrl, // 假设每个颜色有代表图
+              price: v.price,
+            });
           }
+          sizesSet.add(v.sizeName);
+        });
 
-        } else {
-          throw new Error(res.data.message || '商品信息加载失败');
+        this.styles = Array.from(stylesMap.values());
+        this.sizes = Array.from(sizesSet);
+        this.variations = productData.variations.map(v => ({
+          styleId: v.styleId,
+          size: v.sizeName,
+          stock: v.stockQuantity,
+        }));
+
+        // 设置默认选中项
+        if (this.styles.length > 0) {
+          this.selectStyle(0);
         }
+        if (this.sizes.length > 0) {
+          // 默认选中第一个可用尺码
+          const firstAvailableSize = this.sizes.find(s => this.isSizeAvailable(s));
+          if (firstAvailableSize) {
+            this.selectSize(firstAvailableSize);
+          }
+        }
+
       } catch (error) {
-        uni.showToast({ title: error.message || '网络请求异常', icon: 'none' });
+        console.error("fetchProductDetails failed:", error);
+        // 错误提示已由 request 函数处理，这里可以加一些额外逻辑，比如返回上一页
+        setTimeout(() => uni.navigateBack(), 1500);
+      } finally {
+        uni.hideLoading();
       }
     },
+
+    // 3. 改造 confirmSku 和增加 addToCart 方法
+    async confirmSku() {
+      if (!this.selectedSize) {
+        uni.showToast({ title: '请选择尺码', icon: 'none' });
+        return;
+      }
+      if (this.skuAction === 'cart') {
+        await this.addToCart();
+      } else if (this.skuAction === 'buy') {
+        // 立即购买逻辑，可以跳转到订单确认页
+        console.log('立即购买');
+      }
+      this.closeSkuPopup();
+    },
+
+    async addToCart() {
+      uni.showLoading({ title: '正在添加...' });
+      try {
+        const variation = this.selectedVariation;
+        if (!variation) {
+          uni.showToast({ title: '无效的商品规格', icon: 'none' });
+          return;
+        }
+        await request({
+          url: `${apiConfig.BASE_URL}/shoppingCart/addProduct`,
+          method: 'POST',
+          data: {
+            productId: this.productId,
+            styleId: this.selectedStyle.styleId,
+            size: this.selectedSize,
+            quantity: this.quantity,
+          },
+        });
+        uni.showToast({ title: '添加成功', icon: 'success' });
+        // 可选：通知购物车图标更新
+      } catch (error) {
+        console.error("addToCart failed:", error);
+      } finally {
+        uni.hideLoading();
+      }
+    },
+
     isSizeAvailable(size) {
         if (!this.selectedStyle) return false;
         const variation = this.variations.find(v => v.styleId === this.selectedStyle.styleId && v.size === size);
@@ -245,126 +293,28 @@ export default {
     },
     selectStyle(idx) {
       this.selectedStyleIndex = idx;
+      // 切换款式时，重置尺码选择
+      this.selectedSize = '';
+      // 自动选择新款式下第一个可用的尺码
+      const firstAvailableSize = this.sizes.find(s => this.isSizeAvailable(s));
+      if (firstAvailableSize) {
+        this.selectSize(firstAvailableSize);
+      }
     },
     selectSize(size) {
       if (this.isSizeAvailable(size)) {
         this.selectedSize = size;
       } else {
-        uni.showToast({ title: '该尺码已售罄', icon: 'none' });
+        uni.showToast({ title: '该尺码无货', icon: 'none' });
       }
     },
     changeQuantity(amount) {
-        const newQuantity = this.quantity + amount;
-        if (newQuantity >= 1) {
-            this.quantity = newQuantity;
-        }
-    },
-    async confirmSku() {
-      if (!this.selectedVariation) {
-        uni.showToast({ title: '请选择有效的商品规格', icon: 'none' });
-        return;
-      }
-      if (this.selectedVariation.stock === 0) {
-        uni.showToast({ title: '该规格已售罄', icon: 'none' });
-        return;
-      }
-
-      this.showSkuPopup = false;
-
-      if (this.skuAction === 'cart') {
-        await this.addToCart();
-      } else {
-        // 修改：调用新的 buyNow 方法
-        await this.buyNow();
+      const newQuantity = this.quantity + amount;
+      if (newQuantity > 0) {
+        this.quantity = newQuantity;
       }
     },
-    // 【此方法已符合API规范，无需修改】
-    async addToCart() {
-      const params = {
-        productId: this.productId,
-        variationId: this.selectedVariation.variationId,
-        quantity: this.quantity
-      };
-
-      console.log('添加到购物车 API 请求参数:', params);
-
-      try {
-        const res = await uni.request({
-          url: `${apiConfig.BASE_URL}/shoppingCart/addProduct`, 
-          method: 'POST',
-          data: params,
-        });
-
-        if (res.statusCode === 200 || res.statusCode === 201) {
-          uni.showToast({
-            title: '已加入购物车',
-            icon: 'success',
-            duration: 2000
-          });
-        } else {
-          throw new Error(res.data.message || '添加失败');
-        }
-      } catch (error) {
-        uni.showToast({
-          title: error.message || '网络请求失败',
-          icon: 'none'
-        });
-      }
-    },
-    // 新增：立即购买并创建订单的方法
-    async buyNow() {
-      // 在实际应用中，此处应先跳转到地址选择页或弹出地址选择器
-      // 这里我们模拟一个默认的地址ID
-      const addressId = 1; 
-
-      const params = {
-        addressId: addressId,
-        productId: this.productId,
-        variationId: this.selectedVariation.variationId,
-        quantity: this.quantity
-      };
-
-      console.log('立即购买 API 请求参数:', params);
-
-      try {
-        const res = await uni.request({
-          url: `${apiConfig.BASE_URL}/order/create`, // 假设的下单API端点
-          method: 'POST',
-          data: params,
-        });
-
-        // 检查后端返回结果
-        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/) {
-          const order = res.data.data;
-          uni.showToast({
-            title: '下单成功',
-            icon: 'success',
-            duration: 1500
-          });
-          
-          // TODO: 订单确认界面
-          // 下单成功后，跳转到订单详情或支付页面，并携带订单ID
-        //   setTimeout(() => {
-        //     uni.navigateTo({
-        //       url: `/pages/OrderConfirmation/OrderConfirmation?orderId=${order.orderId}`
-        //     });
-        //   }, 1500);
-
-        } else {
-          throw new Error(res.data.message || '下单失败');
-        }
-      } catch (error) {
-        uni.showToast({
-          title: error.message || '网络请求异常',
-          icon: 'none'
-        });
-      }
-    }
-  },
-  onLoad(options) {
-      this.productId = options.id || 1; // 从页面参数获取ID
-      this.fetchProductDetails(this.productId); // 获取商品详情
-  },
+  }
 };
 </script>
 

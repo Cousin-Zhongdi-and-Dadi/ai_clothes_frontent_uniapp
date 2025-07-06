@@ -34,12 +34,15 @@
         @click="onComplete"
       >选择完成</button>
     </view>
-    <customer-service />
+    <!-- <customer-service /> -->
   </view>
 </template>
 
 <script>
-// 修改：使用 Options API
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
+import apiConfig from '../../utils/api.js';
+
 export default {
   data() {
     return {
@@ -91,58 +94,47 @@ export default {
       // 4.2 调用提交任务的通用方法
       this.submitTryOnTask();
     },
-    // 5. 新增：提交试衣任务的通用方法
-    submitTryOnTask() {
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
-        return;
-      }
-
+    
+    // 2. 改造：提交试衣任务的通用方法
+    async submitTryOnTask() {
       uni.showLoading({ title: 'AI搭配生成中...' });
 
-      // 从缓存中获取所有需要的URL
-      const personImageUrl = uni.getStorageSync('personImageUrl');
-      const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
-      const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl'); // 可能是空
+      try {
+        // 从缓存中获取所有需要的URL
+        const personImageUrl = uni.getStorageSync('personImageUrl');
+        const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+        const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl'); // 可能是空
 
-      // 构建请求URL
-      let requestUrl = `${apiConfig.BASE_URL}/tryOn/submit?personImageUrl=${encodeURIComponent(personImageUrl)}&topGarmentUrl=${encodeURIComponent(topGarmentUrl)}`;
-      if (bottomGarmentUrl) {
-        requestUrl += `&bottomGarmentUrl=${encodeURIComponent(bottomGarmentUrl)}`;
-      }
-
-      console.log('提交试衣任务, URL:', requestUrl);
-
-      uni.request({
-        url: requestUrl,
-        method: 'GET',
-        header: {
-          'Authorization': `Bearer ${token}`
-        },
-        success: (res) => {
-          // 修改：检查返回的 data 是否为 taskId
-          if (res.data /*&& res.data.code === 0*/ && res.data.data) {
-            const taskId = res.data.data; // 假设 data 是 taskId
-            uni.showToast({ title: '任务提交成功！', icon: 'success' });
-            // 修改：跳转到最终结果页，并携带 taskId
-            setTimeout(() => {
-              uni.navigateTo({
-                url: `/pages/TwoDimComment/TwoDimComment?taskId=${taskId}`
-              });
-            }, 1500);
-          } else {
-            uni.showToast({ title: (res.data && res.data.message) || '任务提交失败', icon: 'none' });
-          }
-        },
-        fail: (err) => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-          console.error('TryOn request failed:', err);
-        },
-        complete: () => {
-          uni.hideLoading();
+        // 构建请求URL
+        let requestUrl = `${apiConfig.BASE_URL}/tryOn/submit?personImageUrl=${encodeURIComponent(personImageUrl)}&topGarmentUrl=${encodeURIComponent(topGarmentUrl)}`;
+        if (bottomGarmentUrl) {
+          requestUrl += `&bottomGarmentUrl=${encodeURIComponent(bottomGarmentUrl)}`;
         }
-      });
+
+        console.log('提交试衣任务, URL:', requestUrl);
+
+        // 使用封装的 request 函数
+        const taskId = await request({
+          url: requestUrl,
+          method: 'GET',
+        });
+
+        // 业务成功，request 函数直接返回了 taskId
+        uni.showToast({ title: '任务提交成功！', icon: 'success' });
+        
+        setTimeout(() => {
+          uni.navigateTo({
+            url: `/pages/TwoDimComment/TwoDimComment?taskId=${taskId}`
+          });
+        }, 1500);
+
+      } catch (error) {
+        // 错误提示已由 request 函数统一处理
+        console.error('TryOn request failed:', error);
+      } finally {
+        // 无论成功或失败，都隐藏加载提示
+        uni.hideLoading();
+      }
     }
   }
 };

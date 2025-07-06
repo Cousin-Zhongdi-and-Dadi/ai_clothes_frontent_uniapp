@@ -73,59 +73,81 @@
     </view>
 
     <!-- 悬浮客服按钮 -->
-    <customer-service />
+    <!-- <customer-service /> -->
   </view>
 </template>
 
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue'
+
 export default {
   components: { CustomerService },
   name: 'UploadTrousers',
   methods: {
-    // 5. 新增：更换模特的方法
+    // 1. 新增：通用的登录检查和后续操作方法
+    checkLoginAndProceed(action) {
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        // 延迟后跳转到登录页
+        setTimeout(() => {
+          uni.navigateTo({
+            url: '/pages/LoginSelection/LoginSelection'
+          });
+        }, 1500);
+        return;
+      }
+      // 如果已登录，则执行传入的回调函数
+      action();
+    },
+
+    // 2. 修改：所有方法都先调用登录检查
     changeModel() {
-      // 虽然按钮是禁用样式，但仍为其添加跳转逻辑
-      uni.navigateTo({
-        url: '/pages/TwoDimDisplay/TwoDimDisplay'
+      this.checkLoginAndProceed(() => {
+        uni.navigateTo({
+          url: '/pages/TwoDimDisplay/TwoDimDisplay'
+        });
       });
     },
-    // 6. “衣物选择”的方法
+
     selectFromResources() {
-      console.log('触发“衣物选择”');
-      // 跳转到素材库，并传递 type=bottom 参数
-      uni.navigateTo({
-        url: '/pages/ResourcesSelection/ResourcesSelection?type=bottom'
+      this.checkLoginAndProceed(() => {
+        uni.navigateTo({
+          url: '/pages/ResourcesSelection/ResourcesSelection?type=bottom'
+        });
       });
     },
-    // 7. 新增：“相册上传”的方法
+
     uploadFromAlbum() {
-      console.log('触发“相册上传”');
-      uni.chooseImage({
-        count: 1,
-        sourceType: ['album'],
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          // 选择成功后，跳转到确认页面
-          uni.navigateTo({
-            url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(tempFilePath)}`
-          });
-        }
+      this.checkLoginAndProceed(() => {
+        uni.chooseImage({
+          count: 1,
+          sourceType: ['album'],
+          success: (res) => {
+            const tempFilePath = res.tempFilePaths[0];
+            uni.navigateTo({
+              url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(tempFilePath)}`
+            });
+          }
+        });
       });
     },
-    // 8. 新增：“拍照上传”的方法
+
     uploadFromCamera() {
-      console.log('触发“拍照上传”');
-      uni.chooseImage({
-        count: 1,
-        sourceType: ['camera'],
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          // 拍摄成功后，跳转到确认页面
-          uni.navigateTo({
-            url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(tempFilePath)}`
-          });
-        }
+      this.checkLoginAndProceed(() => {
+        uni.chooseImage({
+          count: 1,
+          sourceType: ['camera'],
+          success: (res) => {
+            const tempFilePath = res.tempFilePaths[0];
+            uni.navigateTo({
+              url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(tempFilePath)}`
+            });
+          }
+        });
       });
     }
   }

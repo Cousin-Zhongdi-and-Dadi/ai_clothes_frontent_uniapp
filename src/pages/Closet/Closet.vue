@@ -20,6 +20,7 @@
         <scroll-view
           scroll-y
           class="scroll-view-container"
+          @scrolltolower="handleScrollToLower"
         >
           <!-- 商品列表使用网格布局 -->
           <view class="grid-container">
@@ -37,6 +38,7 @@
               v-for="item in closetItems"
               :key="item.id"
               class="goods-card"
+              @longpress="handleLongPress(item)"
             >
               <image
                 :src="item.image"
@@ -47,12 +49,17 @@
               <text class="goods-desc">{{ item.desc }}</text>
             </view>
           </view>
+          <!-- 新增：列表底部的加载状态 -->
+          <uni-load-more
+            v-if="closetItems.length > 0"
+            :status="loadMoreStatus"
+          ></uni-load-more>
         </scroll-view>
       </view>
     </view>
 
     <!-- 悬浮客服按钮 (移到 main-content 外部) -->
-    <customer-service />
+    <!-- <customer-service /> -->
 
     <!-- 上传选项弹窗 -->
     <view
@@ -107,67 +114,213 @@
 </template>
 
 <script>
-import CustomerService from '@/components/CustomerService/CustomerService.vue';
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '@/utils/request.js';
+import apiConfig from '@/utils/api.js';
+
 export default {
   components: { CustomerService },
   name: 'Closet',
   data() {
     return {
-      // 左侧分类数据
-      categories: [
-        { id: 1, name: '上衣' },
-        { id: 2, name: '下装' },
-        { id: 3, name: '连体衣' },
-        { id: 4, name: '鞋袜' },
-        { id: 5, name: '包包' },
-        { id: 6, name: '配饰' }
-      ],
-      // 当前选中的分类
-      activeCategory: 1,
-      // 控制弹窗显示
+      // 1. 修改：分类数据默认为空，将由API填充
+      categories: [],
+      // 2. 修改：当前选中的分类ID，初始为null
+      activeCategory: null,
       showModal: false,
-      // 衣橱商品数据
-      closetItems: [
-        { id: 101, image: '/static/example_pictures/sample2.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
-        { id: 102, image: '/static/example_pictures/sample3.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
-        { id: 103, image: '/static/example_pictures/sample2.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
-        { id: 104, image: '/static/example_pictures/sample3.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
-        { id: 105, image: '/static/example_pictures/sample2.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
-        { id: 106, image: '/static/example_pictures/sample3.png', name: 'New Balance NB 530单层', desc: '经典复古 网布织物' },
-      ]
+      closetItems: [],
+      page: 1,
+      pageSize: 10,
+      isLoading: false,
+      hasMore: true,
     };
   },
+  computed: {
+    loadMoreStatus() {
+      if (this.isLoading) {
+        return 'loading';
+      }
+      if (!this.hasMore) {
+        return 'noMore';
+      }
+      return 'more';
+    }
+  },
+  // 3. 修改：页面加载时，首先获取分类
+  onLoad() {
+    this.initData();
+  },
   methods: {
-    // 切换分类
-    selectCategory(id) {
-      this.activeCategory = id;
-      // 在这里可以根据分类ID重新从后端获取商品数据
+    // 0. 新增：统一的初始化方法
+    async initData() {
+      await this.getCategories();
+      // 如果获取到分类，则默认加载第一个分类的商品
+      if (this.categories.length > 0 && this.activeCategory === null) {
+        this.activeCategory = this.categories[0].id;
+        await this.getClosetItems(true);
+      }
     },
-    // 点击上传按钮时触发
+
+    // 1. 改造 getCategories
+    async getCategories() {
+      try {
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/address/getCategory`,
+          method: 'GET',
+        });
+        this.categories = data
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(item => ({
+            id: item.id,
+            name: item.categoryName
+          }));
+      } catch (error) {
+        console.error("getCategories failed:", error);
+        // 即使分类失败，也允许用户进行其他操作
+      }
+    },
+
+    // 2. 改造 getClosetItems
+    async getClosetItems(isRefresh = false) {
+      if (this.activeCategory === null || this.isLoading) return;
+      this.isLoading = true;
+
+      if (isRefresh) {
+        this.page = 1;
+        this.closetItems = [];
+        this.hasMore = true;
+      }
+
+      try {
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`,
+          method: 'GET',
+          data: {
+            page: this.page,
+            pageSize: this.pageSize
+          }
+        });
+        const newItems = data.map(item => ({
+          id: item.id,
+          image: item.imageUrl,
+          name: `服装ID: ${item.id}`,
+          desc: `分类ID: ${item.categoryId}`
+        }));
+
+        this.closetItems = isRefresh ? newItems : [...this.closetItems, ...newItems];
+        this.hasMore = newItems.length === this.pageSize;
+        if (this.hasMore) {
+          this.page++;
+        }
+      } catch (error) {
+        console.error("getClosetItems failed:", error);
+        this.hasMore = false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    // 3. 改造 deleteClosetItem
+    async deleteClosetItem(clothesId) {
+      uni.showLoading({ title: '正在删除...' });
+      try {
+        await request({
+          url: `${apiConfig.BASE_URL}/address/delete/${clothesId}`,
+          method: 'DELETE',
+        });
+        uni.showToast({ title: '删除成功', icon: 'success' });
+        // 从UI上直接移除，无需刷新
+        this.closetItems = this.closetItems.filter(item => item.id !== clothesId);
+      } catch (error) {
+        console.error("deleteClosetItem failed:", error);
+        // 错误提示已由 request 函数统一处理
+      } finally {
+        uni.hideLoading();
+      }
+    },
+
+    // 4. 改造 handleUpload
+    async handleUpload(sourceType) {
+      this.closeModal();
+      try {
+        const chooseRes = await uni.chooseImage({
+          count: 1,
+          sourceType: sourceType,
+        });
+        const tempFilePath = chooseRes.tempFilePaths[0];
+
+        uni.showLoading({ title: '正在上传...' });
+
+        // 注意：uni.uploadFile 暂未被 request.js 封装，但我们仍可使用 async/await
+        const uploadRes = await uni.uploadFile({
+          url: `${apiConfig.BASE_URL}/closet/add`,
+          filePath: tempFilePath,
+          name: 'file',
+          header: {
+            'Authorization': `Bearer ${uni.getStorageSync('token')}`
+          },
+          formData: {
+            'categoryId': this.activeCategory
+          },
+        });
+        
+        // uni.uploadFile 返回的 data 是字符串，需要解析
+        const data = JSON.parse(uploadRes.data);
+        const successCodes = [1, 200, 0];
+        if (successCodes.includes(data.code)) {
+          uni.showToast({ title: '上传成功！', icon: 'success' });
+          this.getClosetItems(true); // 刷新列表
+        } else {
+          uni.showToast({ title: data.message || '上传失败', icon: 'none' });
+        }
+      } catch (error) {
+        // uni.chooseImage 等API的取消操作会进入catch，这里无需提示
+        console.log("Upload cancelled or failed:", error);
+      } finally {
+        uni.hideLoading();
+      }
+    },
+
+    // 5. 简化事件处理函数
+    handleLongPress(item) {
+      uni.showModal({
+        title: '删除确认',
+        content: `确定要删除这件衣服吗？`,
+        success: (res) => {
+          if (res.confirm) {
+            this.deleteClosetItem(item.id);
+          }
+        }
+      });
+    },
+    selectCategory(id) {
+      if (this.activeCategory === id) return;
+      this.activeCategory = id;
+      this.getClosetItems(true);
+    },
+    handleScrollToLower() {
+      if (!this.isLoading && this.hasMore) {
+        this.getClosetItems();
+      }
+    },
+
+    // 无需修改的本地方法
     handleAdd() {
-      // 改为打开弹窗
       this.showModal = true;
     },
-    // 关闭弹窗
     closeModal() {
       this.showModal = false;
     },
-    // 从相册上传
     uploadFromAlbum() {
-      console.log('从相册上传');
-      this.closeModal();
+      this.handleUpload(['album']);
     },
-    // 拍照上传
     uploadFromCamera() {
-      console.log('拍照上传');
-      this.closeModal();
+      this.handleUpload(['camera']);
     },
-    // 从素材库选择
     selectFromLibrary() {
       console.log('从素材库选择');
-      // 在这里可以添加跳转到素材库页面的逻辑
       this.closeModal();
-    }
+    },
   }
 };
 </script>

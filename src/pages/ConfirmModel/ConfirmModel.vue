@@ -26,13 +26,13 @@
       >下一步</button>
     </view>
 
-    <customer-service />
+    <!-- <customer-service /> -->
   </view>
 </template>
 
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
-import apiConfig from '@/utils/api.js'; // 1. 导入API配置
+import apiConfig from '@/utils/api.js';
 
 export default {
   components: { CustomerService },
@@ -41,19 +41,19 @@ export default {
       imageUrl: '' // 用于存储从上个页面传来的图片临时路径
     }
   },
-  // 2. 在页面加载时，获取上个页面传递的图片URL
   onLoad(options) {
     if (options.imageUrl) {
       this.imageUrl = decodeURIComponent(options.imageUrl);
     }
   },
   methods: {
-    // 3. “重新挑选”按钮，返回上一个页面
+    // “重新挑选”按钮，返回上一个页面
     onRetry() {
       uni.navigateBack();
     },
-    // 4. “下一步”按钮，执行上传逻辑
-    onConfirm() {
+    
+    // 改造：“下一步”按钮，执行上传逻辑
+    async onConfirm() {
       if (!this.imageUrl) {
         uni.showToast({ title: '没有可上传的图片', icon: 'none' });
         return;
@@ -68,38 +68,44 @@ export default {
 
       uni.showLoading({ title: '正在上传...' });
 
-      uni.uploadFile({
-        url: `${apiConfig.BASE_URL}/photo/upload`, // 你的图片上传API地址
-        filePath: this.imageUrl,
-        name: 'file', // 后端接收文件的字段名
-        header: {
-          'Authorization': `Bearer ${token}`
-        },
-        success: (uploadRes) => {
-          const data = JSON.parse(uploadRes.data);
-          // 修改：假设后端返回的 data 是图片的持久化URL
-          if (/*data.code === 0 && data.data*/ true) {
-            // 1. 将模特图片URL存入缓存
-            uni.setStorageSync('personImageUrl', data.data);
-            console.log('模特图URL已存储:', data.data);
+      try {
+        // 使用 async/await 调用 uni.uploadFile
+        const uploadRes = await uni.uploadFile({
+          url: `${apiConfig.BASE_URL}/photo/upload`,
+          filePath: this.imageUrl,
+          name: 'file',
+          header: {
+            'Authorization': `Bearer ${token}`
+          },
+        });
 
-            uni.showToast({ title: '上传成功！', icon: 'success' });
-            // 2. 跳转到下一步
-            setTimeout(() => {
-              uni.navigateTo({ url: '/pages/UploadCloth/UploadCloth' });
-            }, 1500);
-          } else {
-            uni.showToast({ title: data.message || '上传失败', icon: 'none' });
-          }
-        },
-        fail: (err) => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-          console.error('Upload failed:', err);
-        },
-        complete: () => {
-          uni.hideLoading();
+        // uni.uploadFile 返回的 data 是字符串，需要解析
+        const data = JSON.parse(uploadRes.data);
+        
+        // 统一的成功码判断
+        const successCodes = [1, 200, 0];
+        if (data && successCodes.includes(data.code)) {
+          const personImageUrl = data.data;
+          uni.setStorageSync('personImageUrl', personImageUrl);
+          console.log('模特图URL已存储:', personImageUrl);
+
+          uni.showToast({ title: '上传成功！', icon: 'success' });
+          
+          setTimeout(() => {
+            uni.navigateTo({ url: '/pages/UploadCloth/UploadCloth' });
+          }, 1500);
+        } else {
+          // 业务失败
+          uni.showToast({ title: data.message || '上传失败', icon: 'none' });
         }
-      });
+      } catch (error) {
+        // 网络或其它执行错误
+        uni.showToast({ title: '网络请求失败', icon: 'none' });
+        console.error('Upload failed:', error);
+      } finally {
+        // 确保 loading 总是被关闭
+        uni.hideLoading();
+      }
     }
   }
 }

@@ -41,7 +41,9 @@
 </template>
 
 <script>
-import apiConfig from '@/utils/api.js';
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
+import apiConfig from '../../utils/api.js';
 
 export default {
   data() {
@@ -49,23 +51,22 @@ export default {
       taskId: null,
       outfitImageUrl: '',
       description: '',
-      isLoading: true, // 控制加载状态
-      pollingTimer: null, // 轮询计时器
-      pollingCount: 0, // 轮询次数
-      maxPollingCount: 20 // 最大轮询次数，防止无限循环
+      isLoading: true,
+      pollingTimer: null,
+      pollingCount: 0,
+      maxPollingCount: 20
     };
   },
   onLoad(options) {
     if (options.taskId) {
       this.taskId = options.taskId;
-      this.startPolling(); // 开始轮询
+      this.startPolling();
     } else {
       console.error('未接收到 taskId');
       this.isLoading = false;
       this.description = '页面加载错误，缺少任务ID。';
     }
   },
-  // 页面卸载时清除计时器，防止内存泄漏
   onUnload() {
     if (this.pollingTimer) {
       clearInterval(this.pollingTimer);
@@ -73,12 +74,11 @@ export default {
     }
   },
   methods: {
+    // 2. 改造 startPolling 和 fetchResult
     startPolling() {
-      // 立即执行一次，然后开始定时轮询
-      this.fetchResult();
+      this.fetchResult(); // 立即执行一次
       this.pollingTimer = setInterval(() => {
-        this.pollingCount++;
-        if (this.pollingCount > this.maxPollingCount) {
+        if (this.pollingCount++ > this.maxPollingCount) {
           clearInterval(this.pollingTimer);
           this.isLoading = false;
           this.description = '任务处理超时，请稍后重试。';
@@ -86,80 +86,61 @@ export default {
           return;
         }
         this.fetchResult();
-      }, 3000); // 每3秒查询一次
+      }, 3000);
     },
-    fetchResult() {
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        clearInterval(this.pollingTimer);
-        this.isLoading = false;
-        this.description = '用户未登录，无法获取结果。';
-        return;
-      }
 
-      // 根据API文档，使用GET方法，并将taskId作为Path参数
-      const requestUrl = `${apiConfig.BASE_URL}/fitting_2d/getResult/${this.taskId}`;
+    async fetchResult() {
+      try {
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/fitting_2d/getResult/${this.taskId}`,
+          method: 'GET',
+        });
 
-      uni.request({
-        url: requestUrl,
-        method: 'GET',
-        header: {
-          'Authorization': `Bearer ${token}`
-        },
-        success: (res) => {
-          // 假设任务处理中时，返回的data为空或有特定状态码
-          // 当成功获取到数据时，res.data.data 应该包含 imageUrl 和 description
-          if (res.data /*&& res.data.code === 0*/ && res.data.data && res.data.data.imageUrl) {
-            // 成功获取结果
-            clearInterval(this.pollingTimer); // 停止轮询
-            this.isLoading = false;
-            this.outfitImageUrl = res.data.data.imageUrl;
-            this.description = res.data.data.description;
-          } else {
-            // 任务仍在处理中或查询失败，继续轮询
-            console.log(`轮询中... (${this.pollingCount})`);
-          }
-        },
-        fail: (err) => {
-          console.error('Result request failed:', err);
-          // 网络失败时可以考虑停止轮询
+        // 业务成功，但需要判断是否已生成结果
+        if (data && data.imageUrl) {
+          // 成功获取结果
           clearInterval(this.pollingTimer);
           this.isLoading = false;
-          this.description = '网络错误，无法获取搭配结果。';
+          this.outfitImageUrl = data.imageUrl;
+          this.description = data.description;
+        } else {
+          // 任务仍在处理中，继续轮询
+          console.log(`轮询中... (${this.pollingCount})`);
         }
-      });
+      } catch (error) {
+        // request 内部已处理了大部分错误提示
+        // 这里可以针对性地停止轮询
+        console.error('Result request failed:', error);
+        clearInterval(this.pollingTimer);
+        this.isLoading = false;
+        this.description = '网络错误或任务失败，无法获取搭配结果。';
+      }
     },
-    addToFavorites() {
+
+    // 3. 改造 addToFavorites 方法
+    async addToFavorites() {
       if (!this.outfitImageUrl) {
         uni.showToast({ title: '没有可收藏的图片', icon: 'none' });
         return;
       }
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
-        return;
-      }
+      
       uni.showLoading({ title: '正在收藏...' });
-      const requestUrl = `${apiConfig.BASE_URL}/user/addFavorite?imageUrl=${encodeURIComponent(this.outfitImageUrl)}`;
-      uni.request({
-        url: requestUrl,
-        method: 'POST',
-        header: { 'Authorization': `Bearer ${token}` },
-        success: (res) => {
-          if (res.data && res.data.code === 0) {
-            uni.showToast({ title: '收藏成功！', icon: 'success' });
-          } else {
-            uni.showToast({ title: (res.data && res.data.message) || '收藏失败', icon: 'none' });
-          }
-        },
-        fail: (err) => {
-          uni.showToast({ title: '网络请求失败', icon: 'none' });
-        },
-        complete: () => {
-          uni.hideLoading();
-        }
-      });
+      try {
+        // 根据之前的代码，这里应该是 /collection/add
+        await request({
+          url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(this.outfitImageUrl)}`,
+          method: 'POST',
+        });
+        uni.showToast({ title: '收藏成功！', icon: 'success' });
+      } catch (error) {
+        console.error('Favorite request failed:', error);
+        // 错误提示已由 request 函数统一处理
+      } finally {
+        uni.hideLoading();
+      }
     },
+
+    // 4. restartProcess 方法保持不变
     restartProcess() {
       uni.reLaunch({
         url: '/pages/UploadCloth/UploadCloth'

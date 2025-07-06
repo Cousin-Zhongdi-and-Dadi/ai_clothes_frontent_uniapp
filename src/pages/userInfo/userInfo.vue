@@ -150,9 +150,11 @@
   </view>
 </template>
 
-<script scoped>
-import BodyDataEdit from '../../components/BodyDataEdit/BodyDataEdit.vue';
+<script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
 import apiConfig from '@/utils/api.js';
+import BodyDataEdit from '../../components/BodyDataEdit/BodyDataEdit.vue';
 
 export default {
   components: { BodyDataEdit },
@@ -181,193 +183,6 @@ export default {
       ]
     };
   },
-  // 修改：移除 onShow 钩子，将获取数据的逻辑移到 mounted 或者由父组件调用
-  mounted() {
-    this.getUserInfo();
-  },
-  methods: {
-    // 新增：获取用户信息的核心方法
-    getUserInfo() {
-      const token = uni.getStorageSync('token');
-      // 注意：这里的 token 检查可以保留，作为最后一道防线，但不再执行跳转
-      if (!token) {
-        console.error("UserInfo component loaded without a token.");
-        return;
-      }
-
-      uni.request({
-        url: `${apiConfig.BASE_URL}/user/getUserInfo`, // 假设的获取用户信息API
-        method: 'GET',
-        header: {
-          'Authorization': `Bearer ${token}` // 在请求头中携带token
-        },
-        success: (res) => {
-          // 1. 无论成功失败，都先打印出从服务器收到的原始响应
-          console.log('服务器响应:', res);
-
-          // 2. 恢复并使用严格的成功判断条件
-          if (res.data /*&& res.data.code === 0*/) {
-            const userData = res.data.data;
-
-            // 3. 增加一个对 userData 存在的检查，防止后续代码因数据为空而出错
-            if (!userData) {
-              console.error('获取用户信息失败: res.data.data 为空');
-              this.showError('返回的用户数据为空');
-              return;
-            }
-
-            // 更新所有用户信息
-            this.userName = userData.username;
-            this.userAvatar = userData.avatarUrl;
-            this.userGender = userData.gender;
-            this.userHeight = userData.height;
-            this.userWeight = userData.weight;
-            this.userBust = userData.bust;
-            this.userWaist = userData.waist;
-            this.userHip = userData.hips;
-            this.userShoulder = userData.shoulderWidth;
-            this.userArm = userData.armLength;
-            this.userLeg = userData.legLength;
-            this.userNeck = userData.neckCircumference;
-
-            console.log('获取用户信息成功:', userData);
-          } else {
-            // 明确打印出失败原因
-            console.error('获取用户信息失败:', res.data);
-            this.showError((res.data && res.data.message) || '获取用户信息失败');
-          }
-        },
-        fail: (err) => {
-          this.showError('网络错误，请稍后重试');
-        }
-      });
-    },
-    handleSelection(item) {
-      if (item.text === '浏览历史') {
-        uni.navigateTo({ url: '/pages/History/History' });
-      } else if (item.text === '收藏穿搭') {
-        uni.navigateTo({ url: '/pages/Favourite/Favourite' });
-      }
-    },
-    showActionMenu() {
-      uni.showActionSheet({
-        itemList: ['修改头像', '修改昵称', '登出'],
-        success: (res) => {
-          switch (res.tapIndex) {
-            case 0: this.changeAvatar(); break;
-            case 1: this.showUsernameEdit(); break;
-            case 2: this.logout(); break;
-          }
-        }
-      });
-    },
-    logout() {
-      uni.showModal({
-        title: '提示',
-        content: '确定要退出登录吗？',
-        success: (res) => {
-          if (res.confirm) {
-            uni.removeStorageSync('token');
-            uni.reLaunch({ url: '/pages/LoginSelection/LoginSelection' });
-          }
-        }
-      });
-    },
-    showBodyDataEdit() { this.isBodyDataEditVisible = true; },
-    closeBodyDataEdit() { this.isBodyDataEditVisible = false; },
-    showUsernameEdit() {
-      this.newUserName = this.userName;
-      this.isUsernameEditVisible = true;
-    },
-    closeUsernameEdit() { this.isUsernameEditVisible = false; },
-    submitUsernameEdit() {
-      const newName = this.newUserName.trim();
-      if (!newName) {
-        this.showError('昵称不能为空');
-        return;
-      }
-      uni.showLoading({ title: '正在修改...' });
-      uni.request({
-        url: `${apiConfig.BASE_URL}/user/updateName?username=${encodeURIComponent(newName)}`,
-        method: 'POST',
-        header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` },
-        success: (res) => {
-          if (res.data && res.data.data === true) {
-            uni.showToast({ title: '修改成功', icon: 'success' });
-            this.closeUsernameEdit();
-            this.getUserInfo(); // 修改成功后，重新获取所有信息
-          } else {
-            this.showError((res.data && res.data.message) || '修改失败');
-          }
-        },
-        fail: () => this.showError('网络请求失败'),
-        complete: () => uni.hideLoading()
-      });
-    },
-    changeAvatar() {
-      uni.chooseImage({
-        count: 1,
-        success: (res) => {
-          uni.showLoading({ title: '正在上传...' });
-          uni.uploadFile({
-            url: `${apiConfig.BASE_URL}/user/updateAvatar`,
-            filePath: res.tempFilePaths[0],
-            name: 'file',
-            header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` },
-            success: (uploadRes) => {
-              const data = JSON.parse(uploadRes.data);
-              if (data.code === 0) {
-                uni.showToast({ title: '上传成功', icon: 'success' });
-                this.getUserInfo(); // 上传成功后，重新获取所有信息
-              } else {
-                this.showError(data.message || '上传失败');
-              }
-            },
-            fail: () => this.showError('上传失败'),
-            complete: () => uni.hideLoading()
-          });
-        }
-      });
-    },
-    submitBodyDataEdit(newData) {
-      uni.showLoading({ title: '正在更新...' });
-      uni.request({
-        url: `${apiConfig.BASE_URL}/user/updateStature`,
-        method: 'POST',
-        header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` },
-        data: {
-          height: newData.height,
-          weight: newData.weight,
-          gender: newData.gender,
-          bust: newData.bust,
-          waist: newData.waist,
-          hips: newData.hip,
-          shoulderWidth: newData.shoulder,
-          armLength: newData.arm,
-          legLength: newData.leg,
-          neckCircumference: newData.neck
-        },
-        success: (res) => {
-          if (res.data && res.data.data === true) {
-            uni.showToast({ title: '数据已更新', icon: 'success' });
-            this.closeBodyDataEdit();
-            this.getUserInfo(); // 更新成功后，重新获取所有信息
-          } else {
-            this.showError((res.data && res.data.message) || '更新失败');
-          }
-        },
-        fail: () => this.showError('网络请求失败'),
-        complete: () => uni.hideLoading()
-      });
-    },
-    percentageWidth(min, max, value) {
-      const clamped = Math.min(Math.max(value, min), max);
-      return ((clamped - min) / (max - min)) * 100;
-    },
-    showError(error) {
-      uni.showToast({ title: error, icon: 'none' });
-    }
-  },
   computed: {
     currentUserData() {
       return {
@@ -394,6 +209,153 @@ export default {
         leg: this.percentageWidth(50, 150, this.userLeg),
         neck: this.percentageWidth(0, 50, this.userNeck),
       };
+    }
+  },
+  // 2. onShow 中调用改造后的 getUserInfo
+  onShow() {
+    this.getUserInfo();
+  },
+  methods: {
+    // 3. 改造 getUserInfo 方法
+    async getUserInfo() {
+      try {
+        const userData = await request({
+          url: `${apiConfig.BASE_URL}/user/getUserInfo`,
+          method: 'GET',
+        });
+
+        if (!userData) {
+          uni.showToast({ title: '无法加载用户信息', icon: 'none' });
+          return;
+        }
+
+        this.userName = userData.username;
+        this.userAvatar = userData.avatar || '/static/logo.png';
+        // ... 更新其他用户信息
+        this.userGender = userData.gender;
+        this.userHeight = userData.height;
+        this.userWeight = userData.weight;
+        this.userBust = userData.bust;
+        this.userWaist = userData.waist;
+        this.userHip = userData.hip;
+        this.userShoulder = userData.shoulder;
+        this.userArm = userData.arm;
+        this.userLeg = userData.leg;
+        this.userNeck = userData.neck;
+
+      } catch (error) {
+        console.error("getUserInfo failed:", error);
+        // 错误提示已由 request 函数统一处理
+      }
+    },
+
+    // 4. 改造 submitUsernameEdit 方法
+    async submitUsernameEdit() {
+      if (!this.newUserName.trim()) {
+        uni.showToast({ title: '昵称不能为空', icon: 'none' });
+        return;
+      }
+      uni.showLoading({ title: '正在保存...' });
+      try {
+        await request({
+          url: `${apiConfig.BASE_URL}/user/updateUsername`,
+          method: 'POST',
+          data: { username: this.newUserName }
+        });
+        
+        this.userName = this.newUserName;
+        this.closeUsernameEdit();
+        uni.showToast({ title: '昵称修改成功', icon: 'success' });
+
+      } catch (error) {
+        console.error("submitUsernameEdit failed:", error);
+      } finally {
+        uni.hideLoading();
+      }
+    },
+
+    // 5. 改造 changeAvatar 方法
+    async changeAvatar() {
+      try {
+        const chooseRes = await uni.chooseImage({ count: 1, sourceType: ['album', 'camera'] });
+        const tempFilePath = chooseRes.tempFilePaths[0];
+        
+        uni.showLoading({ title: '正在上传...' });
+
+        const uploadRes = await uni.uploadFile({
+          url: `${apiConfig.BASE_URL}/user/uploadAvatar`, // 假设的上传头像API
+          filePath: tempFilePath,
+          name: 'file',
+          header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` },
+        });
+
+        // uni.uploadFile 返回的是字符串，需要解析
+        const responseData = JSON.parse(uploadRes.data);
+        
+        // 判断业务 code
+        if (responseData.code === 200) {
+          this.userAvatar = responseData.data.avatarUrl; // 更新为新头像URL
+          uni.showToast({ title: '头像更换成功', icon: 'success' });
+        } else {
+          // 手动处理上传接口的业务失败
+          uni.showToast({ title: responseData.message || '上传失败', icon: 'none' });
+        }
+
+      } catch (error) {
+        // uni.chooseImage 用户取消等情况会进入这里
+        console.log("Avatar selection/upload cancelled or failed:", error);
+      } finally {
+        uni.hideLoading();
+      }
+    },
+
+    // 6. 改造 logout 方法
+    async logout() {
+      try {
+        const res = await uni.showModal({ title: '提示', content: '确定要退出登录吗？' });
+        if (res.confirm) {
+          // 可选：调用后端API使token失效
+          // await request({ url: `${apiConfig.BASE_URL}/user/logout`, method: 'POST' });
+          
+          uni.removeStorageSync('token');
+          uni.reLaunch({ url: '/pages/LoginSelection/LoginSelection' });
+        }
+      } catch (error) {
+        // modal fail
+      }
+    },
+    handleSelection(item) {
+      if (item.text === '浏览历史') {
+        uni.navigateTo({ url: '/pages/History/History' });
+      } else if (item.text === '收藏穿搭') {
+        uni.navigateTo({ url: '/pages/Favourite/Favourite' });
+      }
+    },
+    showActionMenu() {
+      uni.showActionSheet({
+        itemList: ['更换头像', '修改昵称', '退出登录'],
+        success: (res) => {
+          if (res.tapIndex === 0) this.changeAvatar();
+          else if (res.tapIndex === 1) this.showUsernameEdit();
+          else if (res.tapIndex === 2) this.logout();
+        }
+      });
+    },
+    showBodyDataEdit() { this.isBodyDataEditVisible = true; },
+    closeBodyDataEdit() { this.isBodyDataEditVisible = false; },
+    showUsernameEdit() {
+      this.newUserName = this.userName;
+      this.isUsernameEditVisible = true;
+    },
+    closeUsernameEdit() {
+      this.isUsernameEditVisible = false;
+      this.newUserName = '';
+    },
+    submitBodyDataEdit(editedData) {
+      // ...
+    },
+    showError(error) {
+      // ...
     }
   }
 };

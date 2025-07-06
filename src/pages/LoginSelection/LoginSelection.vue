@@ -24,125 +24,63 @@
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
-
-// 1. 在这里添加一个模拟模式的开关
-//    - 设置为 true:  将不发送真实网络请求，而是使用下面的假数据。
-//    - 设置为 false: 将会发送真实的网络请求到后端。
-const IS_MOCK_MODE = true;
 
 export default {
   name: 'LoginSelection',
-    methods: {
-        // 一键登录逻辑
-        oneClickLogin() {
-            uni.showLoading({
-                title: '正在登录...'
-            });
+  methods: {
+    // 2. 改造 oneClickLogin 方法
+    async oneClickLogin() {
+      uni.showLoading({
+        title: '正在登录...'
+      });
 
-            uni.login({
-                provider: 'weixin',
-                success: (loginRes) => {
-                    // 2. 如果是模拟模式，就走模拟逻辑
-                    if (IS_MOCK_MODE) {
-                        console.warn("【模拟模式】已开启，正在模拟后端响应...");
+      try {
+        // 步骤 1: 调用 uni.login 获取微信登录凭证 code
+        const loginRes = await uni.login({
+          provider: 'weixin',
+        });
 
-                        // --- 在这里切换你想测试的场景 ---
-                        // 场景A: 模拟登录成功
-                        const mockResponse = {
-                            data: {
-                                code: 0,
-                                message: "模拟登录成功",
-                                data: {
-                                    openid: "mock_openid_12345",
-                                    token: "mock_token_string_for_testing"
-                                }
-                            }
-                        };
+        // 步骤 2: 使用封装的 request 函数将 code 发送到后端
+        const loginData = await request({
+          url: `${apiConfig.BASE_URL}/user/login/${loginRes.code}`,
+          method: 'GET',
+        });
 
-                        // 场景B: 模拟登录失败 (可以取消下面的注释来测试失败情况)
-                        /*
-                        const mockResponse = {
-                            data: {
-                                code: 5001, // 一个非0的错误码
-                                message: "模拟的错误：无效的code",
-                                data: null
-                            }
-                        };
-                        */
+        // 业务成功，request 函数直接返回了包含 token 的对象
+        uni.setStorageSync('token', loginData.token);
 
-                        // 使用 setTimeout 模拟网络延迟，让体验更真实
-                        setTimeout(() => {
-                            this.handleLoginResponse(mockResponse);
-                        }, 1000); // 模拟1秒的延迟
+        uni.showToast({
+          title: '登录成功',
+          icon: 'success'
+        });
 
-                    } else {
-                        // 3. 如果不是模拟模式，才发送真实的网络请求
-                        uni.request({
-                            url: `${apiConfig.BASE_URL}/user/login/${loginRes.code}`,
-                            method: 'GET',
-                            success: (res) => {
-                                this.handleLoginResponse(res);
-                            },
-                            fail: (err) => {
-                                uni.hideLoading();
-                                uni.showToast({
-                                    title: '网络请求失败，请重试',
-                                    icon: 'none'
-                                });
-                                console.error('Login request failed:', err);
-                            }
-                        });
-                    }
-                },
-                fail: (err) => {
-                    uni.hideLoading();
-                    uni.showToast({
-                        title: '获取登录凭证失败',
-                        icon: 'none'
-                    });
-                    console.error('uni.login failed:', err);
-                }
-            });
-        },
+        // 延迟后跳转到“我的”页面
+        setTimeout(() => {
+          uni.switchTab({
+            url: '/pages/UserInfoEntry/UserInfoEntry' // 统一跳转到个人中心入口
+          });
+        }, 1500);
 
-        // 4. 新增：将处理响应的逻辑抽离成一个独立方法
-        handleLoginResponse(res) {
-            uni.hideLoading();
-            if (res.data /*&& res.data.code === 0*/) {
-                // 登录成功，保存token
-                uni.setStorageSync('token', res.data.data.token);
-
-                // 给出成功提示
-                uni.showToast({
-                    title: '登录成功',
-                    icon: 'success'
-                });
-
-                // 延迟后跳转到“我的”页面
-                setTimeout(() => {
-                    uni.switchTab({
-                        url: '/pages/UserInfoEntry/UserInfoEntry'
-                    });
-                }, 1500);
-
-            } else {
-                // 后端返回错误
-                uni.showToast({
-                    title: (res.data && res.data.message) || '登录失败',
-                    icon: 'none'
-                });
-            }
-        },
-
-        // 手机号登录逻辑
-        phoneLogin() {
-            // 跳转到手机号登录页面
-            uni.navigateTo({
-                url: '/pages/Login/Login'
-            });
-        }
+      } catch (error) {
+        // uni.login 失败或 request 函数业务失败/网络失败
+        // 错误提示已由 request 函数或 uni.login 内部处理
+        console.error('Login process failed:', error);
+      } finally {
+        // 无论成功或失败，都确保隐藏加载提示
+        uni.hideLoading();
+      }
     },
+
+    // 手机号登录逻辑保持不变
+    phoneLogin() {
+      uni.navigateTo({
+        url: '/pages/Login/Login'
+      });
+    }
+  },
 };
 </script>
 

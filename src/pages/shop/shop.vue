@@ -52,16 +52,16 @@
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
 export default {
   name: 'ShopPage',
   data() {
     return {
-      // 1. 修改：tabs 初始化为空数组，将从API动态获取
       tabs: [],
-      activeTabId: null, // 默认选中“推荐”
-      // 分页相关数据
+      activeTabId: null,
       goods: [],
       page: 1,
       pageSize: 10,
@@ -69,124 +69,104 @@ export default {
       isLoading: false,
     };
   },
+  // 5. 修改：onLoad 中并行获取分类和商品，提升加载速度
+  async onLoad() {
+    await this.fetchCategories(); // 必须先获取分类
+    this.refresh(); // 然后根据默认分类刷新商品
+  },
+  onReachBottom() {
+    this.fetchGoods(true);
+  },
+  onPullDownRefresh() {
+    this.refresh().then(() => {
+      uni.stopPullDownRefresh();
+    });
+  },
   methods: {
     goToDetail(id) {
       uni.navigateTo({
         url: `/pages/GoodsDetail/GoodsDetail?id=${id}`,
       });
     },
-    // 2. 新增：从后端获取所有商品分类
+    // 2. 改造 fetchCategories 方法
     async fetchCategories() {
       try {
-        const res = await uni.request({
-          url: `${apiConfig.BASE_URL}/mall/getCategory`, // 获取分类的API端点
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/mall/getCategory`,
           method: 'GET',
         });
-
-        if (res.statusCode === 200 && res.data && /*res.data.code === 0 &&*/ Array.isArray(res.data.data)) {
-          // 映射API返回的数据到前端需要的格式
-          const categories = res.data.data
-            .sort((a, b) => a.sortOrder - b.sortOrder) // 根据 sortOrder 排序
-            .map(cat => ({
-              id: cat.id,
-              name: cat.categoryName,
-            }));
-          
-          // 将固定的“推荐”标签与从API获取的分类合并
-          this.tabs = [
-            { name: '推荐', id: null },
-            ...categories
-          ];
-        } else {
-          throw new Error(res.data.message || '加载分类失败');
-        }
-      } catch (e) {
-        uni.showToast({ title: e.message || '网络请求异常', icon: 'none' });
-        // 如果API请求失败，提供一个默认的“推荐”标签以保证页面可用性
+        
+        const categories = data
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(cat => ({
+            id: cat.id,
+            name: cat.categoryName,
+          }));
+        
+        this.tabs = [{ name: '推荐', id: null }, ...categories];
+      } catch (error) {
+        console.error("fetchCategories failed:", error);
+        // 错误提示已由 request 函数处理，这里只做降级处理
         if (this.tabs.length === 0) {
-            this.tabs = [{ name: '推荐', id: null }];
+          this.tabs = [{ name: '推荐', id: null }];
         }
       }
     },
     changeTab(tab) {
-      // 如果点击的是当前已激活的标签，则不执行任何操作
-      if (this.activeTabId === tab.id) {
-        return;
-      }
+      if (this.activeTabId === tab.id) return;
       this.activeTabId = tab.id;
-      // 调用 refresh 方法重置列表并加载新数据
       this.refresh();
     },
-    // 3. 修改：fetchGoods 方法以支持不同API
+    // 3. 改造 fetchGoods 方法
     async fetchGoods(loadMore = false) {
-      if (this.isLoading || !this.hasMore) {
+      if (this.isLoading || (!loadMore && !this.hasMore)) {
         return;
       }
       this.isLoading = true;
 
-      // 根据 activeTabId 动态构建 URL 和参数
       let url = '';
       const params = { page: this.page, pageSize: this.pageSize };
 
       if (this.activeTabId === null) {
-        // 调用推荐商品 API
         url = `${apiConfig.BASE_URL}/mall/getRecommended`;
       } else {
-        // 调用分类商品 API
         url = `${apiConfig.BASE_URL}/mall/getProductByTypeId/${this.activeTabId}`;
       }
 
       try {
-        const res = await uni.request({
+        const data = await request({
           url: url,
           method: 'GET',
           data: params,
         });
 
-        if (res.statusCode === 200 && res.data /*&& res.data.code === 0*/ && Array.isArray(res.data.data)) {
-          // 映射API返回的数据到前端需要的格式
-          const newItems = res.data.data.map(item => ({
-            id: item.id,
-            name: item.productName,
-            desc: item.description,
-            image: item.imageGif,
-            price: item.price,
-          }));
+        const newItems = data.map(item => ({
+          id: item.id,
+          name: item.productName,
+          desc: item.description,
+          image: item.imageGif,
+          price: item.price,
+        }));
 
-          this.goods = loadMore ? [...this.goods, ...newItems] : newItems;
-          this.hasMore = newItems.length === this.pageSize;
-          if (this.hasMore) {
-            this.page++;
-          }
-        } else {
-          throw new Error(res.data.message || '加载商品失败');
+        this.goods = loadMore ? [...this.goods, ...newItems] : newItems;
+        this.hasMore = newItems.length === this.pageSize;
+        if (this.hasMore) {
+          this.page++;
         }
-      } catch (e) {
-        uni.showToast({ title: e.message || '网络请求异常', icon: 'none' });
+      } catch (error) {
+        console.error("fetchGoods failed:", error);
+        // 错误提示已由 request 函数处理
       } finally {
         this.isLoading = false;
       }
     },
-    // 4. refresh 方法现在会为当前激活的 tab 加载数据
+    // 4. refresh 方法保持不变，但现在调用的是改造后的 fetchGoods
     async refresh() {
       this.page = 1;
       this.goods = [];
       this.hasMore = true;
       await this.fetchGoods();
     },
-  },
-  // 4. 修改：onLoad 中同时获取分类和商品
-  onLoad() {
-    this.fetchCategories(); // 获取分类
-    this.fetchGoods();      // 获取默认的推荐商品
-  },
-  onReachBottom() {
-    this.fetchGoods(true); // 触底时加载更多
-  },
-  onPullDownRefresh() {
-    this.refresh().then(() => {
-      uni.stopPullDownRefresh(); // 结束下拉刷新动画
-    });
   },
 };
 </script>

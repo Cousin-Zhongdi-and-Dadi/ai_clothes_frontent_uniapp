@@ -69,63 +69,89 @@
     </view>
 
     <!-- 悬浮客服按钮 -->
-    <customer-service />
+    <!-- <customer-service /> -->
   </view>
 </template>
 
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue'
+
 export default {
   components: { CustomerService },
   name: 'UploadCloth',
   methods: {
-    // 1. 更换模特
+    // 1. 新增：通用的登录检查和后续操作方法
+    checkLoginAndProceed(action) {
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        // 延迟后跳转到登录页
+        setTimeout(() => {
+          uni.navigateTo({
+            url: '/pages/LoginSelection/LoginSelection'
+          });
+        }, 1500);
+        return;
+      }
+      // 如果已登录，则执行传入的回调函数
+      action();
+    },
+
+    // 2. 修改：所有方法都先调用登录检查
     changeModel() {
-      // 修改：跳转到 2D 模特展示/上传页面
-      uni.navigateTo({
-        url: '/pages/TwoDimDisplay/TwoDimDisplay'
+      this.checkLoginAndProceed(() => {
+        uni.navigateTo({
+          url: '/pages/TwoDimDisplay/TwoDimDisplay'
+        });
       });
     },
-    // 2. 衣物选择
+    
     selectFromResources() {
-      console.log('触发“衣物选择”');
-      // 修改：跳转到素材库，并传递 type=top 参数
-      uni.navigateTo({
-        url: '/pages/ResourcesSelection/ResourcesSelection?type=top'
+      this.checkLoginAndProceed(() => {
+        uni.navigateTo({
+          url: '/pages/ResourcesSelection/ResourcesSelection?type=top'
+        });
       });
     },
-    // 3. 相册上传
+
     uploadFromAlbum() {
-      console.log('触发“相册上传”');
-      uni.chooseImage({
-        count: 1,
-        sourceType: ['album'],
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          console.log('从相册选择的图片:', tempFilePath);
-          // 这里可以接上传逻辑或跳转到确认页面
-          uni.showToast({ title: '图片选择成功', icon: 'success' });
-        },
-        fail: (err) => {
-          console.log('取消选择或选择失败', err);
-        }
+      this.checkLoginAndProceed(() => {
+        uni.chooseImage({
+          count: 1,
+          sourceType: ['album'],
+          success: (res) => {
+            const tempFilePath = res.tempFilePaths[0];
+            // 3. 修改：将图片路径传递到确认页面
+            uni.navigateTo({
+              url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}`
+            });
+          },
+          fail: (err) => {
+            console.log('取消选择或选择失败', err);
+          }
+        });
       });
     },
-    // 4. 拍照上传
+
     uploadFromCamera() {
-      console.log('触发“拍照上传”');
-      uni.chooseImage({
-        count: 1,
-        sourceType: ['camera'],
-        success: (res) => {
-          const tempFilePath = res.tempFilePaths[0];
-          console.log('拍摄的图片:', tempFilePath);
-          // 这里可以接上传逻辑或跳转到确认页面
-          uni.showToast({ title: '照片拍摄成功', icon: 'success' });
-        },
-        fail: (err) => {
-          console.log('取消拍摄或拍摄失败', err);
-        }
+      this.checkLoginAndProceed(() => {
+        uni.chooseImage({
+          count: 1,
+          sourceType: ['camera'],
+          success: (res) => {
+            const tempFilePath = res.tempFilePaths[0];
+            // 3. 修改：将图片路径传递到确认页面
+            uni.navigateTo({
+              url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}`
+            });
+          },
+          fail: (err) => {
+            console.log('取消拍摄或拍摄失败', err);
+          }
+        });
       });
     }
   }

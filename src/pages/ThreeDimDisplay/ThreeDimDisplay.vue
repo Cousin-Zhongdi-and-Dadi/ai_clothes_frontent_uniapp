@@ -1,24 +1,112 @@
 <template>
-  <view>
-    <web-view :src="url"></web-view>
+  <view class="container">
+    <!-- 1. 加载时显示提示 -->
+    <view
+      v-if="isLoading"
+      class="status-container"
+    >
+      <view class="loading-animation"></view>
+      <text>正在加载3D模型...</text>
+    </view>
+
+    <!-- 2. 获取到URL后，再渲染 web-view -->
+    <web-view
+      v-if="url"
+      :src="url"
+    ></web-view>
+
+    <!-- 3. 如果获取失败，显示错误提示 -->
+    <view
+      v-if="!isLoading && !url"
+      class="status-container"
+    >
+      <text>无法加载模型，请稍后重试。</text>
+    </view>
   </view>
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
+import apiConfig from '@/utils/api.js';
+
 export default {
-    name: 'ThreeDimDisplay',
-    data() {
-        return {
-            // 在这里替换成你想要显示的网页地址
-            url: 'https://cloud.style3d.com/cd/product/2457242?share_state_id=83518&func=resproduct&is_share_page=1' 
-        };
-    },
-    methods: {
-        // Add your methods here
+  name: 'ThreeDimDisplay',
+  data() {
+    return {
+      // 4. url 初始为空
+      url: '',
+      // 5. 新增加载状态
+      isLoading: true
+    };
+  },
+  // 6. 页面加载时触发
+  onLoad(options) {
+    // 从页面跳转的参数中获取 styleId
+    if (options.styleId) {
+      this.fetchModelUrl(options.styleId);
+    } else {
+      console.error('No styleId provided to ThreeDimDisplay page.');
+      uni.showToast({
+        title: '缺少模型ID',
+        icon: 'none'
+      });
+      this.isLoading = false;
     }
+  },
+  methods: {
+    // 7. 新增：根据 styleId 获取模型URL的方法
+    async fetchModelUrl(styleId) {
+      this.isLoading = true;
+      try {
+        // 使用封装的 request 函数
+        const modelUrl = await request({
+          url: `${apiConfig.BASE_URL}/fitting_3d/getLink/${styleId}`,
+          method: 'GET',
+        });
+        
+        // 业务成功，request 函数直接返回了 URL
+        this.url = modelUrl;
+
+      } catch (error) {
+        // 错误提示已由 request 函数统一处理
+        console.error('Fetch 3D URL failed:', error);
+        // this.url 保持为空，模板会自动显示错误提示
+      } finally {
+        // 无论成功或失败，都隐藏加载提示
+        this.isLoading = false;
+      }
+    }
+  }
 };
 </script>
 
 <style scoped>
-/* Add your styles here */
+.container {
+  width: 100%;
+  height: 100vh;
+}
+.status-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #666;
+  font-size: 28rpx;
+}
+.loading-animation {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #e0e0e0;
+  border-top-color: #6c63ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 </style>

@@ -149,50 +149,97 @@
 </template>
 
 <script>
+// 1. 导入封装的 request 函数和 apiConfig
+import request from '../../utils/request.js';
+import apiConfig from '../../utils/api.js';
+
 export default {
   data() {
     return {
       activeTab: 0,
-      pageType: 'top', // 4. 新增页面类型字段，默认为'top'
+      pageType: 'top', // 'top' or 'bottom'
       isPopupVisible: false,
       selectedItem: null,
-      topsList: [
-        { img: '/static/example_pictures/sample1.png', title: '经典复古西装外套', desc: '轻盈百搭 时尚休闲' },
-        { img: '/static/example_pictures/sample2.png', title: '简约纯色T恤', desc: '舒适透气 基础必备' },
-        { img: '/static/example_pictures/sample3.png', title: '条纹长袖衬衫', desc: '经典条纹 设计感十足' }
-      ],
-      suitList: [
-        { img: '/static/example_pictures/sample4.png', title: '优雅长款连衣裙', desc: '修身显瘦 气质之选' },
-        { img: '/static/example_pictures/sample5.png', title: '工装风连体裤', desc: '帅气有型 潮流必备' }
-      ],
-      // 5. 新增下装数据
-      trousersList: [
-        { img: '/static/example_pictures/trousers1.png', title: '高腰直筒牛仔裤', desc: '显高显瘦 复古百搭' },
-        { img: '/static/example_pictures/trousers2.png', title: '休闲运动卫裤', desc: '舒适柔软 日常必备' }
-      ],
-      shortsList: [
-        { img: '/static/example_pictures/shorts1.png', title: 'A字牛仔短裤', desc: '清爽活力 夏日首选' }
-      ],
-      skirtsList: [
-        { img: '/static/example_pictures/skirt1.png', title: '百褶半身裙', desc: '学院风格 甜美减龄' },
-        { img: '/static/example_pictures/skirt2.png', title: '碎花雪纺长裙', desc: '温柔飘逸 度假风情' }
-      ]
+      // 2. 将静态数据改为空数组，准备从API获取
+      topsList: [],
+      suitList: [],
+      trousersList: [],
+      shortsList: [],
+      skirtsList: [],
+      isLoading: false, // 新增加载状态
     };
   },
-  // 6. 新增 onLoad 生命周期钩子
+  computed: {
+    // 3. 新增计算属性，根据 activeTab 返回当前应显示的列表
+    currentList() {
+      switch (this.activeTab) {
+        case 0: return this.topsList;
+        case 1: return this.suitList;
+        case 2: return this.trousersList;
+        case 3: return this.shortsList;
+        case 4: return this.skirtsList;
+        default: return [];
+      }
+    }
+  },
   onLoad(options) {
-    // 检查URL参数中是否有type
     if (options.type === 'bottom') {
       this.pageType = 'bottom';
-      // 如果是下装，默认选中第一个下装Tab（长裤）
       this.activeTab = 2;
     } else {
-      // 默认为上装
       this.pageType = 'top';
       this.activeTab = 0;
     }
+    // 4. 页面加载时获取当前Tab的数据
+    this.fetchListData();
   },
   methods: {
+    // 5. 新增：切换Tab时获取数据
+    changeTab(tabIndex) {
+      if (this.activeTab === tabIndex) return;
+      this.activeTab = tabIndex;
+      this.fetchListData();
+    },
+    // 6. 新增：获取列表数据的核心方法
+    async fetchListData() {
+      // 如果当前列表已有数据，则不再重复获取
+      if (this.currentList.length > 0) return;
+
+      this.isLoading = true;
+      
+      // 假设的API端点，你需要根据后端实际情况修改
+      // 例如 /getResources?category=tops, /getResources?category=suits 等
+      const categoryMap = ['tops', 'suits', 'trousers', 'shorts', 'skirts'];
+      const currentCategory = categoryMap[this.activeTab];
+      
+      if (!currentCategory) {
+        this.isLoading = false;
+        return;
+      }
+
+      try {
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/resource/getList`,
+          method: 'GET',
+          data: { category: currentCategory }
+        });
+
+        // 将获取到的数据赋值给对应的列表
+        switch (this.activeTab) {
+          case 0: this.topsList = data; break;
+          case 1: this.suitList = data; break;
+          case 2: this.trousersList = data; break;
+          case 3: this.shortsList = data; break;
+          case 4: this.skirtsList = data; break;
+        }
+      } catch (error) {
+        console.error(`Failed to fetch ${currentCategory}:`, error);
+        // 错误提示已由 request 函数处理
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
     // 显示弹窗的方法
     showPopup(item) {
       this.selectedItem = item;

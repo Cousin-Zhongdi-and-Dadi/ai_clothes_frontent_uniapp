@@ -1362,9 +1362,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dcloudio/uni-automator@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/uni-automator@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/uni-automator@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/uni-automator@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     address: "npm:^1.1.2"
     debug: "npm:^4.1.1"
@@ -1381,23 +1381,23 @@ __metadata:
     adbkit: ^2.11.1
     node-simctl: ^6.1.0
     puppeteer: ^3.0.1
-  checksum: 10c0/9b9a8a331853b4b2e650de73487cfee04254b5d685ac626bfc03087c956d3a96d967fa24f93cdd5044c61cdf05f992b6a59d6c31ebea4ad1eefc9724ac490ebc
+  checksum: 10c0/3e517b83a31debde9cf1a7b92fd17127d7697babce5c5562ed1b03d3be9669bed9a60e367186e9f5a0f75fc74d83e638cfb697c00b51fabbe497e422954b48ec
   languageName: node
   linkType: hard
 
-"@dcloudio/uni-cli-i18n@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/uni-cli-i18n@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/uni-cli-i18n@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/uni-cli-i18n@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     i18n: "npm:^0.13.3"
     os-locale-s-fix: "npm:^1.0.8-fix-1"
-  checksum: 10c0/bf7108f833875c3a0f520fc4975805ececd59592e16bdb526f6794de0700f491cf4b59a740d89330227f51cb58d43ce6126e514d63a30232941d592df477c30f
+  checksum: 10c0/dfd6852d3b331fed8b420c16a4d53e571e2d239941bc67a9e97c71ae4860dc2afd8a655fb133b42a81c0119d7fd90993ec14982c333744228c72209553886483
   languageName: node
   linkType: hard
 
-"@dcloudio/uni-cli-shared@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/uni-cli-shared@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/uni-cli-shared@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/uni-cli-shared@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     escape-string-regexp: "npm:^4.0.0"
     fast-glob: "npm:^3.2.11"
@@ -1406,7 +1406,7 @@ __metadata:
     hash-sum: "npm:^1.0.2"
     postcss-urlrewrite: "npm:^0.2.2"
     strip-json-comments: "npm:^2.0.1"
-  checksum: 10c0/a10d77ab4d0cd460169f1d3e60f6c5e340062dafc3cc2d163ba5b4dd56aba9bd78be89992aeffb82b2162d18e308eb67975cebb7a2e7e91a2be7b9211b393281
+  checksum: 10c0/00726d9465531117ea9c3090305492c8732555e3d1397e320006f619ae2d8c63160de68da9e9bcd582a6073ca426887a4ef90d875d8058f3a0aee2be84f3ddf9
   languageName: node
   linkType: hard
 
@@ -1437,9 +1437,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dcloudio/uni-migration@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/uni-migration@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/uni-migration@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/uni-migration@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     commander: "npm:^4.0.1"
     fs-extra: "npm:^8.1.0"
@@ -1448,7 +1448,7 @@ __metadata:
     stricter-htmlparser2: "npm:^3.9.6"
   bin:
     uni-migration: bin/uni-migration.js
-  checksum: 10c0/3cd330c09474f0e2ec170cd16b7df37ae5eb94006650529dbde4f32ed40c0614184467a30a38d3bc9c101c24280a08586a2243b40489dbac972edb2f56a5b23f
+  checksum: 10c0/3df5fad780df97b89cc1924f5b62af0876ec6a0e5b3b05622c1301b8b4a088f1f71015b726ca3ad662f829d736bd9066adf8a75bd1c611ca5bec1692474b6592
   languageName: node
   linkType: hard
 
@@ -1562,23 +1562,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dcloudio/uni-stat@npm:^2.0.2-alpha-4060720250515001, @dcloudio/uni-stat@npm:^2.0.2-alpha-4070120250530001":
+"@dcloudio/uni-stat@npm:^2.0.2-alpha-4060720250515001":
   version: 2.0.2-alpha-4070120250530001
   resolution: "@dcloudio/uni-stat@npm:2.0.2-alpha-4070120250530001"
   checksum: 10c0/5f178cf333c044c84e65b23b51cfad6a761882365d82c463a2b99d553d3718516128aeecc5202950315c1bec5f6e95085c4513716693427f1184d21d703e44c5
   languageName: node
   linkType: hard
 
-"@dcloudio/uni-template-compiler@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/uni-template-compiler@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/uni-stat@npm:^2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/uni-stat@npm:2.0.2-alpha-4070520250704003"
+  checksum: 10c0/1794558de1b099ef53f4f8aabed2f1fb3674bd1b63a4fc0f7873ca8c4cf57a789382d41c7d1ebf103737fd8722f9d4341eecd7f700dac44c59013dab0aa568c6
+  languageName: node
+  linkType: hard
+
+"@dcloudio/uni-template-compiler@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/uni-template-compiler@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     "@babel/parser": "npm:^7.3.3"
     "@babel/template": "npm:^7.3.3"
     "@babel/traverse": "npm:^7.3.3"
     "@babel/types": "npm:^7.3.3"
     vue-template-compiler: "npm:^2.6.10"
-  checksum: 10c0/6298e66fdea90137cd6a091227737c2af7f69260b3597a4b0041337f3636b4bff614a7758e3ed873785b398b88d7a28b56087ecf042135dec65aef77990912ba
+  checksum: 10c0/63bd25af6e7d83fcc15c787515ba2651f37f8cf952b7540777f546926f270d509b19bf80da50421005986605c9333cfeab3e7aa52d2abccec42d6227b2f2913d
   languageName: node
   linkType: hard
 
@@ -1589,29 +1596,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dcloudio/vue-cli-plugin-hbuilderx@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/vue-cli-plugin-hbuilderx@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/vue-cli-plugin-hbuilderx@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/vue-cli-plugin-hbuilderx@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     acorn: "npm:^5.2.1"
     css: "npm:~2.2.1"
     escodegen: "npm:^1.8.1"
-  checksum: 10c0/df4121ce2ea02cad720f32cfbc57b7f5883883ffbc5ee9a81446631055284bc3804e60d251f7c073890322a2c6da1397089e2420b755bdf43214ee3fb6d93bdf
+  checksum: 10c0/33d5549e439cc3bf80539f2bec2db263ca476f54bbf7f0256107f751e32e6f73426ebf0d7af6a7d2b096b1a3b9ca27dd8bd36f623febad3c2c637d79fc7342a4
   languageName: node
   linkType: hard
 
-"@dcloudio/vue-cli-plugin-uni-optimize@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/vue-cli-plugin-uni-optimize@npm:2.0.2-alpha-4070120250530001"
-  checksum: 10c0/3a20128f0234972352311ac2c84505de21ee8682022ba7b726e3d07eae67520a1f6572e365caa33aaad37a5d4585ada95179ca096783ade0e967fb9fa3b5df2a
+"@dcloudio/vue-cli-plugin-uni-optimize@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/vue-cli-plugin-uni-optimize@npm:2.0.2-alpha-4070520250704003"
+  checksum: 10c0/abc5603a34798fa6de199d1520cfc1f837109f26c8c260ee4ce5642a9c84d7c201062b5671cc4090eb3af64b5e7d94c44dacb43953b2e28886b19ca2f6daaceb
   languageName: node
   linkType: hard
 
-"@dcloudio/vue-cli-plugin-uni@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/vue-cli-plugin-uni@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/vue-cli-plugin-uni@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/vue-cli-plugin-uni@npm:2.0.2-alpha-4070520250704003"
   dependencies:
-    "@dcloudio/uni-stat": "npm:^2.0.2-alpha-4070120250530001"
+    "@dcloudio/uni-stat": "npm:^2.0.2-alpha-4070520250704003"
     buffer-json: "npm:^2.0.0"
     clone-deep: "npm:^4.0.1"
     cross-env: "npm:^5.2.0"
@@ -1635,24 +1642,24 @@ __metadata:
     postcss: ">=7"
   bin:
     uniapp-cli: bin/uniapp-cli.js
-  checksum: 10c0/119d17c8cc10bc12a2d91dc606e8b2ae4f734a151b8a29247406a014b6e3b439483fad59278ae0a88bd8ccfefb324a7a3d207f805efb0627e3a5ff97cc00333f
+  checksum: 10c0/a60fd64f807f0de6d1d6101f9551413a6d0d1a0133ebd45fb6a98abf919b9eb0a4e9a3e827c06c66beebcb660a538a7c027cf34a68235d614af8ae16c25b1202
   languageName: node
   linkType: hard
 
-"@dcloudio/webpack-uni-mp-loader@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/webpack-uni-mp-loader@npm:2.0.2-alpha-4070120250530001"
-  checksum: 10c0/390dba72e5b845d4c951b0c0189d9851d029c2be82d09b3e8981d6481a5a965ad3e20d7ca1910e3b0e38dcb9c9acb791b27fa4c4f9596607f2632fbaefb33eae
+"@dcloudio/webpack-uni-mp-loader@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/webpack-uni-mp-loader@npm:2.0.2-alpha-4070520250704003"
+  checksum: 10c0/6ccd2fef479256b0a9c09223ed8bce576f1d637aef1dfa3af8e36bd9db78c99fd4696a8bd3b836c1a3aee548cb56e5ad6641fe67ecb2bbf2b50fa4a48e2f98a8
   languageName: node
   linkType: hard
 
-"@dcloudio/webpack-uni-pages-loader@npm:^2.0.2-alpha-4060720250515001":
-  version: 2.0.2-alpha-4070120250530001
-  resolution: "@dcloudio/webpack-uni-pages-loader@npm:2.0.2-alpha-4070120250530001"
+"@dcloudio/webpack-uni-pages-loader@npm:2.0.2-alpha-4070520250704003":
+  version: 2.0.2-alpha-4070520250704003
+  resolution: "@dcloudio/webpack-uni-pages-loader@npm:2.0.2-alpha-4070520250704003"
   dependencies:
     merge: "npm:^2.1.1"
     strip-json-comments: "npm:^2.0.1"
-  checksum: 10c0/34fbd11adc5a13d789bbdb9f7301b7fe90237af748eb11a0afe4c1cb728cacd4380eceb3c6fd0878308d3b46bd8259af9347a0a36220dcd13c055852b7e90b98
+  checksum: 10c0/0aa9507e72246888fc5e1fa9e39bb4a03e69254677a5abed40bce62bea7bda8f605baca04a22afcde838b1028d47a307a0bca1aa723d6952137ca4bcc732f850
   languageName: node
   linkType: hard
 
@@ -4177,13 +4184,13 @@ __metadata:
     "@dcloudio/types": "npm:^3.3.2"
     "@dcloudio/uni-app": "npm:^2.0.2-alpha-4060720250515001"
     "@dcloudio/uni-app-plus": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/uni-automator": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/uni-cli-i18n": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/uni-cli-shared": "npm:^2.0.2-alpha-4060720250515001"
+    "@dcloudio/uni-automator": "npm:2.0.2-alpha-4070520250704003"
+    "@dcloudio/uni-cli-i18n": "npm:2.0.2-alpha-4070520250704003"
+    "@dcloudio/uni-cli-shared": "npm:2.0.2-alpha-4070520250704003"
     "@dcloudio/uni-h5": "npm:^2.0.2-alpha-4060720250515001"
     "@dcloudio/uni-helper-json": "npm:*"
     "@dcloudio/uni-i18n": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/uni-migration": "npm:^2.0.2-alpha-4060720250515001"
+    "@dcloudio/uni-migration": "npm:2.0.2-alpha-4070520250704003"
     "@dcloudio/uni-mp-360": "npm:^2.0.2-alpha-4060720250515001"
     "@dcloudio/uni-mp-alipay": "npm:^2.0.2-alpha-4060720250515001"
     "@dcloudio/uni-mp-baidu": "npm:^2.0.2-alpha-4060720250515001"
@@ -4200,20 +4207,20 @@ __metadata:
     "@dcloudio/uni-quickapp-webview": "npm:^2.0.2-alpha-4060720250515001"
     "@dcloudio/uni-stacktracey": "npm:^2.0.2-alpha-4060720250515001"
     "@dcloudio/uni-stat": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/uni-template-compiler": "npm:^2.0.2-alpha-4060720250515001"
+    "@dcloudio/uni-template-compiler": "npm:2.0.2-alpha-4070520250704003"
     "@dcloudio/uni-ui": "npm:^1.5.8"
-    "@dcloudio/vue-cli-plugin-hbuilderx": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/vue-cli-plugin-uni": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/vue-cli-plugin-uni-optimize": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/webpack-uni-mp-loader": "npm:^2.0.2-alpha-4060720250515001"
-    "@dcloudio/webpack-uni-pages-loader": "npm:^2.0.2-alpha-4060720250515001"
+    "@dcloudio/vue-cli-plugin-hbuilderx": "npm:2.0.2-alpha-4070520250704003"
+    "@dcloudio/vue-cli-plugin-uni": "npm:2.0.2-alpha-4070520250704003"
+    "@dcloudio/vue-cli-plugin-uni-optimize": "npm:2.0.2-alpha-4070520250704003"
+    "@dcloudio/webpack-uni-mp-loader": "npm:2.0.2-alpha-4070520250704003"
+    "@dcloudio/webpack-uni-pages-loader": "npm:2.0.2-alpha-4070520250704003"
     "@vue/cli-plugin-babel": "npm:~5.0.0"
     "@vue/cli-service": "npm:~5.0.0"
     "@vue/shared": "npm:^3.0.0"
     axios: "npm:^1.9.0"
     babel-plugin-import: "npm:^1.11.0"
     core-js: "npm:^3.8.3"
-    cross-env: "npm:^7.0.3"
+    cross-env: "npm:^7.0.2"
     flyio: "npm:^0.6.2"
     jest: "npm:^25.4.0"
     postcss-comment: "npm:^2.0.0"
@@ -6045,7 +6052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-env@npm:^7.0.3":
+"cross-env@npm:^7.0.2":
   version: 7.0.3
   resolution: "cross-env@npm:7.0.3"
   dependencies:

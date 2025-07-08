@@ -50,10 +50,18 @@
             </view>
           </view>
           <!-- 新增：列表底部的加载状态 -->
-          <uni-load-more
+          <!-- <uni-load-more
             v-if="closetItems.length > 0"
             :status="loadMoreStatus"
-          ></uni-load-more>
+          ></uni-load-more> -->
+          <!-- 新增：自定义的加载状态提示 -->
+          <view
+            class="load-more-status"
+            v-if="closetItems.length > 0"
+          >
+            <text v-if="loadMoreStatus === 'loading'">正在加载...</text>
+            <text v-if="loadMoreStatus === 'noMore'">没有更多了</text>
+          </view>
         </scroll-view>
       </view>
     </view>
@@ -119,7 +127,6 @@ import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
 export default {
-  components: { CustomerService },
   name: 'Closet',
   data() {
     return {
@@ -494,5 +501,14 @@ export default {
   width: 40rpx;
   height: 40rpx;
   margin-right: 20rpx;
+}
+
+/* 新增：自定义加载状态样式 */
+.load-more-status {
+  text-align: center;
+  color: #999;
+  padding: 20rpx 0;
+  font-size: 24rpx;
+  width: 100%;
 }
 </style>

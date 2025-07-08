@@ -1,138 +1,112 @@
 <template>
   <view class="container">
-    <view class="title">选择服装</view>
     <view class="image-container">
-      <!-- 修改：使用 image 标签显示图片 -->
       <image
         v-if="imageUrl"
         :src="imageUrl"
-        class="img-placeholder"
         mode="aspectFit"
+        class="photo"
       />
-      <!-- 如果没有图片URL，显示占位符 -->
-      <view
-        v-else
-        class="img-placeholder"
-      ></view>
     </view>
-    <view class="button-row">
-      <!-- 修改：绑定点击事件并启用按钮 -->
+
+    <view class="button-group">
       <button
-        class="btn btn-grey"
+        class="retry-btn"
         @click="onReselect"
       >重新挑选</button>
-    </view>
-    <view class="button-row">
+      <!-- 仅当为上装时，显示“选择下装”按钮 -->
       <button
-        class="btn btn-purple"
-        @click="onSelectBottoms"
-      >选择下装</button>
-    </view>
-    <view class="complete-btn-row">
+        v-if="type === 'top'"
+        class="secondary-btn"
+        @click="onSelectBottom"
+      >
+        选择下装
+      </button>
       <button
-        class="btn btn-complete"
-        @click="onComplete"
-      >选择完成</button>
+        class="confirm-btn"
+        @click="startFitting"
+      >开始搭配</button>
     </view>
-    <!-- <customer-service /> -->
   </view>
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
 export default {
   data() {
     return {
-      imageUrl: '' // 用于存储上个页面传来的图片路径
+      imageUrl: '',
+      type: 'top' // 默认为 'top'，可以被 onLoad 覆盖
     };
   },
-  // 1. 在页面加载时，获取上个页面传递的图片URL
   onLoad(options) {
-    if (options.imageUrl) {
+    // 1. 接收图片URL和衣物类型
+    if (options.imageUrl && options.type) {
       this.imageUrl = decodeURIComponent(options.imageUrl);
-      // 1.1 将上装图片URL存入缓存
-      uni.setStorageSync('topGarmentUrl', this.imageUrl);
-      console.log('上装URL已存储:', this.imageUrl);
+      this.type = options.type;
+
+      // 2. 根据类型将URL存入不同的缓存键
+      const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+      uni.setStorageSync(key, this.imageUrl);
+      console.log(`${this.type === 'top' ? '上装' : '下装'}URL已存储:`, this.imageUrl);
     } else {
-      console.error('未接收到图片URL');
+      console.error('未接收到图片URL或类型');
+      uni.showToast({ title: '页面参数错误', icon: 'none' });
     }
   },
   methods: {
-    // 2. “重新挑选”按钮的逻辑
+    // “重新挑选”按钮，直接返回上一页
     onReselect() {
-      console.log('点击了重新挑选');
-      // 返回到 UploadCloth 页面 (通常是返回两级)
-      uni.navigateBack({
-        delta: 2
-      });
+      uni.navigateBack();
     },
-    // 3. “选择下装”按钮的逻辑
-    onSelectBottoms() {
-      console.log('点击了选择下装');
-      // 跳转到 UploadTrousers 页面
+
+    // “选择下装”按钮的逻辑
+    onSelectBottom() {
       uni.navigateTo({
-        url: '/pages/UploadTrousers/UploadTrousers'
+        url: '/pages/UploadWhole/UploadWhole'
       });
     },
-    // 4. “选择完成”按钮的逻辑 (只穿上装)
-    onComplete() {
-      console.log('点击了选择完成（仅上装）');
+
+    // “开始搭配”按钮的逻辑（调用API）
+    async startFitting() {
       const personImageUrl = uni.getStorageSync('personImageUrl');
       const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+      // 如果只选了上装，bottomGarmentUrl会是null
+      const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || null;
 
+      // 至少需要有人物和一件上装
       if (!personImageUrl || !topGarmentUrl) {
-        uni.showToast({ title: '缺少必要的图片信息', icon: 'none' });
+        uni.showToast({ title: '缺少人物或上装图片', icon: 'none' });
         return;
       }
 
-      // 4.1 清空可能存在的下装URL，确保只提交上装
-      uni.removeStorageSync('bottomGarmentUrl');
-
-      // 4.2 调用提交任务的通用方法
-      this.submitTryOnTask();
-    },
-    
-    // 2. 改造：提交试衣任务的通用方法
-    async submitTryOnTask() {
-      uni.showLoading({ title: 'AI搭配生成中...' });
+      uni.showLoading({ title: '正在生成搭配...' });
 
       try {
-        // 从缓存中获取所有需要的URL
-        const personImageUrl = uni.getStorageSync('personImageUrl');
-        const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
-        const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl'); // 可能是空
-
-        // 构建请求URL
-        let requestUrl = `${apiConfig.BASE_URL}/tryOn/submit?personImageUrl=${encodeURIComponent(personImageUrl)}&topGarmentUrl=${encodeURIComponent(topGarmentUrl)}`;
-        if (bottomGarmentUrl) {
-          requestUrl += `&bottomGarmentUrl=${encodeURIComponent(bottomGarmentUrl)}`;
-        }
-
-        console.log('提交试衣任务, URL:', requestUrl);
-
-        // 使用封装的 request 函数
-        const taskId = await request({
-          url: requestUrl,
-          method: 'GET',
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/fitting_2d/generate`,
+          method: 'POST',
+          data: {
+            personImageUrl,
+            topGarmentUrl,
+            bottomGarmentUrl // 如果为null，后端应能处理
+          }
         });
 
-        // 业务成功，request 函数直接返回了 taskId
-        uni.showToast({ title: '任务提交成功！', icon: 'success' });
-        
-        setTimeout(() => {
-          uni.navigateTo({
-            url: `/pages/TwoDimComment/TwoDimComment?taskId=${taskId}`
-          });
-        }, 1500);
+        // 清理本次试衣的缓存
+        uni.removeStorageSync('personImageUrl');
+        uni.removeStorageSync('topGarmentUrl');
+        uni.removeStorageSync('bottomGarmentUrl');
 
+        // 跳转到结果页
+        uni.redirectTo({
+          url: `/pages/TwoDimComment/TwoDimComment?taskId=${data.taskId}`
+        });
       } catch (error) {
-        // 错误提示已由 request 函数统一处理
-        console.error('TryOn request failed:', error);
+        console.error('生成搭配失败:', error);
       } finally {
-        // 无论成功或失败，都隐藏加载提示
         uni.hideLoading();
       }
     }
@@ -142,96 +116,60 @@ export default {
 
 <style scoped>
 .container {
-  padding: 32rpx 0 0 0;
-  background: #fff;
   min-height: 100vh;
-  box-sizing: border-box;
-}
-.title {
-  text-align: center;
-  font-size: 32rpx;
-  font-weight: 500;
-  margin-bottom: 32rpx;
-}
-.image-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 48rpx;
-}
-.img-placeholder {
-  width: 420rpx;
-  height: 520rpx;
-  background: #f0f0f0; /* 修改背景色以区分 */
-  border-radius: 8rpx;
-  border: 2rpx solid #e0e0e0;
-}
-.button-row {
-  display: flex;
-  justify-content: center;
-  gap: 32rpx;
-  margin-bottom: 40rpx;
-}
-.btn {
-  font-size: 28rpx;
-  border-radius: 12rpx;
-  padding: 0 40rpx;
-  height: 64rpx;
-  line-height: 64rpx;
-  border: none;
-}
-.btn-grey {
-  width: 80%;
-  background: #e5e5e5;
-  color: #333; /* 修改颜色，因为按钮已启用 */
-}
-.btn-purple {
-  width: 80%;
-  background: #635bff;
-  color: #fff;
-}
-.complete-btn-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-.btn-complete {
-  width: 80%;
-  background: #635bff;
-  color: #fff;
-  font-size: 30rpx;
-  border-radius: 12rpx;
-  height: 64rpx;
-  line-height: 64rpx;
-  border: none;
-}
-.ai-btn {
-  position: absolute;
-  right: 40rpx; /* 调整位置 */
-  top: 50%;
-  transform: translateY(-50%);
-}
-.ai-circle {
-  width: 88rpx; /* 稍微增大 */
-  height: 88rpx;
-  background: #fff;
-  border: 2rpx solid #e5e5e5;
-  border-radius: 50%;
+  background: #fafafa;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 80rpx;
+}
+.image-container {
+  width: 440rpx;
+  height: 560rpx;
+  margin-bottom: 80rpx;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  box-shadow: 0 2rpx 8rpx rgba(99, 91, 255, 0.1);
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
 }
-.ai-text {
-  color: #635bff;
-  font-weight: bold;
-  font-size: 28rpx; /* 增大字体 */
+.photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
 }
-.ai-desc {
-  color: #aaa;
-  font-size: 18rpx; /* 增大字体 */
-  margin-top: 2rpx;
+.button-group {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 20rpx; /* 减小间距以容纳更多按钮 */
+  padding: 0 20rpx;
+  box-sizing: border-box;
+}
+.retry-btn,
+.confirm-btn,
+.secondary-btn {
+  flex: 1; /* 让按钮平分空间 */
+  max-width: 280rpx; /* 限制最大宽度 */
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  border: none;
+  font-weight: 500;
+  margin: 0; /* 重置默认边距 */
+}
+.retry-btn {
+  background: #f0f0f0;
+  color: #333;
+}
+.secondary-btn {
+  background: #e0dffc;
+  color: #6c5ce7;
+}
+.confirm-btn {
+  background: #6c5ce7;
+  color: #fff;
 }
 </style>

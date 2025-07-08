@@ -1,3 +1,5 @@
+<!-- 已弃用 -->
+
 <template>
   <view class="container">
     <!-- 1. 修改为图片显示区域 -->

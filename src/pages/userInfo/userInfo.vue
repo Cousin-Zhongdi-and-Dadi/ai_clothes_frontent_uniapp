@@ -211,11 +211,36 @@ export default {
       };
     }
   },
-  // 2. onShow 中调用改造后的 getUserInfo
-  onShow() {
+  created() {
+    // console.log('UserInfo.vue created');
+  },
+  mounted() {
+    // console.log('UserInfo.vue mounted');
     this.getUserInfo();
   },
+  onShow() {
+    // console.log('UserInfo.vue onShow');
+    // this.getUserInfo();
+  },
   methods: {
+    // --- 开始修改：新增缺失的辅助函数 ---
+    percentageWidth(min, max, value) {
+      // 确保 value 是一个有效的数字
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue <= min) {
+        return 0;
+      }
+      if (numValue >= max) {
+        return 100;
+      }
+      // 避免除以零
+      if (max === min) {
+        return 0;
+      }
+      return ((numValue - min) / (max - min)) * 100;
+    },
+    // --- 结束修改 ---
+
     // 3. 改造 getUserInfo 方法
     async getUserInfo() {
       try {
@@ -230,7 +255,9 @@ export default {
         }
 
         this.userName = userData.username;
-        this.userAvatar = userData.avatar || '/static/logo.png';
+        // --- 开始修改 ---
+        this.userAvatar = userData.avatarUrl || '/static/logo.png'; // 将 avatar 修改为 avatarUrl
+        // --- 结束修改 ---
         // ... 更新其他用户信息
         this.userGender = userData.gender;
         this.userHeight = userData.height;

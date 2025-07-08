@@ -53,7 +53,7 @@ export default {
     },
     goTo2D() {
       // 2D试衣通常是流程的第一步，让用户上传自己的照片
-      this.checkLoginAndNavigate('/pages/UploadCloth/UploadCloth');
+      this.checkLoginAndNavigate('/pages/TwoDimDisplay/TwoDimDisplay');
     }
   }
 }

@@ -26,7 +26,7 @@
         :frontImage="card.frontImage"
         :backText="card.backText"
         :style="{ 
-          top: `${index * 20}rpx`,
+          top: `${index * 100}rpx`, // 增加垂直偏移量
           transform: `scale(${1 - index * 0.05})`,
           zIndex: cards.length - index 
         }"

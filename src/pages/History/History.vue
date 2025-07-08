@@ -50,8 +50,11 @@
           </view>
         </view>
       </view>
-      <!-- 列表底部的加载状态 -->
-      <uni-load-more :status="loadMoreStatus"></uni-load-more>
+      <!-- 列表底部的加载状态 (已替换) -->
+      <view class="load-more-status">
+        <text v-if="loadMoreStatus === 'loading'">正在加载...</text>
+        <text v-else-if="loadMoreStatus === 'noMore'">没有更多了</text>
+      </view>
     </view>
 
     <!-- 3. 空状态 -->
@@ -248,6 +251,11 @@ export default {
   padding: 0 16rpx;
   background: #fafbfc;
   min-height: 100vh;
+  /* 为底部操作栏预留空间 */
+  padding-bottom: 120rpx;
+}
+.is-managing {
+  background: #f0f4f8;
 }
 .date-group {
   margin-bottom: 32rpx;
@@ -307,9 +315,6 @@ export default {
   }
 }
 /* 新增：管理模式下的样式 */
-.is-managing {
-  background: #f0f4f8;
-}
 .selection-overlay {
   position: absolute;
   top: 0;
@@ -333,43 +338,51 @@ export default {
   background: #6c63ff;
 }
 .footer-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16rpx 0;
+  padding: 16rpx 32rpx;
   border-top: 1rpx solid #e0e0e0;
   background: #fff;
-}
-.action-item {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-.action-item text {
-  margin-left: 8rpx;
-  font-size: 28rpx;
-  color: #333;
+  box-sizing: border-box;
+  padding-bottom: calc(16rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
 }
 .delete-button {
-  padding: 10rpx 20rpx;
+  flex: 1;
+  margin-left: 24rpx;
   background: #ff4d4f;
   color: #fff;
   border: none;
-  border-radius: 4rpx;
+  border-radius: 40rpx;
   font-size: 28rpx;
-  cursor: pointer;
+  height: 80rpx;
+  line-height: 80rpx;
 }
 .delete-button:disabled {
   background: #f5f5f5;
   color: #ccc;
 }
 .cancel-button {
-  padding: 10rpx 20rpx;
+  flex: 1;
   background: #f0f0f0;
   color: #333;
   border: none;
-  border-radius: 4rpx;
+  border-radius: 40rpx;
   font-size: 28rpx;
-  cursor: pointer;
+  height: 80rpx;
+  line-height: 80rpx;
+}
+/* 新增：自定义的加载更多状态样式 */
+.load-more-status {
+  width: 100%;
+  text-align: center;
+  padding: 20rpx 0;
+  color: #999;
+  font-size: 24rpx;
 }
 </style>

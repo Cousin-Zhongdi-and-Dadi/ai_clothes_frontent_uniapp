@@ -85,13 +85,7 @@
             }
         },
         {
-            "path": "pages/UploadCloth/UploadCloth",
-            "style": {
-                "navigationBarTitleText": "小程序"
-            }
-        },
-        {
-            "path": "pages/UploadTrousers/UploadTrousers",
+            "path": "pages/UploadWhole/UploadWhole",
             "style": {
                 "navigationBarTitleText": "小程序"
             }
@@ -116,12 +110,6 @@
         },
         {
             "path": "pages/ConfirmCloth/ConfirmCloth",
-            "style": {
-                "navigationBarTitleText": "小程序"
-            }
-        },
-        {
-            "path": "pages/ConfirmTrousers/ConfirmTrousers",
             "style": {
                 "navigationBarTitleText": "小程序"
             }

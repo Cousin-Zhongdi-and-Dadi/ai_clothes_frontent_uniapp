@@ -21,8 +21,9 @@ export default {
   },
   methods: {
     updateLoginStatus() {
-      // 修改：只通过是否存在 token 来判断登录状态
-      this.isLogin = !!uni.getStorageSync('token');
+      const token = uni.getStorageSync('token');
+      console.log('token in updateLoginStatus:', token, typeof token);
+      this.isLogin = !!token;
     }
   },
   onShow() {

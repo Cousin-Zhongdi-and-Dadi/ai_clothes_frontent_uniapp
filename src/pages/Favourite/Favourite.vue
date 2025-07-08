@@ -34,7 +34,12 @@
         </view>
       </view>
       <!-- 列表底部的加载状态 -->
-      <uni-load-more :status="loadMoreStatus"></uni-load-more>
+      <!-- <uni-load-more :status="loadMoreStatus"></uni-load-more> -->
+      <!-- 新增：自定义的加载状态提示 -->
+      <view class="load-more-status">
+        <text v-if="loadMoreStatus === 'loading'">正在加载...</text>
+        <text v-if="loadMoreStatus === 'noMore'">没有更多了</text>
+      </view>
     </view>
 
     <!-- 3. 空状态 -->
@@ -219,6 +224,12 @@ export default {
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20rpx;
+}
+.load-more-status {
+  text-align: center;
+  color: #999;
+  padding: 20rpx 0;
+  font-size: 24rpx;
 }
 @keyframes spin {
   to {

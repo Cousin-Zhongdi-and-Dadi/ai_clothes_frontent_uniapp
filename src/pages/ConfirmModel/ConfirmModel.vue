@@ -33,6 +33,8 @@
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import apiConfig from '@/utils/api.js';
+// 1. 同时导入 request 和 uploadFile
+import request, { uploadFile } from '@/utils/request.js';
 
 export default {
   components: { CustomerService },
@@ -52,15 +54,15 @@ export default {
       uni.navigateBack();
     },
     
-    // 改造：“下一步”按钮，执行上传逻辑
+    // 2. 改造：“下一步”按钮，使用封装的 uploadFile 函数
     async onConfirm() {
       if (!this.imageUrl) {
         uni.showToast({ title: '没有可上传的图片', icon: 'none' });
         return;
       }
 
-      const token = uni.getStorageSync('token');
-      if (!token) {
+      // 登录检查（uploadFile 内部会自动带 token，但前置检查可以避免不必要的操作）
+      if (!uni.getStorageSync('token')) {
         uni.showToast({ title: '请先登录', icon: 'none' });
         setTimeout(() => uni.reLaunch({ url: '/pages/LoginSelection/LoginSelection' }), 1500);
         return;
@@ -69,41 +71,28 @@ export default {
       uni.showLoading({ title: '正在上传...' });
 
       try {
-        // 使用 async/await 调用 uni.uploadFile
-        const uploadRes = await uni.uploadFile({
+        // 3. 调用封装好的 uploadFile 函数
+        const personImageUrl = await uploadFile({
           url: `${apiConfig.BASE_URL}/photo/upload`,
           filePath: this.imageUrl,
           name: 'file',
-          header: {
-            'Authorization': `Bearer ${token}`
-          },
         });
 
-        // uni.uploadFile 返回的 data 是字符串，需要解析
-        const data = JSON.parse(uploadRes.data);
-        
-        // 统一的成功码判断
-        const successCodes = [1, 200, 0];
-        if (data && successCodes.includes(data.code)) {
-          const personImageUrl = data.data;
-          uni.setStorageSync('personImageUrl', personImageUrl);
-          console.log('模特图URL已存储:', personImageUrl);
+        // 业务成功，uploadFile 直接返回了需要的数据
+        uni.setStorageSync('personImageUrl', personImageUrl);
+        console.log('模特图URL已存储:', personImageUrl);
 
-          uni.showToast({ title: '上传成功！', icon: 'success' });
-          
-          setTimeout(() => {
-            uni.navigateTo({ url: '/pages/UploadCloth/UploadCloth' });
-          }, 1500);
-        } else {
-          // 业务失败
-          uni.showToast({ title: data.message || '上传失败', icon: 'none' });
-        }
+        uni.showToast({ title: '上传成功！', icon: 'success' });
+        
+        setTimeout(() => {
+          uni.navigateTo({ url: '/pages/UploadWhole/UploadWhole' });
+        }, 1500);
+
       } catch (error) {
-        // 网络或其它执行错误
-        uni.showToast({ title: '网络请求失败', icon: 'none' });
+        // 4. 错误处理被大大简化
+        // 错误提示已由 uploadFile 函数统一处理，这里只需在控制台记录
         console.error('Upload failed:', error);
       } finally {
-        // 确保 loading 总是被关闭
         uni.hideLoading();
       }
     }

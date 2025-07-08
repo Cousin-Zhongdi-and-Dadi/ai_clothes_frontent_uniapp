@@ -1,3 +1,5 @@
+<!-- 已弃用 -->
+
 <template>
   <view class="two-dim-page">
     <!-- 主体内容 -->

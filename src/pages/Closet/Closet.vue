@@ -325,7 +325,12 @@ export default {
       this.handleUpload(['camera']);
     },
     selectFromLibrary() {
-      console.log('从素材库选择');
+      // --- 开始修改 ---
+      // 跳转到素材库，并告知来源是衣橱
+      uni.navigateTo({
+        url: '/pages/ResourcesSelection/ResourcesSelection?source=closet'
+      });
+      // --- 结束修改 ---
       this.closeModal();
     },
   }

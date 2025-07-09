@@ -1,3 +1,5 @@
+<!-- 素材库 -->
+
 <template>
   <view class="shop-page">
     <!-- 修改：分类标签栏改为动态生成 -->
@@ -32,22 +34,6 @@
         <text class="goods-price">￥{{ item.price }}</text>
       </view>
     </view>
-
-    <!-- [删除] 以下是使用了 uni-ui 的加载状态提示，将被移除 -->
-    <!-- 
-    <view class="loading-status">
-      <uni-load-more
-        v-if="isLoading"
-        status="loading"
-        content-text="正在加载..."
-      ></uni-load-more>
-      <uni-load-more
-        v-if="!hasMore && goods.length > 0"
-        status="noMore"
-        content-text="没有更多商品了"
-      ></uni-load-more>
-    </view>
-    -->
   </view>
 </template>
 

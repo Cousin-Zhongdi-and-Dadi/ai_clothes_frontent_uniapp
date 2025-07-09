@@ -1,3 +1,5 @@
+<!-- 素材库按钮 -->
+
 <template>
   <view>
     <view
@@ -6,12 +8,12 @@
     >
       <!-- 图标 -->
       <image
-        src="/static/icon/icon-13.png"
-        mode="widthFix"
+        src="/static/icon/我的素材库-02.png"
+        mode="aspectFit"
         class="cart-icon"
       ></image>
       <!-- 文本 -->
-      <view class="icon_panel_text">购物车</view>
+      <view class="icon_panel_text">素材库</view>
     </view>
   </view>
 </template>
@@ -19,15 +21,13 @@
 <script>
 export default {
   name: 'CartIcon',
-  components: {},
-  data() {
-    return {};
-  },
   methods: {
     goToCart() {
-      uni.navigateTo({
-        url: '/pages/Cart/Cart'
+      // --- 开始修改：使用 switchTab 跳转到 TabBar 页面 ---
+      uni.switchTab({
+        url: '/pages/Shop/Shop'
       });
+      // --- 结束修改 ---
     }
   }
 };
@@ -52,8 +52,10 @@ export default {
 }
 
 .cart-icon {
-  width: 80rpx; /* 图标大小 */
-  height: 80rpx;
+  /* --- 开始修改 --- */
+  width: 55rpx; /* 调整图标宽度以适应容器 */
+  height: 55rpx; /* 明确设置高度以定义一个方形容器 */
+  /* --- 结束修改 --- */
   margin-bottom: 5rpx; /* 图标和文本之间的间距 */
 }
 

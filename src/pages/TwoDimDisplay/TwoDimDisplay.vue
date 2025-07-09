@@ -56,7 +56,7 @@ export default {
   components: { CustomerService },
   name: 'TwoDimDisplay',
   methods: {
-    // 1. 新增：通用的登录检查和后续操作方法
+    // 1. 修改：在发起新流程时，清理旧的缓存
     checkLoginAndProceed(action) {
       const token = uni.getStorageSync('token');
       if (!token) {
@@ -72,11 +72,19 @@ export default {
         }, 1500);
         return;
       }
+
+      // --- 开始修改：在执行操作前，清理上一次试衣的缓存 ---
+      console.log('开始新的2D试衣流程，清理旧缓存...');
+      uni.removeStorageSync('personImageUrl');
+      uni.removeStorageSync('topGarmentUrl');
+      uni.removeStorageSync('bottomGarmentUrl');
+      // --- 结束修改 ---
+
       // 如果已登录，则执行传入的回调函数
       action();
     },
 
-    // 2. 修改：uploadFromAlbum 调用通用方法
+    // 2. uploadFromAlbum 调用通用方法 (无需修改)
     uploadFromAlbum() {
       this.checkLoginAndProceed(() => {
         uni.chooseImage({

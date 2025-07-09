@@ -38,16 +38,15 @@ export default {
   data() {
     return {
       imageUrl: '',
-      type: 'top' // 默认为 'top'，可以被 onLoad 覆盖
+      type: 'top',
     };
   },
   onLoad(options) {
-    // 1. 接收图片URL和衣物类型
     if (options.imageUrl && options.type) {
       this.imageUrl = decodeURIComponent(options.imageUrl);
       this.type = options.type;
 
-      // 2. 根据类型将URL存入不同的缓存键
+      // 将选择的衣物URL存入缓存，供后续2D试衣使用
       const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
       uni.setStorageSync(key, this.imageUrl);
       console.log(`${this.type === 'top' ? '上装' : '下装'}URL已存储:`, this.imageUrl);
@@ -57,26 +56,21 @@ export default {
     }
   },
   methods: {
-    // “重新挑选”按钮，直接返回上一页
     onReselect() {
       uni.navigateBack();
     },
 
-    // “选择下装”按钮的逻辑
     onSelectBottom() {
       uni.navigateTo({
         url: '/pages/UploadWhole/UploadWhole'
       });
     },
 
-    // “开始搭配”按钮的逻辑（调用API）
     async startFitting() {
       const personImageUrl = uni.getStorageSync('personImageUrl');
       const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
-      // 如果只选了上装，bottomGarmentUrl会是null
       const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || null;
 
-      // 至少需要有人物和一件上装
       if (!personImageUrl || !topGarmentUrl) {
         uni.showToast({ title: '缺少人物或上装图片', icon: 'none' });
         return;
@@ -91,16 +85,14 @@ export default {
           data: {
             personImageUrl,
             topGarmentUrl,
-            bottomGarmentUrl // 如果为null，后端应能处理
+            bottomGarmentUrl
           }
         });
 
-        // 清理本次试衣的缓存
         uni.removeStorageSync('personImageUrl');
         uni.removeStorageSync('topGarmentUrl');
         uni.removeStorageSync('bottomGarmentUrl');
 
-        // 跳转到结果页
         uni.redirectTo({
           url: `/pages/TwoDimComment/TwoDimComment?taskId=${data.taskId}`
         });
@@ -143,22 +135,22 @@ export default {
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 20rpx; /* 减小间距以容纳更多按钮 */
+  gap: 20rpx;
   padding: 0 20rpx;
   box-sizing: border-box;
 }
 .retry-btn,
 .confirm-btn,
 .secondary-btn {
-  flex: 1; /* 让按钮平分空间 */
-  max-width: 280rpx; /* 限制最大宽度 */
+  flex: 1;
+  max-width: 280rpx;
   height: 88rpx;
   line-height: 88rpx;
   border-radius: 44rpx;
   font-size: 30rpx;
   border: none;
   font-weight: 500;
-  margin: 0; /* 重置默认边距 */
+  margin: 0;
 }
 .retry-btn {
   background: #f0f0f0;

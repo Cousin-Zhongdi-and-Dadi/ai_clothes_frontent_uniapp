@@ -1,127 +1,56 @@
 <template>
   <view class="container">
-    <!-- Tabs -->
+    <!-- Tabs: Dynamically rendered from API -->
     <view class="tabs">
-      <!-- 1. 根据 pageType 显示上装相关的Tabs -->
-      <template v-if="pageType === 'top'">
-        <view
-          class="tab"
-          :class="{ active: activeTab === 0 }"
-          @click="activeTab = 0"
-        >上衣</view>
-        <view
-          class="tab"
-          :class="{ active: activeTab === 1 }"
-          @click="activeTab = 1"
-        >连体衣</view>
-      </template>
+      <view
+        v-for="tab in tabs"
+        :key="tab.id"
+        class="tab"
+        :class="{ active: activeTabId === tab.id }"
+        @click="changeTab(tab)"
+      >
+        {{ tab.categoryName }}
+      </view>
+    </view>
 
-      <!-- 2. 根据 pageType 显示下装相关的Tabs -->
-      <template v-if="pageType === 'bottom'">
+    <!-- Loading Indicator -->
+    <view
+      v-if="isLoading"
+      class="loading-container"
+    >
+      <text>加载中...</text>
+    </view>
+
+    <!-- Grid List: Dynamically rendered -->
+    <view
+      v-else
+      class="grid"
+    >
+      <view
+        v-if="itemList.length === 0"
+        class="empty-state"
+      >
+        <text>该分类下暂无素材</text>
+      </view>
+      <template v-else>
         <view
-          class="tab"
-          :class="{ active: activeTab === 2 }"
-          @click="activeTab = 2"
-        >长裤</view>
-        <view
-          class="tab"
-          :class="{ active: activeTab === 3 }"
-          @click="activeTab = 3"
-        >短裤</view>
-        <view
-          class="tab"
-          :class="{ active: activeTab === 4 }"
-          @click="activeTab = 4"
-        >裙子</view>
+          class="grid-item"
+          v-for="item in itemList"
+          :key="item.id"
+          @click="showPopup(item)"
+        >
+          <image
+            :src="item.img"
+            class="item-img"
+            mode="aspectFill"
+          />
+          <view class="item-title">{{ item.title }}</view>
+          <view class="item-desc">{{ item.desc }}</view>
+        </view>
       </template>
     </view>
 
-    <!-- Grid List -->
-    <view class="grid">
-      <!-- 3. 根据 activeTab 显示不同的列表 -->
-      <block v-if="activeTab === 0">
-        <view
-          class="grid-item"
-          v-for="(item, idx) in topsList"
-          :key="idx"
-          @click="showPopup(item)"
-        >
-          <image
-            :src="item.img"
-            class="item-img"
-            mode="aspectFill"
-          />
-          <view class="item-title">{{ item.title }}</view>
-          <view class="item-desc">{{ item.desc }}</view>
-        </view>
-      </block>
-      <block v-else-if="activeTab === 1">
-        <view
-          class="grid-item"
-          v-for="(item, idx) in suitList"
-          :key="idx"
-          @click="showPopup(item)"
-        >
-          <image
-            :src="item.img"
-            class="item-img"
-            mode="aspectFill"
-          />
-          <view class="item-title">{{ item.title }}</view>
-          <view class="item-desc">{{ item.desc }}</view>
-        </view>
-      </block>
-      <block v-else-if="activeTab === 2">
-        <view
-          class="grid-item"
-          v-for="(item, idx) in trousersList"
-          :key="idx"
-          @click="showPopup(item)"
-        >
-          <image
-            :src="item.img"
-            class="item-img"
-            mode="aspectFill"
-          />
-          <view class="item-title">{{ item.title }}</view>
-          <view class="item-desc">{{ item.desc }}</view>
-        </view>
-      </block>
-      <block v-else-if="activeTab === 3">
-        <view
-          class="grid-item"
-          v-for="(item, idx) in shortsList"
-          :key="idx"
-          @click="showPopup(item)"
-        >
-          <image
-            :src="item.img"
-            class="item-img"
-            mode="aspectFill"
-          />
-          <view class="item-title">{{ item.title }}</view>
-          <view class="item-desc">{{ item.desc }}</view>
-        </view>
-      </block>
-      <block v-else-if="activeTab === 4">
-        <view
-          class="grid-item"
-          v-for="(item, idx) in skirtsList"
-          :key="idx"
-          @click="showPopup(item)"
-        >
-          <image
-            :src="item.img"
-            class="item-img"
-            mode="aspectFill"
-          />
-          <view class="item-title">{{ item.title }}</view>
-          <view class="item-desc">{{ item.desc }}</view>
-        </view>
-      </block>
-    </view>
-
-    <!-- 确认选择弹窗 (代码无变化) -->
+    <!-- Confirmation Popup (template is unchanged) -->
     <view
       class="popup-overlay"
       v-if="isPopupVisible"
@@ -149,131 +78,189 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
 export default {
   data() {
     return {
-      activeTab: 0,
-      pageType: 'top', // 'top' or 'bottom'
+      pageType: 'top', // 'top' or 'bottom', determines navigation on confirm
+      // --- 开始修改 ---
+      source: '', // 新增：记录页面来源，例如 'closet'
+      // --- 结束修改 ---
+      tabs: [], // To store categories from API
+      activeTabId: null, // ID of the active category
+      itemList: [], // Items for the currently active tab
+      itemsCache: {}, // Cache for fetched items to prevent re-fetching
+      
+      isLoading: false,
       isPopupVisible: false,
       selectedItem: null,
-      // 2. 将静态数据改为空数组，准备从API获取
-      topsList: [],
-      suitList: [],
-      trousersList: [],
-      shortsList: [],
-      skirtsList: [],
-      isLoading: false, // 新增加载状态
     };
   },
-  computed: {
-    // 3. 新增计算属性，根据 activeTab 返回当前应显示的列表
-    currentList() {
-      switch (this.activeTab) {
-        case 0: return this.topsList;
-        case 1: return this.suitList;
-        case 2: return this.trousersList;
-        case 3: return this.shortsList;
-        case 4: return this.skirtsList;
-        default: return [];
-      }
-    }
-  },
   onLoad(options) {
+    // Preserve the page's purpose (selecting a top or bottom)
     if (options.type === 'bottom') {
       this.pageType = 'bottom';
-      this.activeTab = 2;
     } else {
       this.pageType = 'top';
-      this.activeTab = 0;
     }
-    // 4. 页面加载时获取当前Tab的数据
-    this.fetchListData();
+    // --- 开始修改 ---
+    // 新增：记录来源
+    if (options.source) {
+      this.source = options.source;
+    }
+    // --- 结束修改 ---
+    // Fetch categories to build the tabs
+    this.fetchCategories();
   },
   methods: {
-    // 5. 新增：切换Tab时获取数据
-    changeTab(tabIndex) {
-      if (this.activeTab === tabIndex) return;
-      this.activeTab = tabIndex;
-      this.fetchListData();
-    },
-    // 6. 新增：获取列表数据的核心方法
-    async fetchListData() {
-      // 如果当前列表已有数据，则不再重复获取
-      if (this.currentList.length > 0) return;
-
+    // Fetch categories from the API to build the tabs
+    async fetchCategories() {
       this.isLoading = true;
-      
-      // 假设的API端点，你需要根据后端实际情况修改
-      // 例如 /getResources?category=tops, /getResources?category=suits 等
-      const categoryMap = ['tops', 'suits', 'trousers', 'shorts', 'skirts'];
-      const currentCategory = categoryMap[this.activeTab];
-      
-      if (!currentCategory) {
-        this.isLoading = false;
-        return;
-      }
-
       try {
         const data = await request({
-          url: `${apiConfig.BASE_URL}/resource/getList`,
+          url: `${apiConfig.BASE_URL}/mall/getCategory`, // 获取分类列表
           method: 'GET',
-          data: { category: currentCategory }
         });
-
-        // 将获取到的数据赋值给对应的列表
-        switch (this.activeTab) {
-          case 0: this.topsList = data; break;
-          case 1: this.suitList = data; break;
-          case 2: this.trousersList = data; break;
-          case 3: this.shortsList = data; break;
-          case 4: this.skirtsList = data; break;
+        
+        // Sort categories by sortOrder if available
+        this.tabs = data.sort((a, b) => a.sortOrder - b.sortOrder);
+        
+        // If tabs are loaded, activate the first one and fetch its items
+        if (this.tabs.length > 0) {
+          this.activeTabId = this.tabs[0].id;
+          this.fetchItemsForCurrentTab();
         }
       } catch (error) {
-        console.error(`Failed to fetch ${currentCategory}:`, error);
-        // 错误提示已由 request 函数处理
+        console.error('Failed to fetch categories:', error);
       } finally {
         this.isLoading = false;
       }
     },
     
-    // 显示弹窗的方法
+    // Handle tab switching
+    changeTab(tab) {
+      if (this.activeTabId === tab.id) return;
+      this.activeTabId = tab.id;
+      this.fetchItemsForCurrentTab();
+    },
+
+    // Fetch items for the currently active tab
+    async fetchItemsForCurrentTab() {
+      if (!this.activeTabId) return;
+
+      // Use cache if available
+      if (this.itemsCache[this.activeTabId]) {
+        this.itemList = this.itemsCache[this.activeTabId];
+        return;
+      }
+
+      this.isLoading = true;
+      this.itemList = []; // Clear previous list while loading
+      try {
+        const data = await request({
+          // API uses typeId as a path parameter
+          url: `${apiConfig.BASE_URL}/mall/getProductByTypeId/${this.activeTabId}`, 
+          method: 'GET',
+          data: {
+            page: 1,
+            pageSize: 20 // Fetch more items, e.g., 20
+          }
+        });
+
+        // Map API response fields to template fields
+        const mappedData = data.map(item => ({
+          id: item.id,
+          title: item.productName,
+          desc: item.description,
+          img: item.imageGif,
+          ...item 
+        }));
+        
+        this.itemList = mappedData;
+        // Cache the result
+        this.$set(this.itemsCache, this.activeTabId, mappedData);
+
+      } catch (error) {
+        console.error(`Failed to fetch items for category ${this.activeTabId}:`, error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    // Show the confirmation popup
     showPopup(item) {
       this.selectedItem = item;
       this.isPopupVisible = true;
     },
-    // 关闭弹窗的方法
+    
+    // Close the confirmation popup
     closePopup() {
       this.isPopupVisible = false;
       this.selectedItem = null;
     },
-    // 确认选择的方法
-    confirmSelection() {
-      console.log('已确认选择:', this.selectedItem.title);
-      const imageUrl = this.selectedItem.img;
-      // 修改：使用 this.pageType 来访问 data 中的属性
-      if (this.pageType === 'top') {
-        // 如果是上装，跳转到确认上装页面
-        uni.navigateTo({
-          url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(imageUrl)}`
-        });
+    
+    async confirmSelection() {
+      if (!this.selectedItem) return;
+
+      // 检查来源，如果是从衣橱页来的，则直接调用添加API
+      if (this.source === 'closet') {
+        uni.showLoading({ title: '正在添加...' });
+        try {
+          await request({
+            url: `${apiConfig.BASE_URL}/shoppingCart/addProduct`,
+            method: 'POST',
+            // --- 开始修改：根据API文档调整请求体 ---
+            data: {
+              variationId: 0, // 根据API文档，添加 variationId，默认值为0
+              productId: this.selectedItem.id, // 使用已映射的商品ID
+              quantity: 1
+            }
+            // --- 结束修改 ---
+          });
+          uni.showToast({ title: '添加成功！', icon: 'success' });
+
+          // 刷新衣橱页并返回
+          const pages = getCurrentPages();
+          const closetPage = pages[pages.length - 2]; // 获取上一个页面（衣橱页）
+          if (closetPage && typeof closetPage.initData === 'function') {
+            closetPage.initData(); // 调用衣橱页的刷新方法
+          }
+          
+          this.closePopup();
+          uni.navigateBack(); // 返回衣橱页
+
+        } catch (error) {
+          console.error('添加到衣橱失败:', error);
+          // 错误提示已由 request.js 统一处理
+        } finally {
+          uni.hideLoading();
+        }
       } else {
-        // 如果是下装，跳转到确认下装页面
-        uni.navigateTo({
-          url: `/pages/ConfirmTrousers/ConfirmTrousers?imageUrl=${encodeURIComponent(imageUrl)}`
-        });
+        // 如果来源不是衣橱（例如来自2D试衣），则执行原有的跳转到ConfirmCloth页的逻辑
+        const imageUrl = this.selectedItem.img;
+        const url = `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(imageUrl)}&type=${this.pageType}`;
+        uni.navigateTo({ url });
+        this.closePopup();
       }
-      this.closePopup();
     }
   }
 };
 </script>
 
 <style scoped>
-/* 样式部分无需修改 */
+/* Adding styles for loading and empty states */
+.loading-container,
+.empty-state {
+  width: 100%;
+  padding: 100rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* Other styles are preserved from the original file */
 .container {
   background: #fff;
   min-height: 100vh;
@@ -285,14 +272,18 @@ export default {
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: 24rpx;
   margin-top: 16rpx;
+  /* For scrollable tabs if there are many */
+  overflow-x: auto;
+  white-space: nowrap;
 }
 .tab {
-  flex: 1;
+  display: inline-block;
   text-align: center;
-  padding: 20rpx 0;
+  padding: 20rpx 30rpx; /* Added horizontal padding */
   font-size: 30rpx;
   color: #888;
   position: relative;
+  flex-shrink: 0; /* Prevent tabs from shrinking */
 }
 .tab.active {
   color: #333;
@@ -353,7 +344,7 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* 弹窗样式 */
+/* Popup styles are preserved */
 .popup-overlay {
   position: fixed;
   top: 0;

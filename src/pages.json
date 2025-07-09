@@ -3,127 +3,115 @@
         {
             "path": "pages/UserInfoEntry/UserInfoEntry",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "个人中心"
             }
         },
         {
 			"path": "pages/UserInfoNotLogin/UserInfoNotLogin",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "登录"
 			}
 		},
         {
 			"path": "pages/LoginSelection/LoginSelection",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "登录"
 			}
 		},
         {
 			"path": "pages/Login/Login",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "登录"
 			}
 		},
         {
 			"path": "pages/GoodsDetail/GoodsDetail",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "详情"
 			}
 		},
         {
 			"path": "pages/UserInfo/UserInfo",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "个人中心"
 			}
 		},
         {
 			"path": "pages/Shop/Shop",
 			"style": {
-				"navigationBarTitleText": "商城"
-			}
-		},
-        {
-			"path": "pages/Cart/Cart",
-			"style": {
-				"navigationBarTitleText": "小程序"
-			}
-		},
-        {
-			"path": "pages/ServiceChat/ServiceChat",
-			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "素材库"
 			}
 		},
         {
 			"path": "pages/Recommendation/Recommendation",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "每日推荐"
 			}
 		},    
         {
 			"path": "pages/ThreeDimDisplay/ThreeDimDisplay",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "3D试衣"
 			}
 		},
         {
             "path": "pages/Closet/Closet",
 			"style": {
-				"navigationBarTitleText": "小程序"
+				"navigationBarTitleText": "我的衣橱"
 			}
         },
         {
             "path": "pages/TryOnContainer/TryOnContainer",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "试衣搭配"
             }
         },
         {
             "path": "pages/TwoDimDisplay/TwoDimDisplay",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "上传模特"
             }
         },
         {
             "path": "pages/UploadWhole/UploadWhole",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "上传衣物"
             }
         },
         {
             "path": "pages/History/History",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "浏览历史"
             }
         },
         {
             "path": "pages/Favourite/Favourite",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "收藏搭配"
             }
         },
         {
             "path": "pages/ConfirmModel/ConfirmModel",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "确认模特"
             }
         },
         {
             "path": "pages/ConfirmCloth/ConfirmCloth",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "确认衣物"
             }
         },
         {
             "path": "pages/ResourcesSelection/ResourcesSelection",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "素材库"
             }
         },
         {
             "path": "pages/TwoDimComment/TwoDimComment",
             "style": {
-                "navigationBarTitleText": "小程序"
+                "navigationBarTitleText": "试衣结果"
             }
         }
 	],
@@ -155,7 +143,7 @@
 				"pagePath": "pages/Shop/Shop",
 				"iconPath": "static/icon/icon-05.png",
 				"selectedIconPath": "static/icon/icon-06.png",
-				"text": "我的商城"
+				"text": "总素材库"
 			},
 			{
 				"pagePath": "pages/UserInfoEntry/UserInfoEntry",

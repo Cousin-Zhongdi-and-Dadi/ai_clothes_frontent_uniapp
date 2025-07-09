@@ -119,7 +119,7 @@
       <button
         class="add_to_cart"
         @click="openSkuPopup('cart')"
-      >加入购物车</button>
+      >加入素材库</button>
       <button
         class="buy_now"
         @click="openSkuPopup('buy')"
@@ -248,6 +248,7 @@ export default {
       } else if (this.skuAction === 'buy') {
         // 立即购买逻辑，可以跳转到订单确认页
         console.log('立即购买');
+        // TODO: 接受一个商品链接，并跳转
       }
       this.closeSkuPopup();
     },

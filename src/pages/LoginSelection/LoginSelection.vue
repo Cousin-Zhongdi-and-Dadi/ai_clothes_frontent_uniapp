@@ -54,15 +54,19 @@ export default {
 
         uni.showToast({
           title: '登录成功',
-          icon: 'success'
+          icon: 'success',
+          // 明确设置提示框的持续时间为 1.5 秒
+          duration: 1500 
         });
 
-        // 延迟后跳转到“我的”页面
+        // --- 开始修改：设置一个匹配提示框时长的延迟 ---
+        // 在提示框完整显示 1.5 秒后，再执行页面跳转操作
         setTimeout(() => {
           uni.switchTab({
             url: '/pages/UserInfoEntry/UserInfoEntry' // 统一跳转到个人中心入口
           });
         }, 1500);
+        // --- 结束修改 ---
 
       } catch (error) {
         // uni.login 失败或 request 函数业务失败/网络失败

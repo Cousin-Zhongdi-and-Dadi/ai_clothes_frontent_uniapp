@@ -33,50 +33,65 @@ export default {
   methods: {
     // 2. 改造 oneClickLogin 方法
     async oneClickLogin() {
-      uni.showLoading({
-        title: '正在登录...'
+    uni.showLoading({
+      title: '正在登录...'
+    });
+
+    try {
+      // 重构登录凭证获取方式
+      const [loginErr, loginRes] = await uni.login({
+        provider: 'weixin',
+        timeout: 5000 // 增加超时设置
+      });
+      
+      // 错误处理优先
+      if (loginErr) {
+        throw new Error(`微信登录失败: ${loginErr.errMsg || '未知错误'}`);
+      }
+      
+      // 确保code存在
+      if (!loginRes || !loginRes.code) {
+        throw new Error('获取登录凭证(code)失败，请重试或检查微信权限');
+      }
+
+      // 步骤 2: 使用封装的 request 函数将 code 发送到后端
+      const loginData = await request({
+        url: `${apiConfig.BASE_URL}/user/login/${loginRes.code}`,
+        method: 'GET',
       });
 
-      try {
-        // 步骤 1: 调用 uni.login 获取微信登录凭证 code
-        const loginRes = await uni.login({
-          provider: 'weixin',
+      // 业务成功处理
+      uni.setStorageSync('token', loginData.token);
+
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success',
+        duration: 1500 
+      });
+
+      setTimeout(() => {
+        uni.switchTab({
+          url: '/pages/UserInfoEntry/UserInfoEntry'
         });
+      }, 1500);
 
-        // 步骤 2: 使用封装的 request 函数将 code 发送到后端
-        const loginData = await request({
-          url: `${apiConfig.BASE_URL}/user/login/${loginRes.code}`,
-          method: 'GET',
-        });
-
-        // 业务成功，request 函数直接返回了包含 token 的对象
-        uni.setStorageSync('token', loginData.token);
-
-        uni.showToast({
-          title: '登录成功',
-          icon: 'success',
-          // 明确设置提示框的持续时间为 1.5 秒
-          duration: 1500 
-        });
-
-        // --- 开始修改：设置一个匹配提示框时长的延迟 ---
-        // 在提示框完整显示 1.5 秒后，再执行页面跳转操作
-        setTimeout(() => {
-          uni.switchTab({
-            url: '/pages/UserInfoEntry/UserInfoEntry' // 统一跳转到个人中心入口
-          });
-        }, 1500);
-        // --- 结束修改 ---
-
-      } catch (error) {
-        // uni.login 失败或 request 函数业务失败/网络失败
-        // 错误提示已由 request 函数或 uni.login 内部处理
-        console.error('Login process failed:', error);
-      } finally {
-        // 无论成功或失败，都确保隐藏加载提示
-        uni.hideLoading();
-      }
-    },
+    } catch (error) {
+      console.error('登录流程失败:', error);
+      
+      // 更友好的错误提示
+      const errorMsg = error.message.includes('微信登录') 
+        ? error.message 
+        : `登录失败: ${error.message || '系统异常'}`;
+      
+      uni.showToast({
+        title: errorMsg,
+        icon: 'none',
+        duration: 3000
+      });
+    } finally {
+      uni.hideLoading();
+    }
+  },
 
     // 手机号登录逻辑保持不变
     phoneLogin() {

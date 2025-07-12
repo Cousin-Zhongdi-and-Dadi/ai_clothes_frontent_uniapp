@@ -111,7 +111,13 @@
         {
             "path": "pages/TwoDimComment/TwoDimComment",
             "style": {
-                "navigationBarTitleText": "试衣结果"
+                "navigationBarTitleText": "AI评价"
+            }
+        },
+        {
+            "path": "pages/ConfirmFromUserUpload/ConfirmFromUserUpload",
+            "style": {
+                "navigationBarTitleText": "确认上传信息"
             }
         }
 	],

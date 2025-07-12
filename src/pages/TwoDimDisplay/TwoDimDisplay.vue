@@ -35,6 +35,12 @@
       </view>
     </view>
 
+    <!-- 提示信息 -->
+    <text class="reminder-text">
+      此照片将作为您的唯一体型基础仅能上传一次且不可更改,
+      请确认是您本人后上传。
+    </text>
+
     <!-- 提示图片 -->
     <view class="tips-img-section">
       <image
@@ -197,6 +203,18 @@ export default {
 .upload-btn::after {
   border: none;
 }
+
+/* --- 开始修改：为提示文字添加样式 --- */
+.reminder-text {
+  margin-top: 40rpx;
+  width: 90%;
+  text-align: center;
+  color: #6c5ce7;
+  font-size: 26rpx;
+  line-height: 1.5;
+}
+/* --- 结束修改 --- */
+
 .tips-img-section {
   margin-top: 40rpx;
   width: 90vw;

@@ -119,7 +119,7 @@
       <button
         class="add_to_cart"
         @click="openSkuPopup('cart')"
-      >加入素材库</button>
+      >加入我的衣橱</button>
       <button
         class="buy_now"
         @click="openSkuPopup('buy')"

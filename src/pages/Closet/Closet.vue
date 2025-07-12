@@ -1,6 +1,18 @@
 <template>
   <view class="closet-page">
-    <view class="main-content">
+    <!-- 新增：初始加载动画 -->
+    <view
+      v-if="isInitialLoading"
+      class="loading-overlay"
+    >
+      <uni-load-more status="loading"></uni-load-more>
+    </view>
+
+    <!-- 主内容，初始加载完成前隐藏 -->
+    <view
+      class="main-content"
+      v-else
+    >
       <!-- 左侧分类栏 -->
       <view class="sidebar">
         <view
@@ -15,7 +27,6 @@
       </view>
 
       <!-- 右侧商品展示区 -->
-      <!-- 新增一个包裹层，并把 .content-grid 类名移到这里 -->
       <view class="content-grid">
         <scroll-view
           scroll-y
@@ -49,12 +60,16 @@
               <text class="goods-desc">{{ item.desc }}</text>
             </view>
           </view>
-          <!-- 新增：列表底部的加载状态 -->
-          <!-- <uni-load-more
-            v-if="closetItems.length > 0"
-            :status="loadMoreStatus"
-          ></uni-load-more> -->
-          <!-- 新增：自定义的加载状态提示 -->
+
+          <!-- 新增：空状态提示 -->
+          <view
+            class="empty-state"
+            v-if="!isLoading && closetItems.length === 0"
+          >
+            <text class="empty-text">这个分类下还没有衣服哦</text>
+          </view>
+
+          <!-- 列表底部的加载状态 -->
           <view
             class="load-more-status"
             v-if="closetItems.length > 0"
@@ -65,9 +80,6 @@
         </scroll-view>
       </view>
     </view>
-
-    <!-- 悬浮客服按钮 (移到 main-content 外部) -->
-    <!-- <customer-service /> -->
 
     <!-- 上传选项弹窗 -->
     <view
@@ -112,12 +124,11 @@
               src="/static/icon/补充icon0116-07.png"
               mode="aspectFit"
             />
-            素材库选择
+            总素材库选择
           </button>
         </view>
       </view>
     </view>
-
   </view>
 </template>
 
@@ -140,6 +151,7 @@ export default {
       pageSize: 10,
       isLoading: false,
       hasMore: true,
+      isInitialLoading: true, // 新增：初始加载状态
     };
   },
   computed: {
@@ -156,38 +168,49 @@ export default {
   // 3. 修改：页面加载时，首先获取分类
   onLoad() {
     this.initData();
+    // 新增：监听从确认页发来的刷新事件
+    uni.$on('closet-refresh', () => {
+      this.getClosetItems(true);
+    });
+  },
+  // 新增：页面卸载时，移除事件监听
+  onUnload() {
+    uni.$off('closet-refresh');
   },
   methods: {
-    // 0. 新增：统一的初始化方法
+    // 0. 改造 initData
     async initData() {
-      await this.getCategories();
-      // 如果获取到分类，则默认加载第一个分类的商品
-      if (this.categories.length > 0 && this.activeCategory === null) {
-        this.activeCategory = this.categories[0].id;
-        await this.getClosetItems(true);
+      this.isInitialLoading = true;
+      try {
+        await this.getCategories();
+        // 如果获取到分类，则默认加载第一个分类的商品
+        if (this.categories.length > 0 && this.activeCategory === null) {
+          this.activeCategory = this.categories[0].id;
+          await this.getClosetItems(true);
+        }
+      } catch (error) {
+        console.error("Initialization failed:", error);
+      } finally {
+        this.isInitialLoading = false;
       }
     },
 
-    // 1. 改造 getCategories
+    // 1. 改造 getCategories (修正API端点)
     async getCategories() {
       try {
         const data = await request({
-          url: `${apiConfig.BASE_URL}/address/getCategory`,
+          url: `${apiConfig.BASE_URL}/address/getCategory`, // 修正API端点
           method: 'GET',
         });
         this.categories = data
           .sort((a, b) => a.sortOrder - b.sortOrder)
-          .map(item => ({
-            id: item.id,
-            name: item.categoryName
-          }));
+          .map(item => ({ id: item.id, name: item.categoryName }));
       } catch (error) {
         console.error("getCategories failed:", error);
-        // 即使分类失败，也允许用户进行其他操作
       }
     },
 
-    // 2. 改造 getClosetItems
+    // 2. 改造 getClosetItems (修正API调用方式)
     async getClosetItems(isRefresh = false) {
       if (this.activeCategory === null || this.isLoading) return;
       this.isLoading = true;
@@ -199,23 +222,28 @@ export default {
       }
 
       try {
+        // --- 开始修改：根据API文档，将 categoryId 作为 Path 参数传递 ---
         const data = await request({
-          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`,
+          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`, // categoryId in path
           method: 'GET',
           data: {
+            // Query参数只保留 page 和 pageSize
             page: this.page,
             pageSize: this.pageSize
           }
         });
+        // --- 结束修改 ---
+
+        // 优化数据映射，显示更有意义的信息
         const newItems = data.map(item => ({
           id: item.id,
           image: item.imageUrl,
-          name: `服装ID: ${item.id}`,
-          desc: `分类ID: ${item.categoryId}`
+          name: item.brand || `服装ID: ${item.id}`,
+          desc: item.color || `分类ID: ${item.categoryId}`
         }));
 
         this.closetItems = isRefresh ? newItems : [...this.closetItems, ...newItems];
-        this.hasMore = newItems.length === this.pageSize;
+        this.hasMore = newItems.length >= this.pageSize;
         if (this.hasMore) {
           this.page++;
         }
@@ -227,20 +255,18 @@ export default {
       }
     },
 
-    // 3. 改造 deleteClosetItem
+    // 3. 改造 deleteClosetItem (修正API端点)
     async deleteClosetItem(clothesId) {
       uni.showLoading({ title: '正在删除...' });
       try {
         await request({
-          url: `${apiConfig.BASE_URL}/address/delete/${clothesId}`,
+          url: `${apiConfig.BASE_URL}/closet/delete/${clothesId}`, // 修正API端点
           method: 'DELETE',
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
-        // 从UI上直接移除，无需刷新
         this.closetItems = this.closetItems.filter(item => item.id !== clothesId);
       } catch (error) {
         console.error("deleteClosetItem failed:", error);
-        // 错误提示已由 request 函数统一处理
       } finally {
         uni.hideLoading();
       }
@@ -250,41 +276,40 @@ export default {
     async handleUpload(sourceType) {
       this.closeModal();
       try {
-        const chooseRes = await uni.chooseImage({
+        // --- 开始修改：使用解构赋值正确获取API返回值 ---
+        const [err, chooseRes] = await uni.chooseImage({
           count: 1,
           sourceType: sourceType,
         });
-        const tempFilePath = chooseRes.tempFilePaths[0];
 
-        uni.showLoading({ title: '正在上传...' });
-
-        // 注意：uni.uploadFile 暂未被 request.js 封装，但我们仍可使用 async/await
-        const uploadRes = await uni.uploadFile({
-          url: `${apiConfig.BASE_URL}/closet/add`,
-          filePath: tempFilePath,
-          name: 'file',
-          header: {
-            'Authorization': `Bearer ${uni.getStorageSync('token')}`
-          },
-          formData: {
-            'categoryId': this.activeCategory
-          },
-        });
-        
-        // uni.uploadFile 返回的 data 是字符串，需要解析
-        const data = JSON.parse(uploadRes.data);
-        const successCodes = [1, 200, 0];
-        if (successCodes.includes(data.code)) {
-          uni.showToast({ title: '上传成功！', icon: 'success' });
-          this.getClosetItems(true); // 刷新列表
-        } else {
-          uni.showToast({ title: data.message || '上传失败', icon: 'none' });
+        // 优先处理错误
+        if (err) {
+          // 捕获到错误，例如用户拒绝授权
+          console.error("uni.chooseImage failed:", err);
+          // 可以根据 err.errMsg 给用户更明确的提示
+          if (err.errMsg.includes('cancel')) {
+            console.log('User cancelled image selection.');
+          } else {
+            uni.showToast({ title: '选择图片失败', icon: 'none' });
+          }
+          return; // 终止后续操作
         }
+        
+        // 确保用户确实选择了图片
+        if (chooseRes && chooseRes.tempFilePaths && chooseRes.tempFilePaths.length > 0) {
+          const tempFilePath = chooseRes.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmFromUserUpload/ConfirmFromUserUpload?tempFilePath=${tempFilePath}`
+          });
+        } else {
+          // 虽然没有err，但也没有返回图片路径，也视为取消
+          console.log('User cancelled image selection (no file path returned).');
+        }
+        // --- 结束修改 ---
+
       } catch (error) {
-        // uni.chooseImage 等API的取消操作会进入catch，这里无需提示
-        console.log("Upload cancelled or failed:", error);
-      } finally {
-        uni.hideLoading();
+        // 一般的JS语法错误等会进入这里
+        console.error("An unexpected error occurred in handleUpload:", error);
       }
     },
 
@@ -381,7 +406,6 @@ export default {
   padding: 20rpx;
   box-sizing: border-box;
 }
-
 /* 网格容器 */
 .grid-container {
   width: 80%; /* 保持100%，让内容不超出 scroll-view */
@@ -391,13 +415,11 @@ export default {
   box-sizing: border-box; /* 确保 padding 不影响宽度 */
   padding-bottom: 20rpx; /* 确保底部有足够的空间 */
 }
-
 .goods-card {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
-
 .add-card {
   display: flex;
   flex-direction: column;
@@ -444,7 +466,6 @@ export default {
   text-overflow: ellipsis;
   width: 100%;
 }
-
 /* 弹窗样式 */
 .modal-overlay {
   position: fixed;
@@ -458,7 +479,6 @@ export default {
   justify-content: center;
   z-index: 1000;
 }
-
 .modal-content {
   background-color: white;
   padding: 60rpx 50rpx;
@@ -467,7 +487,6 @@ export default {
   position: relative;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
 }
-
 .modal-close-btn {
   position: absolute;
   top: 0;
@@ -476,13 +495,11 @@ export default {
   color: #999;
   font-weight: 300;
 }
-
 .modal-body {
   display: flex;
   flex-direction: column;
   gap: 30rpx;
 }
-
 .modal-btn {
   display: flex;
   align-items: center;
@@ -497,17 +514,14 @@ export default {
   padding: 0;
   margin: 0;
 }
-
 .modal-btn::after {
   border: none;
 }
-
 .modal-btn-icon {
   width: 40rpx;
   height: 40rpx;
   margin-right: 20rpx;
 }
-
 /* 新增：自定义加载状态样式 */
 .load-more-status {
   text-align: center;

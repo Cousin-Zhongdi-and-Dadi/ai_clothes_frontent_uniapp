@@ -57,9 +57,11 @@ function request(options) {
                     return;
                 }
 
-                // 真实环境下的网络错误
+                // --- 开始修改：修正真实环境下的网络错误处理 ---
+                // 移除之前错误的逻辑，只保留统一的网络异常提示
                 uni.showToast({ title: '网络请求异常，请稍后重试', icon: 'none' });
                 reject(err);
+                // --- 结束修改 ---
             }
         });
     });

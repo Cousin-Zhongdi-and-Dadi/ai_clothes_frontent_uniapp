@@ -19,7 +19,7 @@
           />
           素材库选择
         </button>
-        <button
+        <!-- <button
           class="btn btn-primary"
           @click="uploadFromAlbum('top')"
         >
@@ -40,7 +40,7 @@
             mode="widthFix"
           />
           拍照上传
-        </button>
+        </button> -->
       </view>
     </view>
     <view class="tips-block">
@@ -73,7 +73,7 @@
           />
           素材库选择
         </button>
-        <button
+        <!-- <button
           class="btn btn-primary"
           @click="uploadFromAlbum('bottom')"
         >
@@ -94,7 +94,7 @@
             mode="widthFix"
           />
           拍照上传
-        </button>
+        </button> -->
       </view>
     </view>
     <view class="tips-block">

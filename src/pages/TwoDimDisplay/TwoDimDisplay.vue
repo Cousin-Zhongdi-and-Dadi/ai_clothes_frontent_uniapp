@@ -62,63 +62,38 @@ export default {
   components: { CustomerService },
   name: 'TwoDimDisplay',
   methods: {
-    // 1. 修改：在发起新流程时，清理旧的缓存
-    checkLoginAndProceed(action) {
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({
-          title: '请先登录',
-          icon: 'none'
-        });
-        // 延迟后跳转到登录页
-        setTimeout(() => {
-          uni.navigateTo({
-            url: '/pages/LoginSelection/LoginSelection'
-          });
-        }, 1500);
-        return;
-      }
-
-      // --- 开始修改：在执行操作前，清理上一次试衣的缓存 ---
-      console.log('开始新的2D试衣流程，清理旧缓存...');
+    // 统一流程：无论是否登录，均可直接进入流程
+    // 清理上一次试衣的缓存后，选择图片并跳转
+    uploadFromAlbum() {
+      // 清理缓存
       uni.removeStorageSync('personImageUrl');
       uni.removeStorageSync('topGarmentUrl');
       uni.removeStorageSync('bottomGarmentUrl');
-      // --- 结束修改 ---
-
-      // 如果已登录，则执行传入的回调函数
-      action();
-    },
-
-    // 2. uploadFromAlbum 调用通用方法 (无需修改)
-    uploadFromAlbum() {
-      this.checkLoginAndProceed(() => {
-        uni.chooseImage({
-          count: 1,
-          sourceType: ['album'],
-          success: (res) => {
-            const tempFilePath = res.tempFilePaths[0];
-            uni.navigateTo({
-              url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
-            });
-          }
-        });
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['album'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
+        }
       });
     },
-
-    // 3. 修改：uploadFromCamera 调用通用方法
     uploadFromCamera() {
-      this.checkLoginAndProceed(() => {
-        uni.chooseImage({
-          count: 1,
-          sourceType: ['camera'],
-          success: (res) => {
-            const tempFilePath = res.tempFilePaths[0];
-            uni.navigateTo({
-              url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
-            });
-          }
-        });
+      // 清理缓存
+      uni.removeStorageSync('personImageUrl');
+      uni.removeStorageSync('topGarmentUrl');
+      uni.removeStorageSync('bottomGarmentUrl');
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['camera'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
+        }
       });
     }
   }

@@ -65,7 +65,8 @@ export default {
       isLoading: false,
       page: 1,
       pageSize: 12,
-      hasMore: true
+      hasMore: true,
+      isGuest: false // 新增：是否为游客模式
     };
   },
   computed: {
@@ -88,6 +89,8 @@ export default {
   },
   // onShow 会在页面每次显示时触发，比 onLoad 更适合刷新数据
   onShow() {
+    const token = uni.getStorageSync('token');
+    this.isGuest = !token;
     this.getFavorites(true);
   },
   onPullDownRefresh() {
@@ -99,8 +102,22 @@ export default {
     }
   },
   methods: {
+    // 游客模式静态收藏数据
+    getMockFavorites() {
+      return [
+        { id: 1, img: '/static/example_pictures/sample1.png' },
+        { id: 2, img: '/static/example_pictures/sample2.png' },
+        { id: 3, img: '/static/example_pictures/sample3.png' }
+      ];
+    },
     // 2. 改造 getFavorites 方法
     async getFavorites(isRefresh = false) {
+      if (this.isGuest) {
+        this.isLoading = false;
+        this.images = this.getMockFavorites();
+        this.hasMore = false;
+        return;
+      }
       if (this.isLoading) return;
       this.isLoading = true;
       if (isRefresh) {
@@ -119,13 +136,8 @@ export default {
           }
         });
 
-        const newImages = data.map(item => ({
-          id: item.imageId,
-          img: item.imageUrl
-        }));
-        
-        this.images = isRefresh ? newImages : [...this.images, ...newImages];
-        this.hasMore = newImages.length === this.pageSize;
+        this.images = isRefresh ? data : [...this.images, ...data];
+        this.hasMore = data.length === this.pageSize;
         if (this.hasMore) {
           this.page++;
         }

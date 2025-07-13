@@ -103,6 +103,7 @@ export default {
       hasMore: true,
       isManaging: false, // 是否处于选择模式
       selectedIds: [],   // 选中的ID列表
+      isGuest: false // 新增：是否为游客模式
     };
   },
   computed: {
@@ -132,6 +133,8 @@ export default {
     },
   },
   onShow() {
+    const token = uni.getStorageSync('token');
+    this.isGuest = !token;
     this.getHistory(true);
   },
   onPullDownRefresh() {
@@ -143,8 +146,29 @@ export default {
     }
   },
   methods: {
+    // 游客模式静态历史数据
+    getMockHistory() {
+      return [
+        {
+          id: 1,
+          imageGif: '/static/example_pictures/sample1.png',
+          createTime: '2025-07-12T10:00:00Z'
+        },
+        {
+          id: 2,
+          imageGif: '/static/example_pictures/sample2.png',
+          createTime: '2025-07-12T11:00:00Z'
+        }
+      ];
+    },
     // 2. 改造 getHistory 方法
     async getHistory(isRefresh = false) {
+      if (this.isGuest) {
+        this.isLoading = false;
+        this.historyItems = this.getMockHistory();
+        this.hasMore = false;
+        return;
+      }
       if (this.isLoading) return;
       this.isLoading = true;
       if (isRefresh) {
@@ -180,6 +204,10 @@ export default {
 
     // 3. 改造 deleteHistoryItems 方法
     async deleteHistoryItems() {
+      if (this.isGuest) {
+        uni.showToast({ title: '请登录后删除', icon: 'none' });
+        return;
+      }
       uni.showLoading({ title: '正在删除...' });
       try {
         await request({

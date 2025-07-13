@@ -82,78 +82,38 @@ export default {
   components: { CustomerService },
   name: 'UploadCloth',
   methods: {
-    // 1. 新增：通用的登录检查和后续操作方法
-    checkLoginAndProceed(action) {
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({
-          title: '请先登录',
-          icon: 'none'
-        });
-        // 延迟后跳转到登录页
-        setTimeout(() => {
-          uni.navigateTo({
-            url: '/pages/LoginSelection/LoginSelection'
-          });
-        }, 1500);
-        return;
-      }
-      // 如果已登录，则执行传入的回调函数
-      action();
-    },
-
-    // 2. 修改：所有方法都先调用登录检查
     changeModel() {
-      this.checkLoginAndProceed(() => {
-        uni.navigateTo({
-          url: '/pages/TwoDimDisplay/TwoDimDisplay'
-        });
+      uni.navigateTo({
+        url: '/pages/TwoDimDisplay/TwoDimDisplay'
       });
     },
-    
     selectFromResources() {
-      this.checkLoginAndProceed(() => {
-        uni.navigateTo({
-          url: '/pages/ResourcesSelection/ResourcesSelection?type=top'
-        });
+      uni.navigateTo({
+        url: '/pages/ResourcesSelection/ResourcesSelection?type=top'
       });
     },
-
     uploadFromAlbum() {
-      this.checkLoginAndProceed(() => {
-        uni.chooseImage({
-          count: 1,
-          sourceType: ['album'],
-          success: (res) => {
-            const tempFilePath = res.tempFilePaths[0];
-            // 3. 修改：将图片路径传递到确认页面
-            uni.navigateTo({
-              url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}`
-            });
-          },
-          fail: (err) => {
-            console.log('取消选择或选择失败', err);
-          }
-        });
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['album'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
+        }
       });
     },
-
     uploadFromCamera() {
-      this.checkLoginAndProceed(() => {
-        uni.chooseImage({
-          count: 1,
-          sourceType: ['camera'],
-          success: (res) => {
-            const tempFilePath = res.tempFilePaths[0];
-            // 3. 修改：将图片路径传递到确认页面
-            uni.navigateTo({
-              url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}`
-            });
-          },
-          fail: (err) => {
-            console.log('取消拍摄或拍摄失败', err);
-          }
-        });
+      uni.chooseImage({
+        count: 1,
+        sourceType: ['camera'],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}`
+          });
+        }
       });
     }
   }

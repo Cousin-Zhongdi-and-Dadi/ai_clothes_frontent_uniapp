@@ -1,3 +1,5 @@
+<!-- 已弃用 -->
+
 <template>
   <view class="cart-page">
     <!-- 购物车商品列表 -->

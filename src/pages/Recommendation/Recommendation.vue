@@ -61,16 +61,41 @@ export default {
     return {
       cards: [],
       isLoading: true,
-      emptyMessage: '今日推荐已看完'
+      emptyMessage: '今日推荐已看完',
+      isGuest: false // 新增：是否为游客模式
     };
   },
   created() {
+    const token = uni.getStorageSync('token');
+    this.isGuest = !token;
     this.loadInitialStack();
   },
   methods: {
+    // 游客模式静态推荐数据
+    getMockRecommendations() {
+      return [
+        {
+          id: 1,
+          frontImage: '/static/example_pictures/sample1.png',
+          backText: '静态推荐1：欢迎体验游客模式！'
+        },
+        {
+          id: 2,
+          frontImage: '/static/example_pictures/sample2.png',
+          backText: '静态推荐2：登录后可获得更多个性化推荐。'
+        }
+      ];
+    },
     // 2. 改造 loadInitialStack 和 fetchRecommendation
     async loadInitialStack() {
       this.isLoading = true;
+      if (this.isGuest) {
+        // 游客模式：加载本地静态数据
+        this.cards = this.getMockRecommendations();
+        this.isLoading = false;
+        this.emptyMessage = '游客模式下仅展示部分静态推荐';
+        return;
+      }
       // 并行发起5个请求
       const promises = Array(5).fill(null).map(() => this.fetchRecommendation());
       try {
@@ -89,6 +114,10 @@ export default {
     },
 
     async fetchRecommendation() {
+      if (this.isGuest) {
+        // 游客模式下不请求后端
+        return null;
+      }
       try {
         const data = await request({
           url: `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`,
@@ -110,6 +139,10 @@ export default {
 
     // 3. 改造 addToFavorites 方法
     async addToFavorites(imageUrl) {
+      if (this.isGuest) {
+        uni.showToast({ title: '请登录后收藏', icon: 'none' });
+        return;
+      }
       if (!imageUrl) {
         console.error('没有可收藏的图片URL');
         return;

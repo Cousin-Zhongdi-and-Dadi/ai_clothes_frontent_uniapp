@@ -111,39 +111,27 @@
 export default {
   name: 'UploadWhole',
   methods: {
-    checkLoginAndProceed(action) {
-      const token = uni.getStorageSync('token');
-      if (!token) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
-        setTimeout(() => uni.navigateTo({ url: '/pages/LoginSelection/LoginSelection' }), 1500);
-        return;
-      }
-      action();
-    },
+    // 直接进入流程，无论是否登录
     selectFromResources(type) {
-      this.checkLoginAndProceed(() => {
-        uni.navigateTo({
-          url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}`
-        });
+      uni.navigateTo({
+        url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}`
       });
     },
     uploadFrom(sourceType, type) {
-      this.checkLoginAndProceed(() => {
-        uni.chooseImage({
-          count: 1,
-          sourceType: [sourceType],
-          success: (res) => {
-            const tempFilePath = res.tempFilePaths[0];
-            uni.navigateTo({
-              url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}&type=${type}`
-            });
-          },
-          fail: (err) => {
-            if (err.errMsg !== 'chooseImage:fail cancel') {
-              console.error('选择图片失败:', err);
-            }
+      uni.chooseImage({
+        count: 1,
+        sourceType: [sourceType],
+        success: (res) => {
+          const tempFilePath = res.tempFilePaths[0];
+          uni.navigateTo({
+            url: `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}&type=${type}`
+          });
+        },
+        fail: (err) => {
+          if (err.errMsg !== 'chooseImage:fail cancel') {
+            console.error('选择图片失败:', err);
           }
-        });
+        }
       });
     },
     uploadFromAlbum(type) {

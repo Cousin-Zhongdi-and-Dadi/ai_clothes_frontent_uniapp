@@ -152,6 +152,7 @@ export default {
       isLoading: false,
       hasMore: true,
       isInitialLoading: true, // 新增：初始加载状态
+      isGuest: false // 新增：是否为游客模式
     };
   },
   computed: {
@@ -167,8 +168,9 @@ export default {
   },
   // 3. 修改：页面加载时，首先获取分类
   onLoad() {
+    const token = uni.getStorageSync('token');
+    this.isGuest = !token;
     this.initData();
-    // 新增：监听从确认页发来的刷新事件
     uni.$on('closet-refresh', () => {
       this.getClosetItems(true);
     });
@@ -178,9 +180,36 @@ export default {
     uni.$off('closet-refresh');
   },
   methods: {
+    // 游客模式静态分类和衣橱数据
+    getMockCategories() {
+      return [
+        { id: 1, name: '上衣' },
+        { id: 2, name: '裤子' }
+      ];
+    },
+    getMockClosetItems(categoryId) {
+      if (categoryId === 1) {
+        return [
+          { id: 101, image: '/static/example_pictures/sample1.png', name: '静态上衣1', desc: '游客模式样例' },
+          { id: 102, image: '/static/example_pictures/sample2.png', name: '静态上衣2', desc: '游客模式样例' }
+        ];
+      } else if (categoryId === 2) {
+        return [
+          { id: 201, image: '/static/example_pictures/sample3.png', name: '静态裤子1', desc: '游客模式样例' }
+        ];
+      }
+      return [];
+    },
     // 0. 改造 initData
     async initData() {
       this.isInitialLoading = true;
+      if (this.isGuest) {
+        this.categories = this.getMockCategories();
+        this.activeCategory = this.categories[0].id;
+        this.closetItems = this.getMockClosetItems(this.activeCategory);
+        this.isInitialLoading = false;
+        return;
+      }
       try {
         await this.getCategories();
         // 如果获取到分类，则默认加载第一个分类的商品
@@ -197,6 +226,10 @@ export default {
 
     // 1. 改造 getCategories (修正API端点)
     async getCategories() {
+      if (this.isGuest) {
+        this.categories = this.getMockCategories();
+        return;
+      }
       try {
         const data = await request({
           url: `${apiConfig.BASE_URL}/address/getCategory`, // 修正API端点
@@ -212,6 +245,12 @@ export default {
 
     // 2. 改造 getClosetItems (修正API调用方式)
     async getClosetItems(isRefresh = false) {
+      if (this.isGuest) {
+        this.closetItems = this.getMockClosetItems(this.activeCategory);
+        this.hasMore = false;
+        this.isLoading = false;
+        return;
+      }
       if (this.activeCategory === null || this.isLoading) return;
       this.isLoading = true;
 

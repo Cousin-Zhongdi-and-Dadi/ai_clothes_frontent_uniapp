@@ -61,39 +61,23 @@ export default {
         return;
       }
 
-      // 登录检查
-      if (!uni.getStorageSync('token')) {
-        uni.showToast({ title: '请先登录', icon: 'none' });
-        setTimeout(() => uni.reLaunch({ url: '/pages/LoginSelection/LoginSelection' }), 1500);
-        return;
-      }
-
-      // --- 开始修改：核心逻辑调整 ---
-      // 1. 在任何网络请求之前，立刻将本地临时文件路径存入缓存
-      // 这确保了后续页面能获取到用于最终搭配的原始图片路径
+      // 直接存储本地临时文件路径，无论是否登录
       uni.setStorageSync('personImageUrl', this.imageUrl);
       console.log('模特图本地临时路径已存储:', this.imageUrl);
-      // --- 结束修改 ---
 
       uni.showLoading({ title: '正在上传...' });
 
       try {
-        // 2. 继续执行上传操作，但我们不再使用它返回的URL来覆盖缓存
         await uploadFile({
           url: `${apiConfig.BASE_URL}/photo/upload`,
           filePath: this.imageUrl,
           name: 'file',
         });
 
-        // 业务成功，uploadFile 直接返回了需要的数据
-        // uni.setStorageSync('personImageUrl', personImageUrl); // <-- 删除这一行，不再用服务器URL覆盖本地路径
-        
         uni.showToast({ title: '上传成功！', icon: 'success' });
-        
         setTimeout(() => {
           uni.navigateTo({ url: '/pages/UploadWhole/UploadWhole' });
         }, 1500);
-
       } catch (error) {
         console.error('Upload failed:', error);
       } finally {

@@ -123,11 +123,11 @@ export default {
           url: `${apiConfig.BASE_URL}/mall/getCategory`, // 获取分类列表
           method: 'GET',
         });
-        
         // Sort categories by sortOrder if available
-        this.tabs = data.sort((a, b) => a.sortOrder - b.sortOrder);
-        
-        // If tabs are loaded, activate the first one and fetch its items
+        const categories = data.sort((a, b) => a.sortOrder - b.sortOrder);
+        // 新增推荐tab，id为null
+        this.tabs = [{ categoryName: '推荐', id: null }, ...categories];
+        // 默认激活第一个tab
         if (this.tabs.length > 0) {
           this.activeTabId = this.tabs[0].id;
           this.fetchItemsForCurrentTab();
@@ -148,40 +148,69 @@ export default {
 
     // Fetch items for the currently active tab
     async fetchItemsForCurrentTab() {
-      if (!this.activeTabId) return;
+      // 推荐tab（id为null）
+      if (this.activeTabId === null) {
+        // Use cache if available
+        if (this.itemsCache['recommend']) {
+          this.itemList = this.itemsCache['recommend'];
+          return;
+        }
+        this.isLoading = true;
+        this.itemList = [];
+        try {
+          const res = await request({
+            url: `${apiConfig.BASE_URL}/mall/getRecommended`,
+            method: 'GET',
+            data: {
+              page: 1,
+              pageSize: 20
+            }
+          });
+          const goodsList = Array.isArray(res) ? res : [];
+          const mappedData = goodsList.map(item => ({
+            id: item.id,
+            title: item.productName,
+            desc: item.description,
+            img: item.imageGif,
+            ...item
+          }));
+          this.itemList = mappedData;
+          this.$set(this.itemsCache, 'recommend', mappedData);
+        } catch (error) {
+          console.error('Failed to fetch recommended items:', error);
+        } finally {
+          this.isLoading = false;
+        }
+        return;
+      }
 
-      // Use cache if available
+      // 其他分类tab
+      if (!this.activeTabId) return;
       if (this.itemsCache[this.activeTabId]) {
         this.itemList = this.itemsCache[this.activeTabId];
         return;
       }
-
       this.isLoading = true;
-      this.itemList = []; // Clear previous list while loading
+      this.itemList = [];
       try {
-        const data = await request({
-          // API uses typeId as a path parameter
-          url: `${apiConfig.BASE_URL}/mall/getProductByTypeId/${this.activeTabId}`, 
+        const res = await request({
+          url: `${apiConfig.BASE_URL}/mall/getProductByTypeId/${this.activeTabId}`,
           method: 'GET',
           data: {
             page: 1,
-            pageSize: 20 // Fetch more items, e.g., 20
+            pageSize: 20
           }
         });
-
-        // Map API response fields to template fields
-        const mappedData = data.map(item => ({
+        const goodsList = Array.isArray(res) ? res : [];
+        const mappedData = goodsList.map(item => ({
           id: item.id,
           title: item.productName,
           desc: item.description,
           img: item.imageGif,
-          ...item 
+          ...item
         }));
-        
         this.itemList = mappedData;
-        // Cache the result
         this.$set(this.itemsCache, this.activeTabId, mappedData);
-
       } catch (error) {
         console.error(`Failed to fetch items for category ${this.activeTabId}:`, error);
       } finally {
@@ -204,20 +233,17 @@ export default {
     async confirmSelection() {
       if (!this.selectedItem) return;
 
-      // 检查来源，如果是从衣橱页来的，则直接调用添加API
+      // 检查来源，如果是从衣橱页来的，则调用/address/addFromMall
       if (this.source === 'closet') {
         uni.showLoading({ title: '正在添加...' });
         try {
           await request({
-            url: `${apiConfig.BASE_URL}/shoppingCart/addProduct`,
-            method: 'POST',
-            // --- 开始修改：根据API文档调整请求体 ---
+            url: `${apiConfig.BASE_URL}/address/addFromMall`,
+            method: 'GET',
             data: {
-              variationId: 0, // 根据API文档，添加 variationId，默认值为0
-              productId: this.selectedItem.id, // 使用已映射的商品ID
-              quantity: 1
+              categoryId: this.activeTabId, // 当前选中分类id
+              imageUrl: this.selectedItem.img // 当前选中商品图片url
             }
-            // --- 结束修改 ---
           });
           uni.showToast({ title: '添加成功！', icon: 'success' });
 
@@ -227,10 +253,8 @@ export default {
           if (closetPage && typeof closetPage.initData === 'function') {
             closetPage.initData(); // 调用衣橱页的刷新方法
           }
-          
           this.closePopup();
           uni.navigateBack(); // 返回衣橱页
-
         } catch (error) {
           console.error('添加到衣橱失败:', error);
           // 错误提示已由 request.js 统一处理

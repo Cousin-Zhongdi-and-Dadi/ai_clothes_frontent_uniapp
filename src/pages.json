@@ -61,12 +61,6 @@
 			}
         },
         {
-            "path": "pages/TryOnContainer/TryOnContainer",
-            "style": {
-                "navigationBarTitleText": "试衣搭配"
-            }
-        },
-        {
             "path": "pages/TwoDimDisplay/TwoDimDisplay",
             "style": {
                 "navigationBarTitleText": "上传模特"
@@ -140,7 +134,7 @@
 				"text": "我的衣橱"
 			},
 			{
-				"pagePath": "pages/TryOnContainer/TryOnContainer",
+				"pagePath": "pages/TwoDimDisplay/TwoDimDisplay",
 				"iconPath": "static/icon/icon-03.png",
 				"selectedIconPath": "static/icon/icon-04.png",
 				"text": "试衣搭配"

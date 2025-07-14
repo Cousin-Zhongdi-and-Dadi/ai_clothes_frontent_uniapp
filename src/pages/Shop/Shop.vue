@@ -49,7 +49,7 @@ export default {
       tabs: [],
       activeTabId: null,
       goods: [],
-      page: 1,
+      page: 0,
       pageSize: 10,
       hasMore: true,
       isLoading: false,
@@ -77,19 +77,23 @@ export default {
     // 2. 改造 fetchCategories 方法
     async fetchCategories() {
       try {
-        const data = await request({
+        const res = await request({
           url: `${apiConfig.BASE_URL}/mall/getCategory`,
           method: 'GET',
         });
-        
-        const categories = data
+        // 新API返回 { code, message, data: [...] }
+        const categoryList = Array.isArray(res) ? res : [];
+        const categories = categoryList
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map(cat => ({
             id: cat.id,
             name: cat.categoryName,
           }));
-        
         this.tabs = [{ name: '推荐', id: null }, ...categories];
+        // 修复：初始时设置 activeTabId，确保商品能正常显示
+        if (this.activeTabId === null && this.tabs.length > 0) {
+          this.activeTabId = this.tabs[0].id;
+        }
       } catch (error) {
         console.error("fetchCategories failed:", error);
         // 错误提示已由 request 函数处理，这里只做降级处理
@@ -105,7 +109,7 @@ export default {
     },
     // 3. 改造 fetchGoods 方法
     async fetchGoods(loadMore = false) {
-      if (this.isLoading || (!loadMore && !this.hasMore)) {
+      if (this.isLoading || (loadMore && !this.hasMore)) {
         return;
       }
       this.isLoading = true;
@@ -120,13 +124,13 @@ export default {
       }
 
       try {
-        const data = await request({
+        const res = await request({
           url: url,
           method: 'GET',
           data: params,
         });
-
-        const newItems = data.map(item => ({
+        const goodsList = Array.isArray(res) ? res : [];
+        const newItems = goodsList.map(item => ({
           id: item.id,
           name: item.productName,
           desc: item.description,
@@ -134,21 +138,23 @@ export default {
           price: item.price,
         }));
 
-        this.goods = loadMore ? [...this.goods, ...newItems] : newItems;
-        this.hasMore = newItems.length === this.pageSize;
-        if (this.hasMore) {
-          this.page++;
+        if (loadMore) {
+          this.goods = [...this.goods, ...newItems];
+          this.page++; // 下一页自增
+        } else {
+          this.goods = newItems;
+          this.page = 1; // 首次加载后，下一页应为1
         }
+        this.hasMore = newItems.length === this.pageSize;
       } catch (error) {
         console.error("fetchGoods failed:", error);
-        // 错误提示已由 request 函数处理
       } finally {
         this.isLoading = false;
       }
     },
-    // 4. refresh 方法保持不变，但现在调用的是改造后的 fetchGoods
+    // 4. refresh 方法
     async refresh() {
-      this.page = 1;
+      this.page = 0; // 从第0页开始
       this.goods = [];
       this.hasMore = true;
       await this.fetchGoods();
@@ -180,12 +186,20 @@ export default {
   padding: 0 20rpx;
   border-bottom: 1rpx solid #eee;
   overflow-x: auto;
+  white-space: nowrap; /* 新增：防止换行 */
+  height: 70rpx; /* 新增：固定高度，防止被内容撑高 */
+  align-items: center; /* 新增：垂直居中tab内容 */
 }
 .tab {
+  display: inline-block; /* 新增：让tab横向排列且不换行 */
   font-size: 28rpx;
   color: #999;
   margin-right: 32rpx;
-  padding: 20rpx 0;
+  padding: 0 8rpx; /* 修改：上下padding为0，左右适当留白 */
+  line-height: 48rpx; /* 新增：让tab内容垂直居中 */
+  height: 48rpx; /* 新增：与line-height一致，保证高度 */
+  white-space: nowrap; /* 新增：防止tab内容换行 */
+  border-bottom: 4rpx solid transparent;
 }
 .tab.active {
   color: #6753e7;

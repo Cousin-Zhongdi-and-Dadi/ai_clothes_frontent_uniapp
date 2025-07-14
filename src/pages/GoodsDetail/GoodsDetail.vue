@@ -18,11 +18,30 @@
           v-for="(img, idx) in productInfo.images"
           :key="idx"
         >
-          <image
-            :src="img"
-            class="main-image"
-            mode="aspectFill"
-          />
+          <view class="image-wrapper">
+            <image
+              :src="img"
+              class="main-image"
+              mode="aspectFill"
+              @error="onImageError(idx)"
+              :style="{ opacity: imageLoadError[idx] ? 0 : 1 }"
+            />
+            <!-- 图片加载失败时显示占位 -->
+            <view
+              v-if="imageLoadError[idx]"
+              class="image-fallback"
+            >
+              <text class="image-fallback-text">图片加载失败</text>
+            </view>
+            <!-- 只在第一张图片上显示3D按钮 -->
+            <view
+              v-if="idx === 0"
+              class="three-d-btn"
+              @click.stop="goToThreeDimDisplay"
+            >
+              <text class="three-d-btn-text">3d</text>
+            </view>
+          </view>
         </swiper-item>
       </swiper>
     </view>
@@ -152,6 +171,9 @@ export default {
       
       showSkuPopup: false,
       skuAction: '', // 'cart' or 'buy'
+
+      // 新增：图片加载错误处理
+      imageLoadError: [], // 记录每张图片是否加载失败
     };
   },
   computed: {
@@ -315,12 +337,22 @@ export default {
         this.quantity = newQuantity;
       }
     },
+
+    goToThreeDimDisplay() {
+      uni.navigateTo({
+        url: `/pages/ThreeDimDisplay/ThreeDimDisplay?styleId=${this.productId}`
+      });
+    },
+
+    // 新增：处理图片加载错误
+    onImageError(idx) {
+      this.$set(this.imageLoadError, idx, true);
+    },
   }
 };
 </script>
 
 <style scoped>
-/* 样式部分保持不变，此处省略 */
 .goods-detail-page {
   background: #fafafa;
   min-height: 100vh;
@@ -328,13 +360,43 @@ export default {
 }
 .goods-image-swiper {
   width: 100%;
-  height: 1000rpx;
+  height: 500rpx; /* 或1000rpx，根据实际需求调整 */
   background: #fff;
 }
-.main-image {
+.swiper {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+}
+.swiper-item {
+  width: 100%;
+  height: 100%;
+}
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.three-d-btn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 120rpx;
+  height: 120rpx;
+  background: rgba(103, 83, 231, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 4rpx 16rpx rgba(103, 83, 231, 0.15);
+  cursor: pointer;
+}
+.three-d-btn-text {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+  letter-spacing: 2rpx;
 }
 .goods-info {
   background: #fff;
@@ -369,9 +431,6 @@ export default {
   font-size: 24rpx;
   color: #888;
   margin-bottom: 12rpx;
-}
-.swiper {
-  height: 100%;
 }
 .button_pannel {
   position: fixed;
@@ -561,5 +620,21 @@ export default {
   border-radius: 40rpx;
   font-size: 28rpx;
   margin-top: 24rpx;
+}
+.image-fallback {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+.image-fallback-text {
+  color: #bbb;
+  font-size: 28rpx;
 }
 </style>

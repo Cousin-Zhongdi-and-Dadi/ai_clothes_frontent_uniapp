@@ -34,6 +34,13 @@
         <text class="goods-price">￥{{ item.price }}</text>
       </view>
     </view>
+    <!-- 新增：到底了提示 -->
+    <view
+      class="bottom-status"
+      v-if="!isLoading && (goods.length === 0 || !hasMore)"
+    >
+      <text class="bottom-status-text">到底了</text>
+    </view>
   </view>
 </template>
 
@@ -250,6 +257,13 @@ export default {
   font-size: 28rpx;
   font-weight: bold;
   margin-top: 12rpx;
+}
+.bottom-status {
+  width: 100%;
+  text-align: center;
+  padding: 32rpx 0 24rpx 0;
+  color: #aaa;
+  font-size: 26rpx;
 }
 /* [删除] 以下是加载状态的样式，将被移除 */
 /* 

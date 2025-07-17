@@ -1,19 +1,17 @@
-<!-- 已弃用 -->
-
 <template>
   <view class="tryon-container">
     <view class="tryon-btn-container">
-      <view
-        class="tryon-btn tryon-btn-3d"
-        @click="goTo3D"
-      >
-        <text class="tryon-btn-text">3D试衣</text>
-      </view>
       <view
         class="tryon-btn tryon-btn-2d"
         @click="goTo2D"
       >
         <text class="tryon-btn-text">2D试衣</text>
+      </view>
+      <view
+        class="tryon-btn ai-match"
+        @click="goTo3D"
+      >
+        <text class="tryon-btn-text">衣搭AI</text>
       </view>
     </view>
     <!-- <customer-service /> -->
@@ -68,7 +66,7 @@ export default {
   box-sizing: border-box;
   transition: box-shadow 0.2s;
 }
-.tryon-btn-3d {
+.ai-match {
   background: #6c5ce7;
   color: #fff;
   box-shadow: 0 4rpx 16rpx rgba(108, 92, 231, 0.08);

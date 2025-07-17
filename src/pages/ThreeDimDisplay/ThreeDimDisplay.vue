@@ -10,10 +10,13 @@
     </view>
 
     <!-- 2. 获取到URL后，再渲染 web-view -->
-    <web-view
-      v-if="url"
-      :src="url"
-    ></web-view>
+    <view>
+      <text class="tips">当前链接需要您复制到浏览器手动打开</text>
+      <button
+        class="copy-btn"
+        @click="copyUrl"
+      >复制链接到剪贴板</button>
+    </view>
 
     <!-- 3. 如果获取失败，显示错误提示 -->
     <view
@@ -77,6 +80,17 @@ export default {
         // 无论成功或失败，都隐藏加载提示
         this.isLoading = false;
       }
+    },
+    copyUrl() {
+      uni.setClipboardData({
+        data: this.url,
+        success: () => {
+          uni.showToast({
+            title: '已复制链接',
+            icon: 'none'
+          });
+        }
+      });
     }
   }
 };
@@ -109,5 +123,26 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+.tips {
+  display: block;
+  width: 90%;
+  margin: 48rpx auto 24rpx auto;
+  padding: 24rpx 0;
+  background: #f5f6fa;
+  color: #6753e7;
+  font-size: 30rpx;
+  text-align: center;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(103, 83, 231, 0.08);
+  font-weight: 500;
+}
+.copy-btn {
+  margin: 32rpx auto;
+  display: block;
+  width: 80%;
+  background: #6753e7;
+  color: #fff;
+  border-radius: 8rpx;
 }
 </style>

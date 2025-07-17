@@ -1,8 +1,10 @@
 <!-- 素材库 -->
 
+<!-- 在页面最顶部添加 meta 标签 -->
+<meta name="referrer" content="no-referrer" />
+
 <template>
   <view class="shop-page">
-    <!-- 修改：分类标签栏改为动态生成 -->
     <view class="shop-tabs">
       <text
         v-for="tab in tabs"
@@ -22,19 +24,18 @@
         @click="goToDetail(item.id)"
       >
         <image
-          :src="item.image"
+          :src="testImageUrl"
           class="goods-image"
           mode="aspectFill"
+          referrer="no-referrer|origin|unsafe-url"
         />
         <view class="goods-info">
           <text class="goods-name">{{ item.name }}</text>
-          <!-- 修改：使用动态商品描述 -->
           <text class="goods-desc">{{ item.desc }}</text>
         </view>
         <text class="goods-price">￥{{ item.price }}</text>
       </view>
     </view>
-    <!-- 新增：到底了提示 -->
     <view
       class="bottom-status"
       v-if="!isLoading && (goods.length === 0 || !hasMore)"
@@ -60,6 +61,7 @@ export default {
       pageSize: 10,
       hasMore: true,
       isLoading: false,
+      testImageUrl: 'https://dabang-1301469943.cos.ap-guangzhou.myqcloud.com/mall/products/LOOK%2001_1.png?q-sign-algorithm=sha1&q-ak=AKIDgIW5GCGNb_eZfIScO7zLefu4aJRM-_z-XalWeM9HypjUM-kz-HPOIgW2_A2U1GTL&q-sign-time=1752686646;1752690246&q-key-time=1752686646;1752690246&q-header-list=host&q-url-param-list=&q-signature=58a17e03ab35beadea7a0a39dd036d8fa5008a4c&x-cos-security-token=kfEeYbYtCpQY1wakBGCSqkFooB2RIr9a162ad5890902f565913ff768322f9514bpwsZD55MYaPl2VRe3ylGustceUsnx7bZ52cv_zmiPbfo3mjH7HgSQg2A0mGr34n_UwM3kwDky2S8cqKRQ6HqfRw90xPl-FKmCGlvP-XXy1QCDASsSJJyKc-bvYrcWqKEg1WZgwC4yepGVKhKmy-FblPYz8uKxDt16vmvW8s91giHjH5o37CkwRnIIR1fCzYCCNCTjNdIXQSc-FQV8t7cc9LlthD4osdvBe9H09EIsT19I-VFNhqdlZQBkk_ByKHOjDXJu1nn5KAyMn6CiCVDii8pxDVOEk_NPen-IT1bO0iKgGD5S0ysodVaQWB_kauOqPj9_bRRrF0QWprelhe8G7SWFEi8CCTA3UpqfIe5d6DCn0DqGIaR5i3Yy0fRp70pkrghkFFllG5v-hLWqjbdUKTMf5z_9TsUPApubGdTVGd2vJ_8wyH6mcShy2HLQT0e27DttEM0jn-3tgnT1XrUcLmdJ7gtVtzB9UClkQfg6pkvshuleLbH9pcYWeHUFYAb0ZNebENrtnUqXmDFm-Z36cV4r2LdJL6cRD3dU05aGSbssLPyX1Vl2ZWZ7CMO-eEkBeDc-_rpZkSAH3fvCNmi1Rv64A0tMlQZ9A-NqEpoUYDxhKkQNs17_VmJ0Zwt0C1mydkOJbstC3pTPI7FWHxzRhzieIax1WOIzUDXduN2djqh2yjc4eTeQq1KXJnKG0Kzubh9zdlt7asenHiIRjhk6_qgG5RtUTU72osOVDSEZNsk2i-N_M5qfZpJk5yVFg2sXrVqs12OWaqtBahcrHimNrm7oL0aNVBy1LGxxvYH_RS7_0pBL7zWUmu9-lYXL86ZAkkra3XiZcqQoEHFyJFGPxcsxPuNr8HnkaZpKtv39ISOCnprtfTfBVNQSPVc1mHHN-eUARBccAv4Kb3vrEPCK7cjSMuJMtTuGA3iMW5B0-Sm9NqalcW5yMQo-tu9fWe-cQJLMWnYr0T3plgFs8scCNjHQbB9HnjwEmFU5tGYaJk1_Td6qO0pAcv5ZE4_E96N-q_7XXl_yzhiU0HcaWjiafbIF3UKzrLrAPFNz9QKvSmCifOPNF8mcO2h6cu5MuwEXOIaGir1xIh3UBLt-77GYz933C1JpC7LKzvCsW3nbvW8eRcF5ceojN6VPgVRHFG-s7hRlrpSiVe0Z2q1VyP2P3IiZBxEZY49gHSRaF7kS6vAifCH4BXF6pc1Z0g8nHeRb4h0YXO-0_pCS_QmCvX01Lox68JnCQa4vz22dRJMVY'
     };
   },
   // 5. 修改：onLoad 中并行获取分类和商品，提升加载速度

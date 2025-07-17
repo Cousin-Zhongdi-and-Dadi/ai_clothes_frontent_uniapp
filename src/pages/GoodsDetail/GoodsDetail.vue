@@ -271,6 +271,9 @@ export default {
         // 立即购买逻辑，可以跳转到订单确认页
         console.log('立即购买');
         // TODO: 接受一个商品链接，并跳转
+        uni.navigateTo({
+          url: `/pages/OuterShop/OuterShop`
+        });
       }
       this.closeSkuPopup();
     },
@@ -371,10 +374,17 @@ export default {
   width: 100%;
   height: 100%;
 }
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 允许裁剪，横向占满 */
+  display: block;
+}
 .image-wrapper {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 500rpx; /* 保证容器有高度，可根据实际调整 */
+  overflow: hidden;
 }
 .three-d-btn {
   position: absolute;

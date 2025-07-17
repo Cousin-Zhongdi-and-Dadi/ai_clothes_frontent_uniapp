@@ -177,7 +177,6 @@ export default {
       userLeg: 0,
       userNeck: 0,
       selectionItems: [
-        { icon: '/static/icon/微信图片_20250330204817.png', text: '我的订单' },
         { icon: '/static/icon/微信图片_20250330204810.png', text: '浏览历史' },
         { icon: '/static/icon/微信图片_20250330204813.png', text: '收藏穿搭' }
       ]

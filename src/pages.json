@@ -113,6 +113,24 @@
             "style": {
                 "navigationBarTitleText": "确认上传信息"
             }
+        },
+        {
+            "path": "pages/OuterShop/OuterShop",
+            "style": {
+                "navigationBarTitleText": "外部商店"
+            }
+        },
+        {
+            "path": "pages/AiMatch/AiMatch",
+            "style": {
+                "navigationBarTitleText": "上传单品"
+            }
+        },
+        {
+            "path": "pages/AiMatchResult/AiMatchResult",
+            "style": {
+                "navigationBarTitleText": "推荐搭配单品"
+            }
         }
 	],
 	"tabBar": {

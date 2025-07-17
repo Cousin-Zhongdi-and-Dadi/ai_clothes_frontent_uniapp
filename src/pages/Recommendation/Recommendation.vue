@@ -86,17 +86,17 @@ export default {
         },
         {
           id: 3,
-          frontImage: '/static/example_pictures/sample3.jpg',
+          frontImage: '/static/example_pictures/sample1.jpg',
           backText: '静态推荐3：登录后可获得更多个性化推荐。'
         },
         {
           id: 4,
-          frontImage: '/static/example_pictures/sample4.jpg',
+          frontImage: '/static/example_pictures/sample2.jpg',
           backText: '静态推荐4：登录后可获得更多个性化推荐。'
         },
         {
           id: 5,
-          frontImage: '/static/example_pictures/sample5.jpg',
+          frontImage: '/static/example_pictures/sample1.jpg',
           backText: '静态推荐5：登录后可获得更多个性化推荐。'
         }
       ];

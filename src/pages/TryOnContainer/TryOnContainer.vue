@@ -9,7 +9,7 @@
       </view>
       <view
         class="tryon-btn ai-match"
-        @click="goTo3D"
+        @click="goToAiMatch"
       >
         <text class="tryon-btn-text">衣搭AI</text>
       </view>
@@ -25,8 +25,8 @@ export default {
   components: { CustomerService },
   name: 'TryOnContainer',
   methods: {
-    goTo3D() {
-      uni.navigateTo({ url: '/pages/ThreeDimDisplay/ThreeDimDisplay?styleId=1' });
+    goToAiMatch() {
+      uni.navigateTo({ url: '/pages/AiMatch/AiMatch' });
     },
     goTo2D() {
       uni.navigateTo({ url: '/pages/TwoDimDisplay/TwoDimDisplay' });
@@ -67,14 +67,14 @@ export default {
   transition: box-shadow 0.2s;
 }
 .ai-match {
-  background: #6c5ce7;
-  color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(108, 92, 231, 0.08);
-}
-.tryon-btn-2d {
   background: #fff;
   color: #6c5ce7;
   border: 4rpx solid #6c5ce7;
+  box-shadow: 0 4rpx 16rpx rgba(108, 92, 231, 0.08);
+}
+.tryon-btn-2d {
+  background: #6c5ce7;
+  color: #fff;
   box-shadow: 0 4rpx 16rpx rgba(108, 92, 231, 0.08);
 }
 .tryon-btn-text {

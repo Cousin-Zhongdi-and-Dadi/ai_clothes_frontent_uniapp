@@ -99,7 +99,7 @@
         {
             "path": "pages/ResourcesSelection/ResourcesSelection",
             "style": {
-                "navigationBarTitleText": "素材库"
+                "navigationBarTitleText": "从素材库选择"
             }
         },
         {
@@ -131,6 +131,18 @@
             "style": {
                 "navigationBarTitleText": "推荐搭配单品"
             }
+        },
+        {
+            "path": "pages/TryOnContainer/TryOnContainer",
+            "style": {
+                "navigationBarTitleText": "试衣搭配"
+            }
+        },
+        {
+            "path": "pages/ClosetSelection/ClosetSelection",
+            "style": {
+                "navigationBarTitleText": "从我的衣橱选择"
+            }
         }
 	],
 	"tabBar": {
@@ -152,7 +164,7 @@
 				"text": "我的衣橱"
 			},
 			{
-				"pagePath": "pages/TwoDimDisplay/TwoDimDisplay",
+				"pagePath": "pages/TryOnContainer/TryOnContainer",
 				"iconPath": "static/icon/icon-03.png",
 				"selectedIconPath": "static/icon/icon-04.png",
 				"text": "试衣搭配"

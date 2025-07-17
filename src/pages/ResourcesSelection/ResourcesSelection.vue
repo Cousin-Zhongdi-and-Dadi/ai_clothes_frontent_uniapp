@@ -85,9 +85,7 @@ export default {
   data() {
     return {
       pageType: 'top', // 'top' or 'bottom', determines navigation on confirm
-      // --- 开始修改 ---
-      source: '', // 新增：记录页面来源，例如 'closet'
-      // --- 结束修改 ---
+      source: '', // 记录页面来源
       tabs: [], // To store categories from API
       activeTabId: null, // ID of the active category
       itemList: [], // Items for the currently active tab
@@ -105,12 +103,9 @@ export default {
     } else {
       this.pageType = 'top';
     }
-    // --- 开始修改 ---
-    // 新增：记录来源
     if (options.source) {
       this.source = options.source;
     }
-    // --- 结束修改 ---
     // Fetch categories to build the tabs
     this.fetchCategories();
   },
@@ -233,7 +228,19 @@ export default {
     async confirmSelection() {
       if (!this.selectedItem) return;
 
-      // 检查来源，如果是从衣橱页来的，则调用/address/addFromMall
+      // === 新增：从AiMatch跳转时，选择后返回图片url ===
+      if (this.source === 'AiMatch') {
+        // 通过事件通道返回图片url
+        const pages = getCurrentPages();
+        const prevPage = pages[pages.length - 2];
+        if (prevPage) {
+          // 兼容uni-app写法
+          uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
+        }
+        uni.navigateBack();
+        return;
+      }
+      // === 原有逻辑 ===
       if (this.source === 'closet') {
         uni.showLoading({ title: '正在添加...' });
         try {
@@ -241,33 +248,35 @@ export default {
             url: `${apiConfig.BASE_URL}/address/addFromMall`,
             method: 'GET',
             data: {
-              categoryId: this.activeTabId, // 当前选中分类id
-              imageUrl: this.selectedItem.img // 当前选中商品图片url
+              categoryId: this.activeTabId,
+              imageUrl: this.selectedItem.img
             }
           });
           uni.showToast({ title: '添加成功！', icon: 'success' });
-
-          // 刷新衣橱页并返回
           const pages = getCurrentPages();
-          const closetPage = pages[pages.length - 2]; // 获取上一个页面（衣橱页）
+          const closetPage = pages[pages.length - 2];
           if (closetPage && typeof closetPage.initData === 'function') {
-            closetPage.initData(); // 调用衣橱页的刷新方法
+            closetPage.initData();
           }
           this.closePopup();
-          uni.navigateBack(); // 返回衣橱页
+          uni.navigateBack();
         } catch (error) {
           console.error('添加到衣橱失败:', error);
-          // 错误提示已由 request.js 统一处理
         } finally {
           uni.hideLoading();
         }
       } else {
-        // 如果来源不是衣橱（例如来自2D试衣），则执行原有的跳转到ConfirmCloth页的逻辑
         const imageUrl = this.selectedItem.img;
         const url = `/pages/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(imageUrl)}&type=${this.pageType}`;
         uni.navigateTo({ url });
         this.closePopup();
       }
+    }
+  },
+  // 新增：监听页面返回，AiMatch.vue 需监听图片选择事件
+  onUnload() {
+    if (this.source === 'AiMatch') {
+      uni.$off && uni.$off('ai-match-image-selected');
     }
   }
 };

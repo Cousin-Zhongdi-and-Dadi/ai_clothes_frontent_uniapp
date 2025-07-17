@@ -1,36 +1,43 @@
 <template>
   <view class="ai-match-page">
-    <!-- 顶部提示语 -->
-    <view class="tips">点击上传，仅支持单张图片（上装 | 下装）</view>
-
-    <!-- 上传按钮 -->
+    <!-- 上传图片区域（含提示/占位/图片） -->
     <view class="upload-section">
+      <view class="preview-image-wrapper">
+        <image
+          v-if="imageUrl"
+          :src="imageUrl"
+          class="preview-image"
+          mode="aspectFill"
+        />
+        <view
+          v-else
+          class="preview-placeholder"
+        >
+          <text class="tips">点击上传，仅支持单张图片（上装 | 下装）</text>
+        </view>
+      </view>
       <button
         class="upload-btn"
-        @click="chooseImage"
+        @click="showUploadDialog"
       >上传图片</button>
-      <image
-        v-if="imageUrl"
-        :src="imageUrl"
-        class="preview-image"
-        mode="aspectFill"
-      />
     </view>
 
     <!-- 场景选择 -->
     <view class="section-label">场景</view>
-    <view class="scene-checkbox-group">
-      <label
-        class="scene-checkbox"
-        v-for="scene in scenes"
-        :key="scene.value"
-      >
-        <checkbox
-          :value="scene.value"
-          v-model="selectedScenes"
-        />
-        <text>{{ scene.label }}</text>
-      </label>
+    <view class="scene-radio-group">
+      <radio-group @change="onSceneChange">
+        <label
+          class="scene-radio"
+          v-for="scene in scenes"
+          :key="scene.value"
+        >
+          <radio
+            :value="scene.value"
+            :checked="selectedScene === scene.value"
+          />
+          <text>{{ scene.label }}</text>
+        </label>
+      </radio-group>
     </view>
 
     <!-- 产品特征描述 -->
@@ -49,6 +56,28 @@
       class="ai-btn"
       @click="onAiRecommend"
     >AI推荐</button>
+
+    <!-- 上传来源选择弹窗 -->
+    <view
+      v-if="showDialog"
+      class="upload-dialog-mask"
+    >
+      <view class="upload-dialog">
+        <view class="upload-dialog-title">请选择图片来源</view>
+        <button
+          class="upload-dialog-btn"
+          @click="goCloset"
+        >我的衣橱</button>
+        <button
+          class="upload-dialog-btn"
+          @click="goResource"
+        >总素材库</button>
+        <button
+          class="upload-dialog-cancel"
+          @click="showDialog=false"
+        >取消</button>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -62,22 +91,44 @@ export default {
         { label: '运动', value: 'sport' },
         { label: '日常', value: 'daily' }
       ],
-      selectedScenes: [],
-      desc: ''
+      selectedScene: '', // 只能单选
+      desc: '',
+      showDialog: false // 控制弹窗显示
     };
   },
+  onLoad() {
+    uni.$on && uni.$on('ai-match-image-selected', (imgUrl) => {
+      this.imageUrl = imgUrl;
+    });
+  },
+  onUnload() {
+    uni.$off && uni.$off('ai-match-image-selected');
+  },
   methods: {
-    chooseImage() {
-      uni.chooseImage({
-        count: 1,
-        success: (res) => {
-          this.imageUrl = res.tempFilePaths[0];
-        }
+    showUploadDialog() {
+      this.showDialog = true;
+    },
+    goCloset() {
+      this.showDialog = false;
+      uni.navigateTo({
+        url: '/pages/ClosetSelection/ClosetSelection'
+      });
+    },
+    goResource() {
+      this.showDialog = false;
+      uni.navigateTo({
+        url: '/pages/ResourcesSelection/ResourcesSelection?source=AiMatch'
       });
     },
     onAiRecommend() {
       // 这里可添加AI推荐逻辑
       uni.showToast({ title: 'AI推荐功能待实现', icon: 'none' });
+      uni.navigateTo({
+        url: '/pages/AiMatchResult/AiMatchResult'
+      });
+    },
+    onSceneChange(e) {
+      this.selectedScene = e.detail.value;
     }
   }
 };
@@ -87,14 +138,33 @@ export default {
 .ai-match-page {
   padding: 40rpx 32rpx 32rpx 32rpx;
 }
+.preview-image-wrapper {
+  width: 100%;
+  height: 600rpx;
+  position: relative;
+  margin-bottom: 16rpx;
+}
+.preview-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 16rpx;
+  object-fit: cover;
+  border: 1rpx solid #eee;
+}
+.preview-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f5f6fa;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx solid #eee;
+}
 .tips {
   color: #6753e7;
   font-size: 28rpx;
-  background: #f5f6fa;
-  padding: 20rpx 0;
   text-align: center;
-  border-radius: 12rpx;
-  margin-bottom: 32rpx;
 }
 .upload-section {
   display: flex;
@@ -109,10 +179,11 @@ export default {
   font-size: 28rpx;
   padding: 16rpx 48rpx;
   margin-bottom: 16rpx;
+  width: 100%;
 }
 .preview-image {
-  width: 240rpx;
-  height: 240rpx;
+  width: 100%;
+  height: 400rpx;
   border-radius: 16rpx;
   object-fit: cover;
   border: 1rpx solid #eee;
@@ -123,12 +194,14 @@ export default {
   font-weight: 500;
   margin: 32rpx 0 16rpx 0;
 }
-.scene-checkbox-group {
+.scene-radio-group {
   display: flex;
+  flex-direction: row; /* 横向排列 */
   gap: 40rpx;
   margin-bottom: 32rpx;
+  align-items: center;
 }
-.scene-checkbox {
+.scene-radio {
   display: flex;
   align-items: center;
   font-size: 26rpx;
@@ -139,7 +212,7 @@ export default {
 }
 .desc-input {
   width: 100%;
-  min-height: 100rpx;
+  min-height: 200rpx;
   font-size: 26rpx;
   border: 1rpx solid #eee;
   border-radius: 8rpx;
@@ -155,5 +228,50 @@ export default {
   font-size: 30rpx;
   padding: 24rpx 0;
   margin-top: 32rpx;
+}
+.upload-dialog-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upload-dialog {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 48rpx 32rpx 32rpx 32rpx;
+  width: 70vw;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.upload-dialog-title {
+  font-size: 32rpx;
+  color: #222;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+.upload-dialog-btn {
+  background: #6753e7;
+  color: #fff;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  padding: 20rpx 0;
+  margin-bottom: 24rpx;
+  width: 100%;
+}
+.upload-dialog-cancel {
+  background: #f5f6fa;
+  color: #888;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  padding: 20rpx 0;
 }
 </style>

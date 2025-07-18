@@ -24,7 +24,7 @@
         @click="goToDetail(item.id)"
       >
         <image
-          :src="testImageUrl"
+          :src="item.image"
           class="goods-image"
           mode="aspectFill"
           referrer="no-referrer|origin|unsafe-url"
@@ -61,7 +61,6 @@ export default {
       pageSize: 10,
       hasMore: true,
       isLoading: false,
-      testImageUrl: 'https://dabang-1301469943.cos.ap-guangzhou.myqcloud.com/mall/products/LOOK%2001_1.png?q-sign-algorithm=sha1&q-ak=AKIDgIW5GCGNb_eZfIScO7zLefu4aJRM-_z-XalWeM9HypjUM-kz-HPOIgW2_A2U1GTL&q-sign-time=1752686646;1752690246&q-key-time=1752686646;1752690246&q-header-list=host&q-url-param-list=&q-signature=58a17e03ab35beadea7a0a39dd036d8fa5008a4c&x-cos-security-token=kfEeYbYtCpQY1wakBGCSqkFooB2RIr9a162ad5890902f565913ff768322f9514bpwsZD55MYaPl2VRe3ylGustceUsnx7bZ52cv_zmiPbfo3mjH7HgSQg2A0mGr34n_UwM3kwDky2S8cqKRQ6HqfRw90xPl-FKmCGlvP-XXy1QCDASsSJJyKc-bvYrcWqKEg1WZgwC4yepGVKhKmy-FblPYz8uKxDt16vmvW8s91giHjH5o37CkwRnIIR1fCzYCCNCTjNdIXQSc-FQV8t7cc9LlthD4osdvBe9H09EIsT19I-VFNhqdlZQBkk_ByKHOjDXJu1nn5KAyMn6CiCVDii8pxDVOEk_NPen-IT1bO0iKgGD5S0ysodVaQWB_kauOqPj9_bRRrF0QWprelhe8G7SWFEi8CCTA3UpqfIe5d6DCn0DqGIaR5i3Yy0fRp70pkrghkFFllG5v-hLWqjbdUKTMf5z_9TsUPApubGdTVGd2vJ_8wyH6mcShy2HLQT0e27DttEM0jn-3tgnT1XrUcLmdJ7gtVtzB9UClkQfg6pkvshuleLbH9pcYWeHUFYAb0ZNebENrtnUqXmDFm-Z36cV4r2LdJL6cRD3dU05aGSbssLPyX1Vl2ZWZ7CMO-eEkBeDc-_rpZkSAH3fvCNmi1Rv64A0tMlQZ9A-NqEpoUYDxhKkQNs17_VmJ0Zwt0C1mydkOJbstC3pTPI7FWHxzRhzieIax1WOIzUDXduN2djqh2yjc4eTeQq1KXJnKG0Kzubh9zdlt7asenHiIRjhk6_qgG5RtUTU72osOVDSEZNsk2i-N_M5qfZpJk5yVFg2sXrVqs12OWaqtBahcrHimNrm7oL0aNVBy1LGxxvYH_RS7_0pBL7zWUmu9-lYXL86ZAkkra3XiZcqQoEHFyJFGPxcsxPuNr8HnkaZpKtv39ISOCnprtfTfBVNQSPVc1mHHN-eUARBccAv4Kb3vrEPCK7cjSMuJMtTuGA3iMW5B0-Sm9NqalcW5yMQo-tu9fWe-cQJLMWnYr0T3plgFs8scCNjHQbB9HnjwEmFU5tGYaJk1_Td6qO0pAcv5ZE4_E96N-q_7XXl_yzhiU0HcaWjiafbIF3UKzrLrAPFNz9QKvSmCifOPNF8mcO2h6cu5MuwEXOIaGir1xIh3UBLt-77GYz933C1JpC7LKzvCsW3nbvW8eRcF5ceojN6VPgVRHFG-s7hRlrpSiVe0Z2q1VyP2P3IiZBxEZY49gHSRaF7kS6vAifCH4BXF6pc1Z0g8nHeRb4h0YXO-0_pCS_QmCvX01Lox68JnCQa4vz22dRJMVY'
     };
   },
   // 5. 修改：onLoad 中并行获取分类和商品，提升加载速度
@@ -143,9 +142,14 @@ export default {
           id: item.id,
           name: item.productName,
           desc: item.description,
-          image: item.imageGif,
+          image: item.imageGif, // 恢复为接口返回的图片字段
           price: item.price,
         }));
+
+        // 新增：输出前十条图片url到控制台
+        newItems.slice(0, 10).forEach((item, idx) => {
+          console.log(`图片${idx + 1}:`, item.image);
+        });
 
         if (loadMore) {
           this.goods = [...this.goods, ...newItems];
@@ -267,12 +271,4 @@ export default {
   color: #aaa;
   font-size: 26rpx;
 }
-/* [删除] 以下是加载状态的样式，将被移除 */
-/* 
-.loading-status {
-  padding: 20rpx 0;
-  width: 100%;
-  text-align: center;
-}
-*/
 </style>

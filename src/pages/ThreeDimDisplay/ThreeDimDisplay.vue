@@ -63,15 +63,13 @@ export default {
       this.isLoading = true;
       try {
         // 使用封装的 request 函数
-        // const modelUrl = await request({
-        //   url: `${apiConfig.BASE_URL}/fitting_3d/getLink/${styleId}`,
-        //   method: 'GET',
-        // });
+        const modelUrl = await request({
+          url: `${apiConfig.BASE_URL}/fitting_3d/getLink/${styleId}`,
+          method: 'GET',
+        });
         
         // 业务成功，request 函数直接返回了 URL
-        // this.url = modelUrl;
-        this.url = "https://cloud.style3d.com/cd/product/2457242?share_state_id=83518&func=resproduct&is_share_page=1"
-        
+        this.url = modelUrl;        
       } catch (error) {
         // 错误提示已由 request 函数统一处理
         console.error('Fetch 3D URL failed:', error);

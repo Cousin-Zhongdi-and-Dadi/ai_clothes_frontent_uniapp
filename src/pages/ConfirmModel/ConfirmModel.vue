@@ -33,53 +33,50 @@
 <script>
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import apiConfig from '@/utils/api.js';
-// 1. 同时导入 request 和 uploadFile
-import request, { uploadFile } from '@/utils/request.js';
+import request from '@/utils/request.js';
 
 export default {
   components: { CustomerService },
   data() {
     return {
-      imageUrl: '' // 用于存储从上个页面传来的图片临时路径
+      imageUrl: '',      // 用于图片显示
+      imageBase64: ''    // 用于上传
     }
   },
   onLoad(options) {
-    if (options.imageUrl) {
-      this.imageUrl = decodeURIComponent(options.imageUrl);
+    if (options.imageBase64) {
+      this.imageBase64 = decodeURIComponent(options.imageBase64);
+      // 显示图片时加前缀
+      this.imageUrl = 'data:image/jpeg;base64,' + this.imageBase64;
     }
   },
   methods: {
-    // “重新挑选”按钮，返回上一个页面
     onRetry() {
       uni.navigateBack();
     },
-    
-    // 2. 改造：“下一步”按钮，使用封装的 uploadFile 函数
     async onConfirm() {
-      if (!this.imageUrl) {
+      if (!this.imageBase64) {
         uni.showToast({ title: '没有可上传的图片', icon: 'none' });
         return;
       }
-
-      // 直接存储本地临时文件路径，无论是否登录
-      uni.setStorageSync('personImageUrl', this.imageUrl);
-      console.log('模特图本地临时路径已存储:', this.imageUrl);
-
-      uni.showLoading({ title: '正在上传...' });
-
+      uni.showLoading({ title: '正在上传...', mask: true });
       try {
-        await uploadFile({
+        const result = await request({
           url: `${apiConfig.BASE_URL}/photo/upload`,
-          filePath: this.imageUrl,
-          name: 'file',
+          method: 'POST',
+          header: { 'Content-Type': 'application/json' },
+          data: { file: this.imageBase64 } // 只传纯base64，不带前缀
         });
-
-        uni.showToast({ title: '上传成功！', icon: 'success' });
-        setTimeout(() => {
-          uni.navigateTo({ url: '/pages/UploadWhole/UploadWhole' });
-        }, 1500);
+        if (result.code === 200) {
+          uni.showToast({ title: '上传成功！', icon: 'success' });
+          setTimeout(() => {
+            uni.navigateTo({ url: '/pages/UploadWhole/UploadWhole' });
+          }, 1500);
+        } else {
+          uni.showToast({ title: result.message || '上传失败，请重试', icon: 'none' });
+        }
       } catch (error) {
-        console.error('Upload failed:', error);
+        uni.showToast({ title: '上传失败，请重试', icon: 'none' });
       } finally {
         uni.hideLoading();
       }

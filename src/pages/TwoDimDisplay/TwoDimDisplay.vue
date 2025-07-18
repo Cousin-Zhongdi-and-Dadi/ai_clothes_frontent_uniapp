@@ -51,6 +51,10 @@
     </view>
 
     <!-- <customer-service /> -->
+    <canvas
+      canvas-id="compressCanvas"
+      style="width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;"
+    />
   </view>
 </template>
 
@@ -62,10 +66,8 @@ export default {
   components: { CustomerService },
   name: 'TwoDimDisplay',
   methods: {
-    // 统一流程：无论是否登录，均可直接进入流程
-    // 清理上一次试衣的缓存后，选择图片并跳转
+    // 压缩并上传图片（相册）
     uploadFromAlbum() {
-      // 清理缓存
       uni.removeStorageSync('personImageUrl');
       uni.removeStorageSync('topGarmentUrl');
       uni.removeStorageSync('bottomGarmentUrl');
@@ -74,14 +76,60 @@ export default {
         sourceType: ['album'],
         success: (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          uni.navigateTo({
-            url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
+          // 获取图片信息
+          uni.getImageInfo({
+            src: tempFilePath,
+            success: (imgInfo) => {
+              // 设置压缩后宽高（如最大宽度640px，等比缩放）
+              const maxWidth = 640;
+              const scale = imgInfo.width > maxWidth ? maxWidth / imgInfo.width : 1;
+              const targetWidth = Math.floor(imgInfo.width * scale);
+              const targetHeight = Math.floor(imgInfo.height * scale);
+
+              // 创建canvas并绘制图片
+              const ctx = uni.createCanvasContext('compressCanvas', this);
+              ctx.drawImage(tempFilePath, 0, 0, targetWidth, targetHeight);
+              ctx.draw(false, () => {
+                uni.canvasToTempFilePath({
+                  canvasId: 'compressCanvas',
+                  x: 0,
+                  y: 0,
+                  width: targetWidth,
+                  height: targetHeight,
+                  destWidth: targetWidth,
+                  destHeight: targetHeight,
+                  fileType: 'jpg', // 确保为jpeg格式
+                  quality: 0.7,    // 可调节压缩质量
+                  success: (canvasRes) => {
+                    // 读取压缩后的图片为base64
+                    uni.getFileSystemManager().readFile({
+                      filePath: canvasRes.tempFilePath,
+                      encoding: 'base64',
+                      success: (fileRes) => {
+                        uni.navigateTo({
+                          url: `/pages/ConfirmModel/ConfirmModel?imageBase64=${encodeURIComponent(fileRes.data)}`
+                        });
+                      },
+                      fail: () => {
+                        uni.showToast({ title: '图片读取失败', icon: 'none' });
+                      }
+                    });
+                  },
+                  fail: () => {
+                    uni.showToast({ title: '图片压缩失败', icon: 'none' });
+                  }
+                }, this);
+              });
+            },
+            fail: () => {
+              uni.showToast({ title: '图片信息获取失败', icon: 'none' });
+            }
           });
         }
       });
     },
+    // 压缩并上传图片（拍照）
     uploadFromCamera() {
-      // 清理缓存
       uni.removeStorageSync('personImageUrl');
       uni.removeStorageSync('topGarmentUrl');
       uni.removeStorageSync('bottomGarmentUrl');
@@ -90,8 +138,50 @@ export default {
         sourceType: ['camera'],
         success: (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          uni.navigateTo({
-            url: `/pages/ConfirmModel/ConfirmModel?imageUrl=${encodeURIComponent(tempFilePath)}`
+          uni.getImageInfo({
+            src: tempFilePath,
+            success: (imgInfo) => {
+              const maxWidth = 640;
+              const scale = imgInfo.width > maxWidth ? maxWidth / imgInfo.width : 1;
+              const targetWidth = Math.floor(imgInfo.width * scale);
+              const targetHeight = Math.floor(imgInfo.height * scale);
+
+              const ctx = uni.createCanvasContext('compressCanvas', this);
+              ctx.drawImage(tempFilePath, 0, 0, targetWidth, targetHeight);
+              ctx.draw(false, () => {
+                uni.canvasToTempFilePath({
+                  canvasId: 'compressCanvas',
+                  x: 0,
+                  y: 0,
+                  width: targetWidth,
+                  height: targetHeight,
+                  destWidth: targetWidth,
+                  destHeight: targetHeight,
+                  fileType: 'jpg', // 确保为jpeg格式
+                  quality: 0.7,    // 可调节压缩质量
+                  success: (canvasRes) => {
+                    uni.getFileSystemManager().readFile({
+                      filePath: canvasRes.tempFilePath,
+                      encoding: 'base64',
+                      success: (fileRes) => {
+                        uni.navigateTo({
+                          url: `/pages/ConfirmModel/ConfirmModel?imageBase64=${encodeURIComponent(fileRes.data)}`
+                        });
+                      },
+                      fail: () => {
+                        uni.showToast({ title: '图片读取失败', icon: 'none' });
+                      }
+                    });
+                  },
+                  fail: () => {
+                    uni.showToast({ title: '图片压缩失败', icon: 'none' });
+                  }
+                }, this);
+              });
+            },
+            fail: () => {
+              uni.showToast({ title: '图片信息获取失败', icon: 'none' });
+            }
           });
         }
       });

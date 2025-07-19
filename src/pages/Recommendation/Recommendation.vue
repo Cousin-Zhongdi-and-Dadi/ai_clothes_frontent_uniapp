@@ -77,27 +77,27 @@ export default {
         {
           id: 1,
           frontImage: '/static/example_pictures/sample1.jpg',
-          backText: '静态推荐1：欢迎体验游客模式！'
+          backText: '欢迎体验游客模式！'
         },
         {
           id: 2,
           frontImage: '/static/example_pictures/sample2.jpg',
-          backText: '静态推荐2：登录后可获得更多个性化推荐。'
+          backText: '登录后可获得更多个性化推荐。'
         },
         {
           id: 3,
           frontImage: '/static/example_pictures/sample1.jpg',
-          backText: '静态推荐3：登录后可获得更多个性化推荐。'
+          backText: '登录后可获得更多个性化推荐。'
         },
         {
           id: 4,
           frontImage: '/static/example_pictures/sample2.jpg',
-          backText: '静态推荐4：登录后可获得更多个性化推荐。'
+          backText: '登录后可获得更多个性化推荐。'
         },
         {
           id: 5,
           frontImage: '/static/example_pictures/sample1.jpg',
-          backText: '静态推荐5：登录后可获得更多个性化推荐。'
+          backText: '登录后可获得更多个性化推荐。'
         }
       ];
     },

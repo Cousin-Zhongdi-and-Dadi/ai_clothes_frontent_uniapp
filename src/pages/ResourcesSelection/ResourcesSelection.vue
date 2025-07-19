@@ -84,102 +84,70 @@ import apiConfig from '../../utils/api.js';
 export default {
   data() {
     return {
-      pageType: 'top', // 'top' or 'bottom', determines navigation on confirm
-      source: '', // 记录页面来源
-      tabs: [], // To store categories from API
-      activeTabId: null, // ID of the active category
-      itemList: [], // Items for the currently active tab
-      itemsCache: {}, // Cache for fetched items to prevent re-fetching
-      
+      pageType: 'top', // 'top' or 'bottom'
+      source: '',
+      tabs: [],
+      activeTabId: null,
+      itemList: [],
+      itemsCache: {},
       isLoading: false,
       isPopupVisible: false,
       selectedItem: null,
+      parentId: null // 新增：用于记录父分类id
     };
   },
   onLoad(options) {
-    // Preserve the page's purpose (selecting a top or bottom)
+    // 判断是选择上装还是下装
     if (options.type === 'bottom') {
       this.pageType = 'bottom';
+      this.parentId = 24; // 下装
     } else {
       this.pageType = 'top';
+      this.parentId = 23; // 上装
     }
+    // 识别来源
     if (options.source) {
       this.source = options.source;
     }
-    // Fetch categories to build the tabs
-    this.fetchCategories();
+    // 只获取对应父分类的子类tab
+    this.fetchSubCategories();
   },
   methods: {
-    // Fetch categories from the API to build the tabs
-    async fetchCategories() {
+    // 获取上下装子类tab
+    async fetchSubCategories() {
       this.isLoading = true;
       try {
         const data = await request({
-          url: `${apiConfig.BASE_URL}/mall/getCategory`, // 获取分类列表
+          url: `${apiConfig.BASE_URL}/mall/getSubCategory`,
           method: 'GET',
+          data: {
+            parentId: this.parentId
+          }
         });
-        // Sort categories by sortOrder if available
-        const categories = data.sort((a, b) => a.sortOrder - b.sortOrder);
-        // 新增推荐tab，id为null
-        this.tabs = [{ categoryName: '推荐', id: null }, ...categories];
+        // data为数组，按sortOrder排序
+        const categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
+        this.tabs = categories;
         // 默认激活第一个tab
         if (this.tabs.length > 0) {
           this.activeTabId = this.tabs[0].id;
           this.fetchItemsForCurrentTab();
         }
       } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        console.error('Failed to fetch sub categories:', error);
       } finally {
         this.isLoading = false;
       }
     },
-    
-    // Handle tab switching
+
+    // 切换tab
     changeTab(tab) {
       if (this.activeTabId === tab.id) return;
       this.activeTabId = tab.id;
       this.fetchItemsForCurrentTab();
     },
 
-    // Fetch items for the currently active tab
+    // 获取当前tab下的商品
     async fetchItemsForCurrentTab() {
-      // 推荐tab（id为null）
-      if (this.activeTabId === null) {
-        // Use cache if available
-        if (this.itemsCache['recommend']) {
-          this.itemList = this.itemsCache['recommend'];
-          return;
-        }
-        this.isLoading = true;
-        this.itemList = [];
-        try {
-          const res = await request({
-            url: `${apiConfig.BASE_URL}/mall/getRecommended`,
-            method: 'GET',
-            data: {
-              page: 1,
-              pageSize: 20
-            }
-          });
-          const goodsList = Array.isArray(res) ? res : [];
-          const mappedData = goodsList.map(item => ({
-            id: item.id,
-            title: item.productName,
-            desc: item.description,
-            img: item.imageGif,
-            ...item
-          }));
-          this.itemList = mappedData;
-          this.$set(this.itemsCache, 'recommend', mappedData);
-        } catch (error) {
-          console.error('Failed to fetch recommended items:', error);
-        } finally {
-          this.isLoading = false;
-        }
-        return;
-      }
-
-      // 其他分类tab
       if (!this.activeTabId) return;
       if (this.itemsCache[this.activeTabId]) {
         this.itemList = this.itemsCache[this.activeTabId];
@@ -212,7 +180,7 @@ export default {
         this.isLoading = false;
       }
     },
-    
+
     // Show the confirmation popup
     showPopup(item) {
       this.selectedItem = item;

@@ -19,28 +19,6 @@
           />
           素材库选择
         </button>
-        <!-- <button
-          class="btn btn-primary"
-          @click="uploadFromAlbum('top')"
-        >
-          <image
-            class="btn-icon"
-            src="/static/icon/补充icon0116-05.png"
-            mode="widthFix"
-          />
-          相册上传
-        </button>
-        <button
-          class="btn btn-primary"
-          @click="uploadFromCamera('top')"
-        >
-          <image
-            class="btn-icon"
-            src="/static/icon/补充icon0116-06.png"
-            mode="widthFix"
-          />
-          拍照上传
-        </button> -->
       </view>
     </view>
     <view class="tips-block">
@@ -73,28 +51,6 @@
           />
           素材库选择
         </button>
-        <!-- <button
-          class="btn btn-primary"
-          @click="uploadFromAlbum('bottom')"
-        >
-          <image
-            class="btn-icon"
-            src="/static/icon/补充icon0116-05.png"
-            mode="widthFix"
-          />
-          相册上传
-        </button>
-        <button
-          class="btn btn-primary"
-          @click="uploadFromCamera('bottom')"
-        >
-          <image
-            class="btn-icon"
-            src="/static/icon/补充icon0116-06.png"
-            mode="widthFix"
-          />
-          拍照上传
-        </button> -->
       </view>
     </view>
     <view class="tips-block">
@@ -111,11 +67,32 @@
 export default {
   name: 'UploadWhole',
   methods: {
-    // 直接进入流程，无论是否登录
     selectFromResources(type) {
-      uni.navigateTo({
-        url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}`
-      });
+      // 判断是否已选择过上装或下装
+      const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+      const garmentUrl = uni.getStorageSync(key);
+      if (garmentUrl) {
+        // 已选择过，弹窗询问是否覆盖
+        uni.showModal({
+          title: '提示',
+          content: type === 'top' ? '已选择过上装，是否覆盖？' : '已选择过下装，是否覆盖？',
+          confirmText: '覆盖',
+          cancelText: '取消',
+          success: (res) => {
+            if (res.confirm) {
+              uni.navigateTo({
+                url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
+              });
+            }
+            // 取消则不做任何操作
+          }
+        });
+      } else {
+        // 未选择过，直接跳转
+        uni.navigateTo({
+          url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
+        });
+      }
     },
     uploadFrom(sourceType, type) {
       uni.chooseImage({

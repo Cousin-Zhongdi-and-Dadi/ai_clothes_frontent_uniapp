@@ -97,8 +97,10 @@ export default {
       this.pollingCount = 0;
       this.fetchResult();
       this.pollingTimer = setInterval(() => {
-        if (this.pollingCount++ > this.maxPollingCount) {
+        this.pollingCount++;
+        if (this.pollingCount > this.maxPollingCount) {
           clearInterval(this.pollingTimer);
+          this.pollingTimer = null;
           this.isLoading = false;
           this.showRetryModal = true;
           this.description = '任务处理超时，请稍后重试。';
@@ -115,7 +117,10 @@ export default {
           method: 'GET',
         });
         if (res && res.imageUrl) {
-          clearInterval(this.pollingTimer);
+          if (this.pollingTimer) {
+            clearInterval(this.pollingTimer);
+            this.pollingTimer = null;
+          }
           this.isLoading = false;
           this.outfitImageUrl = res.imageUrl;
           this.description = res.description;
@@ -123,7 +128,10 @@ export default {
         }
       } catch (error) {
         console.error('Result request failed:', error);
-        clearInterval(this.pollingTimer);
+        if (this.pollingTimer) {
+          clearInterval(this.pollingTimer);
+          this.pollingTimer = null;
+        }
         this.isLoading = false;
         this.showRetryModal = true;
         this.description = '网络错误或任务失败，无法获取搭配结果。';
@@ -164,8 +172,7 @@ export default {
       }
     },
     restartProcess() {
-      // 跳转回tabBar页面 TwoDimDisplay.vue
-      uni.switchTab({
+      uni.reLaunch({
         url: '/pages/TwoDimDisplay/TwoDimDisplay'
       });
     }
@@ -236,7 +243,7 @@ export default {
 .btn-primary {
   background: #6c63ff;
   color: #fff;
-  margin-bottom: 0;
+  margin-bottom: 20rpx;
 }
 
 /* 新增加载中样式 */

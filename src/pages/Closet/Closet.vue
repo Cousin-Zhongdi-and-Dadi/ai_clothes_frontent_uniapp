@@ -190,12 +190,12 @@ export default {
     getMockClosetItems(categoryId) {
       if (categoryId === 1) {
         return [
-          { id: 101, image: '/static/example_pictures/sample1.jpg', name: '静态上衣1', desc: '游客模式样例' },
-          { id: 102, image: '/static/example_pictures/sample2.jpg', name: '静态上衣2', desc: '游客模式样例' }
+          { id: 101, image: '/static/example_pictures/sample1.jpg', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
+          { id: 102, image: '/static/example_pictures/sample2.jpg', name: 'FORHUG街头上衣', desc: '游客模式样例' }
         ];
       } else if (categoryId === 2) {
         return [
-          { id: 201, image: '/static/example_pictures/sample3.jpg', name: '静态裤子1', desc: '游客模式样例' }
+          { id: 201, image: '/static/example_pictures/sample1.jpg', name: '阿迪达斯街头裤子', desc: '游客模式样例' }
         ];
       }
       return [];

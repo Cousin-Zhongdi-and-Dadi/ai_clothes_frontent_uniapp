@@ -66,124 +66,31 @@ export default {
   components: { CustomerService },
   name: 'TwoDimDisplay',
   methods: {
-    // 压缩并上传图片（相册）
+    // 选择图片后直接跳转，传递临时文件路径
     uploadFromAlbum() {
-      uni.removeStorageSync('personImageUrl');
-      uni.removeStorageSync('topGarmentUrl');
-      uni.removeStorageSync('bottomGarmentUrl');
       uni.chooseImage({
         count: 1,
         sourceType: ['album'],
         success: (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          // 获取图片信息
-          uni.getImageInfo({
-            src: tempFilePath,
-            success: (imgInfo) => {
-              // 设置压缩后宽高（如最大宽度640px，等比缩放）
-              const maxWidth = 640;
-              const scale = imgInfo.width > maxWidth ? maxWidth / imgInfo.width : 1;
-              const targetWidth = Math.floor(imgInfo.width * scale);
-              const targetHeight = Math.floor(imgInfo.height * scale);
-
-              // 创建canvas并绘制图片
-              const ctx = uni.createCanvasContext('compressCanvas', this);
-              ctx.drawImage(tempFilePath, 0, 0, targetWidth, targetHeight);
-              ctx.draw(false, () => {
-                uni.canvasToTempFilePath({
-                  canvasId: 'compressCanvas',
-                  x: 0,
-                  y: 0,
-                  width: targetWidth,
-                  height: targetHeight,
-                  destWidth: targetWidth,
-                  destHeight: targetHeight,
-                  fileType: 'jpg', // 确保为jpeg格式
-                  quality: 0.7,    // 可调节压缩质量
-                  success: (canvasRes) => {
-                    // 读取压缩后的图片为base64
-                    uni.getFileSystemManager().readFile({
-                      filePath: canvasRes.tempFilePath,
-                      encoding: 'base64',
-                      success: (fileRes) => {
-                        uni.navigateTo({
-                          url: `/pages/ConfirmModel/ConfirmModel?imageBase64=${encodeURIComponent(fileRes.data)}`
-                        });
-                      },
-                      fail: () => {
-                        uni.showToast({ title: '图片读取失败', icon: 'none' });
-                      }
-                    });
-                  },
-                  fail: () => {
-                    uni.showToast({ title: '图片压缩失败', icon: 'none' });
-                  }
-                }, this);
-              });
-            },
-            fail: () => {
-              uni.showToast({ title: '图片信息获取失败', icon: 'none' });
-            }
-          });
+          this.navigateToConfirm(tempFilePath);
         }
       });
     },
-    // 压缩并上传图片（拍照）
     uploadFromCamera() {
-      uni.removeStorageSync('personImageUrl');
-      uni.removeStorageSync('topGarmentUrl');
-      uni.removeStorageSync('bottomGarmentUrl');
       uni.chooseImage({
         count: 1,
         sourceType: ['camera'],
         success: (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          uni.getImageInfo({
-            src: tempFilePath,
-            success: (imgInfo) => {
-              const maxWidth = 640;
-              const scale = imgInfo.width > maxWidth ? maxWidth / imgInfo.width : 1;
-              const targetWidth = Math.floor(imgInfo.width * scale);
-              const targetHeight = Math.floor(imgInfo.height * scale);
-
-              const ctx = uni.createCanvasContext('compressCanvas', this);
-              ctx.drawImage(tempFilePath, 0, 0, targetWidth, targetHeight);
-              ctx.draw(false, () => {
-                uni.canvasToTempFilePath({
-                  canvasId: 'compressCanvas',
-                  x: 0,
-                  y: 0,
-                  width: targetWidth,
-                  height: targetHeight,
-                  destWidth: targetWidth,
-                  destHeight: targetHeight,
-                  fileType: 'jpg', // 确保为jpeg格式
-                  quality: 0.7,    // 可调节压缩质量
-                  success: (canvasRes) => {
-                    uni.getFileSystemManager().readFile({
-                      filePath: canvasRes.tempFilePath,
-                      encoding: 'base64',
-                      success: (fileRes) => {
-                        uni.navigateTo({
-                          url: `/pages/ConfirmModel/ConfirmModel?imageBase64=${encodeURIComponent(fileRes.data)}`
-                        });
-                      },
-                      fail: () => {
-                        uni.showToast({ title: '图片读取失败', icon: 'none' });
-                      }
-                    });
-                  },
-                  fail: () => {
-                    uni.showToast({ title: '图片压缩失败', icon: 'none' });
-                  }
-                }, this);
-              });
-            },
-            fail: () => {
-              uni.showToast({ title: '图片信息获取失败', icon: 'none' });
-            }
-          });
+          this.navigateToConfirm(tempFilePath);
         }
+      });
+    },
+    // 跳转到确认页，传递原始图片路径
+    navigateToConfirm(tempFilePath) {
+      uni.navigateTo({
+        url: `/pages/ConfirmModel/ConfirmModel?tempFilePath=${encodeURIComponent(tempFilePath)}`
       });
     }
   }

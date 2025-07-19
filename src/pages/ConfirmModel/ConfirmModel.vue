@@ -7,11 +7,25 @@
         :src="imageUrl"
         mode="aspectFit"
         class="photo"
+        @click="showPreview = true"
       />
       <view
         v-else
         class="photo placeholder"
       ></view>
+    </view>
+
+    <!-- 大图预览遮罩 -->
+    <view
+      v-if="showPreview"
+      class="preview-mask"
+      @click="showPreview = false"
+    >
+      <image
+        :src="imageUrl"
+        mode="widthFix"
+        class="preview-img"
+      />
     </view>
 
     <!-- 按钮区 -->
@@ -26,7 +40,6 @@
       >下一步</button>
     </view>
 
-    <!-- <customer-service /> -->
   </view>
 </template>
 
@@ -39,47 +52,88 @@ export default {
   components: { CustomerService },
   data() {
     return {
-      imageUrl: '',      // 用于图片显示
-      imageBase64: ''    // 用于上传
+      imageUrl: '',      // 用于图片显示的临时路径
+      tempFilePath: '',  // 存储原始的临时文件路径 (从上个页面传来)
+      imageBase64: '',   // 用于上传的Base64数据
+      // 注意：这里保留 compressedFilePath 是为了兼容 onConfirm 中的逻辑
+      // 它现在和 tempFilePath 是同一个值
+      compressedFilePath: '' 
     }
   },
   onLoad(options) {
-    if (options.imageBase64) {
-      this.imageBase64 = decodeURIComponent(options.imageBase64);
-      // 显示图片时加前缀
-      this.imageUrl = 'data:image/jpeg;base64,' + this.imageBase64;
+    // 1. 直接接收并解码上个页面传来的图片路径
+    if (options.tempFilePath) {
+      const filePath = decodeURIComponent(options.tempFilePath);
+      
+      // 2. 将路径赋值给相关变量
+      this.tempFilePath = filePath;
+      this.compressedFilePath = filePath; // 图片已经是压缩过的
+      
+      // 3. 直接调用 displayImage 显示图片，不再进行二次压缩
+      this.displayImage(filePath);
     }
   },
   methods: {
+    // 显示图片
+    displayImage(filePath) {
+      this.imageUrl = filePath;
+    },
+    
+    // 重新挑选，返回上一页
     onRetry() {
       uni.navigateBack();
     },
+    
+    // 确认上传
     async onConfirm() {
-      if (!this.imageBase64) {
+      const filePath = this.compressedFilePath || this.tempFilePath;
+      if (!filePath) {
         uni.showToast({ title: '没有可上传的图片', icon: 'none' });
         return;
       }
       uni.showLoading({ title: '正在上传...', mask: true });
-      try {
-        const result = await request({
-          url: `${apiConfig.BASE_URL}/photo/upload`,
-          method: 'POST',
-          header: { 'Content-Type': 'application/json' },
-          data: { file: this.imageBase64 } // 只传纯base64，不带前缀
-        });
-        if (result.code === 200) {
-          uni.showToast({ title: '上传成功！', icon: 'success' });
-          setTimeout(() => {
-            uni.navigateTo({ url: '/pages/UploadWhole/UploadWhole' });
-          }, 1500);
-        } else {
-          uni.showToast({ title: result.message || '上传失败，请重试', icon: 'none' });
+      uni.uploadFile({
+        url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`, // 新接口
+        filePath: filePath,
+        name: 'file', // 参数名必须为 file
+        formData: {}, // 可加其它参数
+        success: (res) => {
+          uni.hideLoading();
+          try {
+            const result = JSON.parse(res.data);
+            console.log('任务提交响应:', res);
+            if (result.code === 200 && result.data) {
+              uni.showToast({ title: '上传成功！', icon: 'success' });
+              // 保存人物图片的存储链接
+              uni.setStorageSync('personImageUrl', result.data);
+              setTimeout(() => {
+                uni.navigateTo({ url: `/pages/UploadWhole/UploadWhole?imgUrl=${encodeURIComponent(result.data)}` });
+              }, 1500);
+            } else {
+              uni.showToast({ title: result.message || '上传失败', icon: 'none' });
+            }
+          } catch (e) {
+            uni.showToast({ title: '服务器响应解析失败', icon: 'none' });
+          }
+        },
+        fail: (err) => {
+          uni.hideLoading();
+          uni.showToast({ title: '上传失败，请重试', icon: 'none' });
+          console.error('上传失败:', err);
         }
-      } catch (error) {
-        uni.showToast({ title: '上传失败，请重试', icon: 'none' });
-      } finally {
-        uni.hideLoading();
-      }
+      });
+    },
+    
+    // 将文件转换为Base64
+    fileToBase64(filePath) {
+      return new Promise((resolve, reject) => {
+        uni.getFileSystemManager().readFile({
+          filePath,
+          encoding: 'base64',
+          success: (res) => resolve(res.data),
+          fail: (err) => reject(err)
+        });
+      });
     }
   }
 }
@@ -137,20 +191,23 @@ export default {
   font-size: 28rpx;
   border: none;
 }
-.ai-tip {
-  position: absolute;
-  right: 32rpx;
-  top: 120rpx;
-  width: 72rpx;
-  height: 72rpx;
-  background: #fff;
-  border-radius: 50%;
-  border: 2rpx solid #e0e0e0;
+.preview-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20rpx;
-  color: #6c5ce7;
-  box-shadow: 0 2rpx 8rpx rgba(108, 92, 231, 0.08);
+}
+.preview-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.18);
+  background: #fff;
 }
 </style>

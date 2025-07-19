@@ -53,7 +53,7 @@
     >
       <view class="goods-price-row">
         <text class="goods-price">￥{{ productInfo.price }}</text>
-        <text class="goods-tag">新品</text>
+        <!--<text class="goods-tag">新品</text>-->
       </view>
       <view class="goods-title">{{ productInfo.title }}</view>
       <view class="goods-desc">{{ productInfo.desc }}</view>
@@ -192,6 +192,7 @@ export default {
     if (options.id) {
       this.productId = options.id;
       this.fetchProductDetails(this.productId);
+      console.log('Loaded product ID:', this.productId);
     } else {
       uni.showToast({ title: '商品不存在', icon: 'none' });
       uni.navigateBack();
@@ -363,7 +364,7 @@ export default {
 }
 .goods-image-swiper {
   width: 100%;
-  height: 500rpx; /* 或1000rpx，根据实际需求调整 */
+  height: 800rpx; /* 原500rpx，改为800rpx */
   background: #fff;
 }
 .swiper {
@@ -377,13 +378,13 @@ export default {
 .main-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 允许裁剪，横向占满 */
+  object-fit: cover;
   display: block;
 }
 .image-wrapper {
   position: relative;
   width: 100%;
-  height: 500rpx; /* 保证容器有高度，可根据实际调整 */
+  height: 800rpx; /* 原800rpx，可根据实际需求调整更高 */
   overflow: hidden;
 }
 .three-d-btn {

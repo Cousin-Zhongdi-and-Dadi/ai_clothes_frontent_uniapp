@@ -1,8 +1,5 @@
 <!-- 素材库 -->
 
-<!-- 在页面最顶部添加 meta 标签 -->
-<meta name="referrer" content="no-referrer" />
-
 <template>
   <view class="shop-page">
     <view class="shop-tabs">
@@ -27,7 +24,6 @@
           :src="item.image"
           class="goods-image"
           mode="aspectFill"
-          referrer="no-referrer|origin|unsafe-url"
         />
         <view class="goods-info">
           <text class="goods-name">{{ item.name }}</text>

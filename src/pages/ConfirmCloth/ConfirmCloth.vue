@@ -68,24 +68,88 @@ export default {
 
     async startFitting() {
       const personImageUrl = uni.getStorageSync('personImageUrl');
-      const topGarmentUrl = uni.getStorageSync('topGarmentUrl');
-      const bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || null;
+      let topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+      let bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || '';
 
       if (!personImageUrl || !topGarmentUrl) {
         uni.showToast({ title: '缺少人物或上装图片', icon: 'none' });
         return;
       }
 
-      uni.showLoading({ title: '正在生成搭配...' });
+      uni.showLoading({ title: '正在上传衣物图片...' });
 
       try {
-        const data = await request({
-          url: `${apiConfig.BASE_URL}/fitting_2d/generate`,
-          method: 'POST',
+        // 只上传本地临时路径，云端链接直接用
+        if (!/^https?:\/\//.test(topGarmentUrl)) {
+          topGarmentUrl = await new Promise((resolve, reject) => {
+            uni.uploadFile({
+              url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
+              filePath: topGarmentUrl,
+              name: 'file',
+              formData: {},
+              success: (res) => {
+                try {
+                  const result = JSON.parse(res.data);
+                  if (result.code === 200 && result.data) {
+                    uni.setStorageSync('topGarmentUrl', result.data);
+                    resolve(result.data);
+                  } else {
+                    uni.showToast({ title: result.message || '上传失败', icon: 'none' });
+                    reject(result);
+                  }
+                } catch (e) {
+                  uni.showToast({ title: '服务器响应解析失败', icon: 'none' });
+                  reject(e);
+                }
+              },
+              fail: (err) => {
+                uni.showToast({ title: '上传失败，请重试', icon: 'none' });
+                reject(err);
+              }
+            });
+          });
+        }
+
+        if (bottomGarmentUrl && !/^https?:\/\//.test(bottomGarmentUrl)) {
+          bottomGarmentUrl = await new Promise((resolve, reject) => {
+            uni.uploadFile({
+              url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
+              filePath: bottomGarmentUrl,
+              name: 'file',
+              formData: {},
+              success: (res) => {
+                try {
+                  const result = JSON.parse(res.data);
+                  if (result.code === 200 && result.data) {
+                    uni.setStorageSync('bottomGarmentUrl', result.data);
+                    resolve(result.data);
+                  } else {
+                    uni.showToast({ title: result.message || '下装上传失败', icon: 'none' });
+                    reject(result);
+                  }
+                } catch (e) {
+                  uni.showToast({ title: '服务器响应解析失败', icon: 'none' });
+                  reject(e);
+                }
+              },
+              fail: (err) => {
+                uni.showToast({ title: '下装上传失败，请重试', icon: 'none' });
+                reject(err);
+              }
+            });
+          });
+        }
+
+        uni.showLoading({ title: '正在生成搭配...' });
+
+        // 这里参数全部为云端链接
+        const res = await request({
+          url: `${apiConfig.BASE_URL}/fitting_2d/submit_task`,
+          method: 'GET',
           data: {
-            personImageUrl,
-            topGarmentUrl,
-            bottomGarmentUrl
+            personImageUrl: uni.getStorageSync('personImageUrl'),
+            topGarmentUrl: uni.getStorageSync('topGarmentUrl'),
+            bottomGarmentUrl: uni.getStorageSync('bottomGarmentUrl') || ''
           }
         });
 
@@ -93,13 +157,19 @@ export default {
         uni.removeStorageSync('topGarmentUrl');
         uni.removeStorageSync('bottomGarmentUrl');
 
-        uni.redirectTo({
-          url: `/pages/TwoDimComment/TwoDimComment?taskId=${data.taskId}`
-        });
-      } catch (error) {
-        console.error('生成搭配失败:', error);
-      } finally {
         uni.hideLoading();
+
+        if (res) {
+          uni.redirectTo({
+            url: `/pages/TwoDimComment/TwoDimComment?taskId=${res}`
+          });
+        } else {
+          uni.showToast({ title: '任务提交失败', icon: 'none' });
+        }
+      } catch (error) {
+        uni.hideLoading();
+        uni.showToast({ title: '网络错误，请重试', icon: 'none' });
+        console.error('提交试衣任务失败:', error);
       }
     }
   }

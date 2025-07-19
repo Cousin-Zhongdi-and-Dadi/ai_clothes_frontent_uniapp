@@ -1,29 +1,18 @@
 <template>
   <view class="container">
-    <!-- 1. 加载时显示提示 -->
     <view
-      v-if="isLoading"
-      class="status-container"
+      class="copy-container"
+      v-if="!isLoading"
     >
-      <view class="loading-animation"></view>
-      <text>正在加载3D模型...</text>
-    </view>
-
-    <!-- 2. 获取到URL后，再渲染 web-view -->
-    <view>
       <text class="tips">当前链接需要您复制到浏览器手动打开</text>
+      <text class="copy-link">
+        {{ url ? (url.length > 100 ? url.slice(0, 100) + '...' : url) : '获取链接失败' }}
+      </text>
       <button
         class="copy-btn"
         @click="copyUrl"
+        :disabled="!url"
       >复制链接到剪贴板</button>
-    </view>
-
-    <!-- 3. 如果获取失败，显示错误提示 -->
-    <view
-      v-if="!isLoading && !url"
-      class="status-container"
-    >
-      <text>无法加载模型，请稍后重试。</text>
     </view>
   </view>
 </template>
@@ -99,28 +88,16 @@ export default {
   width: 100%;
   height: 100vh;
 }
-.status-container {
+.copy-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  color: #666;
-  font-size: 28rpx;
-}
-.loading-animation {
-  width: 60rpx;
-  height: 60rpx;
-  border: 6rpx solid #e0e0e0;
-  border-top-color: #6c63ff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20rpx;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 .tips {
   display: block;
@@ -134,6 +111,17 @@ export default {
   border-radius: 12rpx;
   box-shadow: 0 2rpx 8rpx rgba(103, 83, 231, 0.08);
   font-weight: 500;
+}
+.copy-link {
+  width: 90%;
+  margin: 0 auto 24rpx auto;
+  padding: 18rpx 0;
+  font-size: 26rpx;
+  color: #333;
+  background: #fafafa;
+  border-radius: 8rpx;
+  text-align: center;
+  word-break: break-all;
 }
 .copy-btn {
   margin: 32rpx auto;

@@ -1,8 +1,7 @@
 <template>
   <view class="container">
     <view class="chat-title">AI 搭配建议</view>
-
-    <!-- 1. 根据加载状态显示不同内容 -->
+    <!-- 加载/图片/失败提示 -->
     <view
       v-if="isLoading"
       class="image-placeholder loading-state"
@@ -22,13 +21,11 @@
     >
       <text>生成失败，请重试</text>
     </view>
-
-    <!-- 2. 显示后端返回的描述信息 -->
+    <!-- 描述信息 -->
     <view class="desc-box">
       <text>{{ description || '正在加载搭配建议...' }}</text>
     </view>
-
-    <!-- 3. 按钮 -->
+    <!-- 按钮 -->
     <button
       class="btn btn-grey"
       @click="restartProcess"
@@ -37,11 +34,30 @@
       class="btn btn-primary"
       @click="addToFavorites"
     >收藏穿搭</button>
+    <!-- 重试弹窗 -->
+    <view
+      v-if="showRetryModal"
+      class="modal-mask"
+    >
+      <view class="modal-content">
+        <view class="modal-title">任务超时</view>
+        <view class="modal-desc">AI搭配生成超时，是否重试？</view>
+        <view class="modal-btns">
+          <button
+            class="modal-btn cancel"
+            @click="cancelRetry"
+          >取消</button>
+          <button
+            class="modal-btn retry"
+            @click="retryPolling"
+          >重试</button>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
@@ -54,12 +70,14 @@ export default {
       isLoading: true,
       pollingTimer: null,
       pollingCount: 0,
-      maxPollingCount: 20
+      maxPollingCount: 40,
+      showRetryModal: false
     };
   },
   onLoad(options) {
     if (options.taskId) {
       this.taskId = options.taskId;
+      // 重新搭配时，personUrl和garmentUrl已在缓存中，无需清理
       this.startPolling();
     } else {
       console.error('未接收到 taskId');
@@ -74,76 +92,81 @@ export default {
     }
   },
   methods: {
-    // 2. 改造 startPolling 和 fetchResult
     startPolling() {
-      this.fetchResult(); // 立即执行一次
+      this.isLoading = true;
+      this.pollingCount = 0;
+      this.fetchResult();
       this.pollingTimer = setInterval(() => {
         if (this.pollingCount++ > this.maxPollingCount) {
           clearInterval(this.pollingTimer);
           this.isLoading = false;
+          this.showRetryModal = true;
           this.description = '任务处理超时，请稍后重试。';
-          uni.showToast({ title: '任务超时', icon: 'none' });
           return;
         }
         this.fetchResult();
       }, 3000);
     },
-
     async fetchResult() {
+      console.log(`开始轮询第 ${this.pollingCount} 次...`);
       try {
-        const data = await request({
+        const res = await request({
           url: `${apiConfig.BASE_URL}/fitting_2d/getResult/${this.taskId}`,
           method: 'GET',
         });
-
-        // 业务成功，但需要判断是否已生成结果
-        if (data && data.imageUrl) {
-          // 成功获取结果
+        if (res && res.imageUrl) {
           clearInterval(this.pollingTimer);
           this.isLoading = false;
-          this.outfitImageUrl = data.imageUrl;
-          this.description = data.description;
-        } else {
-          // 任务仍在处理中，继续轮询
-          console.log(`轮询中... (${this.pollingCount})`);
+          this.outfitImageUrl = res.imageUrl;
+          this.description = res.description;
+          this.showRetryModal = false;
         }
       } catch (error) {
-        // request 内部已处理了大部分错误提示
-        // 这里可以针对性地停止轮询
         console.error('Result request failed:', error);
         clearInterval(this.pollingTimer);
         this.isLoading = false;
+        this.showRetryModal = true;
         this.description = '网络错误或任务失败，无法获取搭配结果。';
       }
     },
-
-    // 3. 改造 addToFavorites 方法
+    retryPolling() {
+      this.showRetryModal = false;
+      this.startPolling();
+    },
+    cancelRetry() {
+      this.showRetryModal = false;
+      uni.reLaunch({
+        url: '/pages/TwoDimDisplay/TwoDimDisplay'
+      });
+    },
     async addToFavorites() {
       if (!this.outfitImageUrl) {
         uni.showToast({ title: '没有可收藏的图片', icon: 'none' });
         return;
       }
-      
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({ title: '未登录', icon: 'none' });
+        return;
+      }
       uni.showLoading({ title: '正在收藏...' });
       try {
-        // 根据之前的代码，这里应该是 /collection/add
         await request({
           url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(this.outfitImageUrl)}`,
           method: 'POST',
+          header: { Authorization: token }
         });
         uni.showToast({ title: '收藏成功！', icon: 'success' });
       } catch (error) {
         console.error('Favorite request failed:', error);
-        // 错误提示已由 request 函数统一处理
       } finally {
         uni.hideLoading();
       }
     },
-
-    // 4. restartProcess 方法保持不变
     restartProcess() {
-      uni.reLaunch({
-        url: '/pages/UploadCloth/UploadCloth'
+      // 跳转回tabBar页面 TwoDimDisplay.vue
+      uni.switchTab({
+        url: '/pages/TwoDimDisplay/TwoDimDisplay'
       });
     }
   }
@@ -243,5 +266,57 @@ export default {
 .error-state {
   color: #ff4d4f;
   font-size: 28rpx;
+}
+.modal-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 48rpx 32rpx;
+  width: 80vw;
+  max-width: 480rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 24rpx;
+}
+.modal-desc {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 40rpx;
+}
+.modal-btns {
+  display: flex;
+  justify-content: space-between;
+  gap: 32rpx;
+}
+.modal-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  border: none;
+}
+.cancel {
+  background: #eee;
+  color: #333;
+}
+.retry {
+  background: #6c5ce7;
+  color: #fff;
 }
 </style>

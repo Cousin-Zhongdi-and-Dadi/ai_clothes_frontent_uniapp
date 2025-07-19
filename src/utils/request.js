@@ -9,12 +9,12 @@ function request(options) {
     return new Promise((resolve, reject) => {
         const token = uni.getStorageSync('token');
 
-        // 1. 自动添加请求头
-        const header = {
-            ...options.header,
+        // 1. 自动添加请求头 (使用headers变量名避免冲突)
+        const headers = {
+            ...(options.header || {}),
         };
         if (token) {
-            header['Authorization'] = `Bearer ${token}`;
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         // 添加请求超时处理
@@ -33,11 +33,25 @@ function request(options) {
             }, timeout);
         }
 
+        // 调试日志
+        console.log(`[Request] Sending to: ${options.url}`);
+        console.log(`[Request] Headers:`, headers);
+        console.log(`[Request] Method: ${options.method || 'GET'}`);
+        if (options.data && typeof options.data === 'object') {
+            console.log(`[Request] Data type: JSON object`);
+            // 不要打印大文件内容
+        } else {
+            console.log(`[Request] Data:`, options.data);
+        }
+
         uni.request({
             ...options,
-            header,
+            header: headers, // 使用新的headers变量
             success: (res) => {
                 if (timeoutTimer) clearTimeout(timeoutTimer);
+
+                // 调试日志
+                console.log(`[Response] Received for ${options.url}:`, res);
 
                 // 2. HTTP状态码为2xx，进入业务逻辑判断
                 const responseData = res.data;
@@ -115,12 +129,12 @@ export function uploadFile(options) {
     return new Promise((resolve, reject) => {
         const token = uni.getStorageSync('token');
 
-        // 1. 自动添加请求头
-        const header = {
-            ...options.header,
+        // 1. 自动添加请求头 (使用headers变量名避免冲突)
+        const headers = {
+            ...(options.header || {}),
         };
         if (token) {
-            header['Authorization'] = `Bearer ${token}`;
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         // 添加超时处理
@@ -146,12 +160,20 @@ export function uploadFile(options) {
             // 保持原样不做任何修改
         }
 
+        // 调试日志
+        console.log(`[Upload] Sending to: ${options.url}`);
+        console.log(`[Upload] Headers:`, headers);
+        console.log(`[Upload] File path: ${finalFilePath}`);
+
         const uploadTask = uni.uploadFile({
             ...options,
             filePath: finalFilePath,
-            header,
+            header: headers, // 使用新的headers变量
             success: (uploadRes) => {
                 if (timeoutTimer) clearTimeout(timeoutTimer);
+
+                // 调试日志
+                console.log(`[Upload Response] Received for ${options.url}:`, uploadRes);
 
                 // 关键改进：检查HTTP状态码
                 if (uploadRes.statusCode < 200 || uploadRes.statusCode >= 300) {

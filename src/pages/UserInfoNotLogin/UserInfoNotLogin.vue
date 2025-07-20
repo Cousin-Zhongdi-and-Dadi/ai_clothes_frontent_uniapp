@@ -29,7 +29,7 @@ export default {
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  /* 预留底部导航栏空间 */
+
   padding-bottom: 100rpx;
 }
 
@@ -42,7 +42,7 @@ export default {
   top: 500rpx;
   left: 0;
   right: 0;
-  bottom: 100rpx; /* 预留navbar高度 */
+  bottom: 100rpx;
 }
 
 .login_button {

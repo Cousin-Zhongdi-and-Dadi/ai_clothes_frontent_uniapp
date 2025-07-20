@@ -360,11 +360,11 @@ export default {
 .goods-detail-page {
   background: #fafafa;
   min-height: 100vh;
-  padding-bottom: 120rpx; /* 为底部按钮留出空间 */
+  padding-bottom: 120rpx;
 }
 .goods-image-swiper {
   width: 100%;
-  height: 800rpx; /* 原500rpx，改为800rpx */
+  height: 800rpx;
   background: #fff;
 }
 .swiper {
@@ -384,7 +384,7 @@ export default {
 .image-wrapper {
   position: relative;
   width: 100%;
-  height: 800rpx; /* 原800rpx，可根据实际需求调整更高 */
+  height: 800rpx;
   overflow: hidden;
 }
 .three-d-btn {

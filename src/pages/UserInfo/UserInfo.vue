@@ -470,7 +470,7 @@ export default {
 }
 
 .user_info_row {
-  position: relative; /* 作为定位参考 */
+  position: relative;
   left: 33.207rpx;
   top: 50rpx;
   width: 239.946rpx;
@@ -479,12 +479,12 @@ export default {
 }
 
 .user_avatar {
-  position: absolute; /* 绝对定位，相对user_info_row */
+  position: absolute;
   left: 0rpx;
   top: 0rpx;
   width: 87.754rpx;
   height: 87.754rpx;
-  border-radius: 43.877rpx; /* 圆形头像 */
+  border-radius: 43.877rpx;
   opacity: 1;
   background: rgba(109, 109, 109, 1);
 }
@@ -511,16 +511,15 @@ export default {
   margin-left: auto;
   margin-right: auto;
   margin-top: 100rpx;
-  border-radius: 20rpx; /* 圆角 */
+  border-radius: 20rpx;
 }
 
 .selection_item {
   flex: 1;
   display: flex;
-  flex-direction: column; /* 纵向排列 */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* 可选：为每个item添加左右间距 */
 }
 
 .selection_icon {
@@ -535,7 +534,7 @@ export default {
 
 .percentage_bar_container {
   display: flex;
-  align-items: center; /* 垂直居中 */
+  align-items: center;
   width: 80%;
   margin: 40rpx auto;
 }
@@ -543,11 +542,11 @@ export default {
 .explanation_text {
   font-size: 28rpx;
   color: #333;
-  margin-right: 20rpx; /* 与百分比条的间距 */
+  margin-right: 20rpx;
 }
 
 .percentage_bar_wrapper {
-  flex: 1; /* 百分比条占据剩余空间 */
+  flex: 1;
   height: 40rpx;
   background-color: #f7f7f7;
   overflow: hidden;
@@ -563,8 +562,8 @@ export default {
   margin: 20rpx auto 40rpx auto;
   padding: 20rpx;
   background: #fff;
-  border-radius: 20rpx; /* 圆角 */
-  cursor: pointer; /* 鼠标指针样式，提示可点击 */
+  border-radius: 20rpx;
+  cursor: pointer;
 }
 
 .popup-overlay {
@@ -573,24 +572,23 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色遮罩 */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99; /* 确保在最上层 */
+  z-index: 99;
 }
 
 .popup-content {
-  width: 90%; /* 使用百分比宽度，适应不同屏幕 */
-  max-width: 600rpx; /* 限制最大宽度 */
-  padding: 40rpx; /* 增加内边距 */
-  background-color: #fff; /* 明确的白色背景 */
-  border-radius: 20rpx; /* 圆角 */
+  width: 90%;
+  max-width: 600rpx;
+  padding: 40rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box; /* 确保padding不会撑大宽度 */
+  box-sizing: border-box;
 }
 
-/* 新增：弹窗内部通用样式 */
 .popup-title {
   font-size: 32rpx;
   font-weight: bold;
@@ -607,11 +605,9 @@ export default {
   box-sizing: border-box;
   text-align: left;
 
-  /* --- 修改开始 --- */
-  height: 80rpx; /* 1. 恢复并固定一个明确的高度 */
-  line-height: 80rpx; /* 2. 强制行高等于高度，实现垂直居中 */
-  padding: 0 20rpx; /* 3. 重新设置内边距，垂直为0，水平为20rpx */
-  /* --- 修改结束 --- */
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 20rpx;
 }
 
 .popup-button {

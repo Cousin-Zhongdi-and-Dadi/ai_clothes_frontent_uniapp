@@ -195,19 +195,19 @@ export default {
   padding: 0 20rpx;
   border-bottom: 1rpx solid #eee;
   overflow-x: auto;
-  white-space: nowrap; /* 新增：防止换行 */
-  height: 70rpx; /* 新增：固定高度，防止被内容撑高 */
-  align-items: center; /* 新增：垂直居中tab内容 */
+  white-space: nowrap;
+  height: 70rpx;
+  align-items: center;
 }
 .tab {
-  display: inline-block; /* 新增：让tab横向排列且不换行 */
+  display: inline-block;
   font-size: 28rpx;
   color: #999;
   margin-right: 32rpx;
-  padding: 0 8rpx; /* 修改：上下padding为0，左右适当留白 */
-  line-height: 48rpx; /* 新增：让tab内容垂直居中 */
-  height: 48rpx; /* 新增：与line-height一致，保证高度 */
-  white-space: nowrap; /* 新增：防止tab内容换行 */
+  padding: 0 8rpx;
+  line-height: 48rpx;
+  height: 48rpx;
+  white-space: nowrap;
   border-bottom: 4rpx solid transparent;
 }
 .tab.active {

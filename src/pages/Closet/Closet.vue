@@ -403,7 +403,6 @@ export default {
 
 <style scoped>
 .closet-page {
-  /* 让页面容器高度等于屏幕高度，并使用 flex 布局 */
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -412,16 +411,15 @@ export default {
 .main-content {
   display: flex;
   flex: 1;
-  overflow: hidden; /* 防止 main-content 自身滚动 */
+  overflow: hidden;
 }
 .sidebar {
-  /* width: 180rpx; 设置一个合适的固定宽度 */
   flex: 1;
   width: 40%;
-  /* flex-shrink: 0; 关键：防止被右侧内容挤压 */
+
   background-color: #f8f8f8;
   padding-top: 20rpx;
-  overflow-y: auto; /* 如果分类过多，允许侧边栏内部滚动 */
+  overflow-y: auto;
 }
 .sidebar-item {
   padding: 25rpx 20rpx;
@@ -437,22 +435,21 @@ export default {
 .content-grid {
   flex: 1;
   height: 100%;
-  /* 不要加 overflow: hidden; 否则会裁剪右侧内容 */
 }
-/* 这是内部 scroll-view 的样式 */
+
 .scroll-view-container {
   height: 100%;
   padding: 20rpx;
   box-sizing: border-box;
 }
-/* 网格容器 */
+
 .grid-container {
-  width: 80%; /* 保持100%，让内容不超出 scroll-view */
+  width: 80%;
   display: grid;
-  grid-template-columns: repeat(2, 280rpx); /* 两列布局 */
-  gap: 20rpx; /* 卡片间距 */
-  box-sizing: border-box; /* 确保 padding 不影响宽度 */
-  padding-bottom: 20rpx; /* 确保底部有足够的空间 */
+  grid-template-columns: repeat(2, 280rpx);
+  gap: 20rpx;
+  box-sizing: border-box;
+  padding-bottom: 20rpx;
 }
 .goods-card {
   display: flex;
@@ -505,7 +502,7 @@ export default {
   text-overflow: ellipsis;
   width: 100%;
 }
-/* 弹窗样式 */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -546,7 +543,7 @@ export default {
   height: 90rpx;
   background-color: #6c5ce7;
   color: white;
-  border-radius: 45rpx; /* half of height for pill shape */
+  border-radius: 45rpx;
   font-size: 30rpx;
   font-weight: bold;
   border: none;
@@ -561,7 +558,7 @@ export default {
   height: 40rpx;
   margin-right: 20rpx;
 }
-/* 新增：自定义加载状态样式 */
+
 .load-more-status {
   text-align: center;
   color: #999;

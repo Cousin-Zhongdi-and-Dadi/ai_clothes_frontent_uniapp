@@ -87,48 +87,43 @@ export default {
 </script>
 
 <style scoped>
-/* 移除 .container 样式 */
-
 .form-container {
   width: 100%;
-  /* 从父组件继承背景色和padding, 这里无需设置 */
 }
 
 .form-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx; /* 增加间距 */
-  padding-bottom: 10rpx; /* 在输入框下加一点空间 */
-  /* border-bottom: 1rpx solid #eee; */ /* 移除这里的整行下划线 */
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
 }
 
 .form-label {
-  font-size: 32rpx; /* 调整字体大小 */
+  font-size: 32rpx;
   color: #333;
-  width: 100rpx; /* 固定标签宽度，使其对齐 */
+  width: 100rpx;
 }
 
 .form-input {
   flex: 1;
-  margin-left: 20rpx; /* 增加左边距 */
+  margin-left: 20rpx;
   padding: 10rpx 0;
-  border: none; /* 移除边框 */
-  border-bottom: 2rpx solid #666; /* 新增：为输入框添加灰色下划线 */
+  border: none;
+  border-bottom: 2rpx solid #666;
   font-size: 28rpx;
   outline: none;
-  text-align: left; /* 输入内容右对齐 */
-  transition: border-color 0.3s; /* 新增：为边框颜色变化添加过渡效果 */
+  text-align: left;
+  transition: border-color 0.3s;
 }
 
-/* 新增：输入框获取焦点时的样式 */
 .form-input:focus {
-  border-bottom-color: #6753e7; /* 将下划线颜色变为主题色 */
+  border-bottom-color: #6753e7;
 }
 
 .submit-button {
   width: 80%;
-  margin: 40rpx auto 0 auto; /* 调整按钮边距 */
+  margin: 40rpx auto 0 auto;
   background-color: #6753e7;
   color: #fff;
   border: none;
@@ -136,7 +131,7 @@ export default {
   font-size: 30rpx;
   text-align: center;
   cursor: pointer;
-  padding: 18rpx 0; /* 增加按钮高度 */
+  padding: 18rpx 0;
 }
 
 .submit-button:hover {
@@ -144,10 +139,10 @@ export default {
 }
 
 .form-note {
-  font-size: 24rpx; /* 调整字体大小 */
+  font-size: 24rpx;
   color: #6753e7;
   margin-left: 10rpx;
-  width: 60rpx; /* 固定宽度 */
+  width: 60rpx;
   text-align: right;
 }
 </style>

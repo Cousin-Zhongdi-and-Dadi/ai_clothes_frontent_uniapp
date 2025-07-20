@@ -251,7 +251,6 @@ export default {
 </script>
 
 <style scoped>
-/* Adding styles for loading and empty states */
 .loading-container,
 .empty-state {
   width: 100%;
@@ -261,7 +260,6 @@ export default {
   font-size: 28rpx;
 }
 
-/* Other styles are preserved from the original file */
 .container {
   background: #fff;
   min-height: 100vh;
@@ -273,18 +271,18 @@ export default {
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: 24rpx;
   margin-top: 16rpx;
-  /* For scrollable tabs if there are many */
+
   overflow-x: auto;
   white-space: nowrap;
 }
 .tab {
   display: inline-block;
   text-align: center;
-  padding: 20rpx 30rpx; /* Added horizontal padding */
+  padding: 20rpx 30rpx;
   font-size: 30rpx;
   color: #888;
   position: relative;
-  flex-shrink: 0; /* Prevent tabs from shrinking */
+  flex-shrink: 0;
 }
 .tab.active {
   color: #333;
@@ -345,7 +343,6 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* Popup styles are preserved */
 .popup-overlay {
   position: fixed;
   top: 0;

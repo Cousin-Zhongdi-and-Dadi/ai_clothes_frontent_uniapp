@@ -221,7 +221,7 @@ export default {
   width: 100%;
   max-width: 520rpx;
   box-sizing: border-box;
-  min-height: 100rpx; /* 最小高度，防止加载时跳动 */
+  min-height: 100rpx;
 }
 .btn {
   width: 100%;
@@ -246,7 +246,6 @@ export default {
   margin-bottom: 20rpx;
 }
 
-/* 新增加载中样式 */
 .loading-state {
   color: #888;
 }

@@ -279,7 +279,7 @@ export default {
   padding: 0 16rpx;
   background: #fafbfc;
   min-height: 100vh;
-  /* 为底部操作栏预留空间 */
+
   padding-bottom: 120rpx;
 }
 .is-managing {
@@ -303,7 +303,7 @@ export default {
 }
 .image-cell {
   width: calc((100% - 24rpx) / 3);
-  aspect-ratio: 1 / 1; /* 使用 aspect-ratio 保持宽高比 */
+  aspect-ratio: 1 / 1;
   position: relative;
 }
 .history-image {
@@ -316,7 +316,7 @@ export default {
   background: #eee;
   display: block;
 }
-/* 新增状态视图样式 */
+
 .status-view {
   width: 100%;
   text-align: center;
@@ -342,7 +342,7 @@ export default {
     transform: rotate(360deg);
   }
 }
-/* 新增：管理模式下的样式 */
+
 .selection-overlay {
   position: absolute;
   top: 0;
@@ -405,7 +405,7 @@ export default {
   height: 80rpx;
   line-height: 80rpx;
 }
-/* 新增：自定义的加载更多状态样式 */
+
 .load-more-status {
   width: 100%;
   text-align: center;

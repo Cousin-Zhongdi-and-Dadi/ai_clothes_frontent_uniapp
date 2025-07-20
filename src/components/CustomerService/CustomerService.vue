@@ -38,28 +38,28 @@ export default {
   position: fixed;
   right: 50rpx;
   bottom: 200rpx;
-  width: 100rpx; /* 调整宽度以适应文本 */
-  height: 100rpx; /* 调整高度以适应文本 */
-  background-color: #fff; /* 圆形白色底 */
-  border-radius: 50%; /* 圆形 */
-  display: flex; /* 使用 flex 布局 */
-  flex-direction: column; /* 垂直排列图标和文本 */
-  align-items: center; /* 水平方向居中 */
-  justify-content: center; /* 垂直方向居中 */
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
-  z-index: 1000; /* 确保在其他元素之上 */
-  padding: 10rpx; /* 添加内边距以适应文本 */
+  width: 100rpx;
+  height: 100rpx;
+  background-color: #fff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  padding: 10rpx;
 }
 
 .customer-service-icon {
-  width: 80rpx; /* 图标大小 */
+  width: 80rpx;
   height: 80rpx;
-  margin-bottom: 5rpx; /* 图标和文本之间的间距 */
+  margin-bottom: 5rpx;
 }
 
 .icon_panel_text {
-  font-size: 16rpx; /* 调整为更小的字体大小 */
-  color: #6753e7; /* 深色文本，确保与背景对比明显 */
-  text-align: center; /* 文本居中 */
+  font-size: 16rpx;
+  color: #6753e7;
+  text-align: center;
 }
 </style>

@@ -229,7 +229,7 @@ export default {
 }
 .image-preview-container {
   width: 100%;
-  height: 600rpx; /* 将高度从 400rpx 增加到 600rpx */
+  height: 600rpx;
   background-color: #000;
   display: flex;
   align-items: center;

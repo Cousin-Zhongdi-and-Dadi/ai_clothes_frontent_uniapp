@@ -186,7 +186,6 @@ export default {
 </script>
 
 <style scoped>
-/* 样式微调 */
 .service-chat-page {
   background: #f7f7f7;
   height: 100vh;

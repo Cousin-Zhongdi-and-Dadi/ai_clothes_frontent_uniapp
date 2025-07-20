@@ -196,7 +196,7 @@ export default {
 }
 .scene-radio-group {
   display: flex;
-  flex-direction: row; /* 横向排列 */
+  flex-direction: row;
   gap: 40rpx;
   margin-bottom: 32rpx;
   align-items: center;

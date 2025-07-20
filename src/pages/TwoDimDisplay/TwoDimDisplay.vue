@@ -104,7 +104,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 120rpx; /* 为tabbar留出空间 */
+  padding-bottom: 120rpx;
 }
 .header {
   width: 100%;
@@ -176,7 +176,6 @@ export default {
   border: none;
 }
 
-/* --- 开始修改：为提示文字添加样式 --- */
 .reminder-text {
   margin-top: 40rpx;
   width: 90%;
@@ -185,7 +184,6 @@ export default {
   font-size: 26rpx;
   line-height: 1.5;
 }
-/* --- 结束修改 --- */
 
 .tips-img-section {
   margin-top: 40rpx;
@@ -200,7 +198,7 @@ export default {
 }
 .floating-btn {
   position: fixed;
-  bottom: 150rpx; /* 调整位置以避开tabbar */
+  bottom: 150rpx;
   right: 40rpx;
   z-index: 10;
 }
@@ -213,14 +211,14 @@ export default {
   padding: 18rpx 36rpx;
   border: none;
 }
-/* 如果你使用的是项目自带的tabBar，这段可以删除 */
+
 .tabbar {
   position: fixed;
   left: 0;
   bottom: 0;
   width: 100%;
   height: 100rpx;
-  padding-bottom: constant(safe-area-inset-bottom); /* 适配iPhoneX等机型 */
+  padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
   background: #fff;
   display: flex;

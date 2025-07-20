@@ -269,7 +269,6 @@ export default {
 </script>
 
 <style scoped>
-/* 复用Closet.vue样式，去除上传相关部分 */
 .closet-page {
   height: 100vh;
   display: flex;
@@ -360,7 +359,7 @@ export default {
   font-size: 24rpx;
   width: 100%;
 }
-/* 替换弹窗样式为与ResourcesSelection.vue一致 */
+
 .popup-overlay {
   position: fixed;
   top: 0;

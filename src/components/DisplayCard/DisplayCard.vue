@@ -9,7 +9,7 @@
     :style="{ transform: `translateX(${transformX}px)` }"
   >
     <view :class="['card', { flipped: isFlipped }]">
-      <!-- 正面 -->
+      <!-- 卡片正面图片 -->
       <view class="card-face card-front">
         <image
           :src="frontImage"
@@ -17,7 +17,7 @@
           class="card-image"
         ></image>
       </view>
-      <!-- 背面 -->
+      <!-- 卡片背面文字及详情按钮 -->
       <view class="card-face card-back">
         <text class="card-back-text">{{ backText }}</text>
         <button class="details">查看更多细节</button>
@@ -27,6 +27,17 @@
 </template>
 
 <script>
+/**
+ * DisplayCard component
+ * Interactive card with swipe and flip features.
+ * Props:
+ *   - frontImage: Card front image (String)
+ *   - backText: Card back text (String)
+ *   - canInteract: Enable interaction (Boolean)
+ * Emits:
+ *   - swipeLeft: Triggered on left swipe
+ *   - swipeRight: Triggered on right swipe
+ */
 export default {
   name: 'DisplayCard',
   props: {
@@ -50,17 +61,27 @@ export default {
       swipedRight: false,
       startX: 0,
       isFlipped: false,
-      transformX: 0     };
+      transformX: 0
+    };
   },
   methods: {
+    /**
+     * Handle touch start event, record initial position
+     */
     onTouchStart(e) {
       if (!this.canInteract) return;       this.startX = e.touches[0].clientX;
       this.isSwiping = true;
     },
+    /**
+     * Handle touch move event, update card offset
+     */
     onTouchMove(e) {
       if (!this.canInteract) return;
       const deltaX = e.touches[0].clientX - this.startX;
       this.transformX = deltaX;     },
+    /**
+     * Handle touch end event, determine swipe direction and emit event
+     */
     onTouchEnd(e) {
       if (!this.canInteract) return;
       const deltaX = e.changedTouches[0].clientX - this.startX;
@@ -75,11 +96,17 @@ export default {
       } else {
         this.transformX = 0;       }
     },
+    /**
+     * Flip card between front and back
+     */
     flipCard() {
       if (!this.canInteract) return;       this.isFlipped = !this.isFlipped;
     },
+    /**
+     * Update card offset from external control
+     */
     updateTransformX(value) {
-      this.transformX = value;       console.log(`Transform X updated to: ${value}`);
+      this.transformX = value;
     }
   }
 };

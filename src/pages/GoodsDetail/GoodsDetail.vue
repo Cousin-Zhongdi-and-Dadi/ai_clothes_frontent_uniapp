@@ -184,7 +184,7 @@ export default {
     if (options.id) {
       this.productId = options.id;
       this.fetchProductDetails(this.productId);
-      console.log('Loaded product ID:', this.productId);
+      
     } else {
       uni.showToast({ title: '商品不存在', icon: 'none' });
       uni.navigateBack();
@@ -253,7 +253,7 @@ export default {
       if (this.skuAction === 'cart') {
         await this.addToCart();
       } else if (this.skuAction === 'buy') {
-                console.log('立即购买');
+                
                 uni.navigateTo({
           url: `/pages/OuterShop/OuterShop`
         });

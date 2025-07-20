@@ -20,6 +20,10 @@
 <script>
 import request from '../../utils/request.js';
 import apiConfig from '@/utils/api.js';
+/**
+ * ThreeDimDisplay page
+ * Fetches and displays 3D model link, allows user to copy to clipboard.
+ */
 
 export default {
   name: 'ThreeDimDisplay',
@@ -41,6 +45,9 @@ export default {
       this.isLoading = false;
     }
   },
+    /**
+     * Fetch 3D model URL from backend
+     */
   methods: {
         async fetchModelUrl(styleId) {
       this.isLoading = true;
@@ -55,6 +62,9 @@ export default {
                 console.error('Fetch 3D URL failed:', error);
               } finally {
                 this.isLoading = false;
+    /**
+     * Copy 3D model URL to clipboard
+     */
       }
     },
     copyUrl() {

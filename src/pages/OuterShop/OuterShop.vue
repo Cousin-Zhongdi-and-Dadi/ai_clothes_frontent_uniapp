@@ -18,6 +18,10 @@
 </template>
 
 <script>
+/**
+ * OuterShop page
+ * Displays external shop link and allows user to copy it to clipboard.
+ */
 export default {
   name: 'OuterShop',
   data() {
@@ -27,6 +31,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * Copy shop URL to clipboard
+     */
     copyUrl() {
       uni.setClipboardData({
         data: this.pageUrl,

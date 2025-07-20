@@ -302,7 +302,7 @@ export default {
                 if (err) {
                     console.error("uni.chooseImage failed:", err);
                     if (err.errMsg.includes('cancel')) {
-            console.log('User cancelled image selection.');
+            
           } else {
             uni.showToast({ title: '选择图片失败', icon: 'none' });
           }
@@ -314,7 +314,7 @@ export default {
             url: `/pages/ConfirmFromUserUpload/ConfirmFromUserUpload?tempFilePath=${tempFilePath}`
           });
         } else {
-                    console.log('User cancelled image selection (no file path returned).');
+                    
         }
         
       } catch (error) {

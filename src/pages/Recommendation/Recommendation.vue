@@ -154,7 +154,7 @@ export default {
           url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(imageUrl)}`,
           method: 'POST',
         });
-        console.log('收藏成功:', imageUrl);
+        
               } catch (error) {
         console.error('Favorite request failed:', error);
               }
@@ -165,7 +165,7 @@ export default {
         const likedCard = this.cards[0];
         if (!likedCard) return;
 
-        console.log('喜欢当前卡片');
+        
         this.addToFavorites(likedCard.frontImage);
 
         this.cards.shift();
@@ -174,7 +174,7 @@ export default {
     },
     handleSwipeRight(index) {
       if (index === 0) {
-        console.log('不喜欢当前卡片');
+        
         this.cards.shift();
         this.$nextTick(() => this.resetCardPosition());
       }
@@ -196,7 +196,7 @@ export default {
     },
     handleCardClick(index) {
       if (index === 0) {
-        console.log('点击翻转卡片');
+        
       }
     }
   }

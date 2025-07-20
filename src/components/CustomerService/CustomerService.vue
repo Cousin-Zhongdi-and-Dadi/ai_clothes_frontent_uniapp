@@ -4,19 +4,23 @@
       class="icon_panel"
       @click="goToChat"
     >
-      <!-- 图标 -->
+      <!-- 客服图标 -->
       <image
         src="/static/icon/icon-12.png"
         mode="widthFix"
         class="customer-service-icon"
       ></image>
-      <!-- 文本 -->
+      <!-- 客服文字 -->
       <view class="icon_panel_text">客服会话</view>
     </view>
   </view>
 </template>
 
 <script>
+/**
+ * CustomerService component
+ * Floating entry to customer service chat, navigates to ServiceChat page on click.
+ */
 export default {
   name: 'CustomerService',
   components: {},
@@ -24,13 +28,16 @@ export default {
     return {};
   },
   methods: {
+    /**
+     * Navigate to customer service chat page
+     */
     goToChat() {
       uni.navigateTo({
         url: '/pages/ServiceChat/ServiceChat'
       });
     }
   }
-};
+}
 </script>
 
 <style scoped>

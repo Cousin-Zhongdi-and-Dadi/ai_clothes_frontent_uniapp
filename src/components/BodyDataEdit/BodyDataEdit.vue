@@ -1,5 +1,5 @@
 <template>
-  <!-- 移除外层的 .container, 直接以表单作为根元素 -->
+  <!-- 用户身体数据编辑表单组件，包含身高、体重等字段，必填项有提示 -->
   <view class="form-container">
     <view
       class="form-item"
@@ -26,6 +26,15 @@
 </template>
 
 <script>
+/**
+ * BodyDataEdit component
+ * Edit user body data (height, weight, etc.), emits events to parent.
+ * Props:
+ *   - initialData: Initial form data (Object)
+ * Emits:
+ *   - success: Form validation passed, returns data object
+ *   - failed: Validation failed, returns error message
+ */
 export default {
   name: 'BodyDataEdit',
   props: {
@@ -64,6 +73,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * Submit form, validate required fields and emit event
+     */
     handleSubmit() {
       const heightField = this.formFields.find(f => f.key === 'height');
       const weightField = this.formFields.find(f => f.key === 'weight');

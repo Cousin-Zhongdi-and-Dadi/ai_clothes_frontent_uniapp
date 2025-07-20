@@ -134,7 +134,7 @@ export default {
         }));
 
                 newItems.slice(0, 10).forEach((item, idx) => {
-          console.log(`图片${idx + 1}:`, item.image);
+          
         });
 
         if (loadMore) {

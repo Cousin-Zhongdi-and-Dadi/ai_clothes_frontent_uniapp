@@ -81,6 +81,10 @@
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
+/**
+ * ResourcesSelection page
+ * Allows users to select clothing/material resources from categories and confirm selection.
+ */
 export default {
   data() {
     return {
@@ -123,6 +127,9 @@ export default {
           this.fetchItemsForCurrentTab();
         }
       } catch (error) {
+        /**
+         * Fetch sub-categories for tabs
+         */
         console.error('Failed to fetch sub categories:', error);
       } finally {
         this.isLoading = false;
@@ -145,11 +152,17 @@ export default {
       this.itemList = [];
       try {
         const res = await request({
+        /**
+         * Change active tab and fetch items
+         */
           url: `${apiConfig.BASE_URL}/mall/getProductByTypeId/${this.activeTabId}`,
           method: 'GET',
           data: {
             page: 1,
             pageSize: 20
+        /**
+         * Fetch items for current tab/category
+         */
           }
         });
         const goodsList = Array.isArray(res) ? res : [];
@@ -183,14 +196,23 @@ export default {
       if (!this.selectedItem) return;
 
             if (this.source === 'AiMatch') {
+        /**
+         * Show confirmation popup for selected item
+         */
                 const pages = getCurrentPages();
         const prevPage = pages[pages.length - 2];
         if (prevPage) {
                     uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
+        /**
+         * Close confirmation popup
+         */
         }
         uni.navigateBack();
         return;
       }
+        /**
+         * Confirm resource selection and handle navigation/storage
+         */
             if (this.source === 'closet') {
         uni.showLoading({ title: '正在添加...' });
         try {

@@ -11,14 +11,21 @@
 </template>
 
 <script>
+/**
+ * UserInfoNotLogin page
+ * Shows login prompt and slogan for unauthenticated users.
+ */
 export default {
-    methods: {
-        login() {
-                        uni.navigateTo({
-                url: '/pages/LoginSelection/LoginSelection'
-            });
-        }
+  methods: {
+    /**
+     * Navigate to login selection page
+     */
+    login() {
+      uni.navigateTo({
+        url: '/pages/LoginSelection/LoginSelection'
+      });
     }
+  }
 }
 </script>
 

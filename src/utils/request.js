@@ -1,21 +1,20 @@
 import apiConfig from './api.js';
 
 /**
- * 封装的全局请求函数
- * @param {object} options - uni.request 的原始参数
- * @returns {Promise<object>} - 返回一个Promise，resolve时返回后端原始的data对象
+ * Global request utility for uni-app.
+ * Handles token, timeout, error toast, and mock mode.
+ * @param {object} options - Parameters for uni.request
+ * @returns {Promise<object>} Resolves with backend data field
  */
 function request(options) {
     return new Promise((resolve, reject) => {
         const token = uni.getStorageSync('token');
-
         const headers = {
             ...(options.header || {}),
         };
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-
         let timeoutTimer = null;
         const timeout = options.timeout || 15000;
         if (timeout) {
@@ -29,23 +28,11 @@ function request(options) {
                 reject(new Error('请求超时'));
             }, timeout);
         }
-
-        console.log(`[Request] Sending to: ${options.url}`);
-        console.log(`[Request] Headers:`, headers);
-        console.log(`[Request] Method: ${options.method || 'GET'}`);
-        if (options.data && typeof options.data === 'object') {
-            console.log(`[Request] Data type: JSON object`);
-        } else {
-            console.log(`[Request] Data:`, options.data);
-        }
-
         uni.request({
             ...options,
-            header: headers, success: (res) => {
+            header: headers,
+            success: (res) => {
                 if (timeoutTimer) clearTimeout(timeoutTimer);
-
-                console.log(`[Response] Received for ${options.url}:`, res);
-
                 const responseData = res.data;
 
                 if (apiConfig.MOCK_MODE_ENABLED && options.url.includes('apifoxmock.com') && responseData) {
@@ -105,9 +92,10 @@ function request(options) {
 }
 
 /**
- * 封装的全局文件上传函数（增强版）
- * @param {object} options - uni.uploadFile 的原始参数
- * @returns {Promise<object>} - 返回一个Promise，resolve时返回后端原始的data对象
+ * File upload utility for uni-app.
+ * Handles token, timeout, error toast, and mock mode.
+ * @param {object} options - Parameters for uni.uploadFile
+ * @returns {Promise<object>} Resolves with backend data field
  */
 export function uploadFile(options) {
     return new Promise((resolve, reject) => {
@@ -139,17 +127,13 @@ export function uploadFile(options) {
             console.warn(`检测到临时文件路径: ${finalFilePath}`);
         }
 
-        console.log(`[Upload] Sending to: ${options.url}`);
-        console.log(`[Upload] Headers:`, headers);
-        console.log(`[Upload] File path: ${finalFilePath}`);
+
 
         const uploadTask = uni.uploadFile({
             ...options,
             filePath: finalFilePath,
             header: headers, success: (uploadRes) => {
                 if (timeoutTimer) clearTimeout(timeoutTimer);
-
-                console.log(`[Upload Response] Received for ${options.url}:`, uploadRes);
 
                 if (uploadRes.statusCode < 200 || uploadRes.statusCode >= 300) {
                     const errorMsg = `服务器返回错误状态码: ${uploadRes.statusCode}`;
@@ -257,7 +241,7 @@ export function uploadFile(options) {
         });
 
         uploadTask.onProgressUpdate((res) => {
-            console.log(`上传进度: ${res.progress}%`);
+
             if (typeof options.onProgress === 'function') {
                 options.onProgress(res);
             }

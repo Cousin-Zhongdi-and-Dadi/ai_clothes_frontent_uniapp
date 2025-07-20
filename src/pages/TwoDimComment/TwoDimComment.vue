@@ -61,6 +61,10 @@
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
+/**
+ * TwoDimComment page
+ * Displays AI outfit suggestions, polling for results and allowing favorites.
+ */
 export default {
   data() {
     return {
@@ -91,6 +95,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * Start polling for AI outfit result
+     */
     startPolling() {
       this.isLoading = true;
       this.pollingCount = 0;
@@ -108,8 +115,11 @@ export default {
         this.fetchResult();
       }, 3000);
     },
+    /**
+     * Fetch AI outfit result from backend
+     */
     async fetchResult() {
-      console.log(`开始轮询第 ${this.pollingCount} 次...`);
+      
       try {
         const res = await request({
           url: `${apiConfig.BASE_URL}/fitting_2d/getResult/${this.taskId}`,
@@ -136,16 +146,25 @@ export default {
         this.description = '网络错误或任务失败，无法获取搭配结果。';
       }
     },
+    /**
+     * Retry polling for AI result
+     */
     retryPolling() {
       this.showRetryModal = false;
       this.startPolling();
     },
+    /**
+     * Cancel retry and return to display page
+     */
     cancelRetry() {
       this.showRetryModal = false;
       uni.reLaunch({
         url: '/pages/TwoDimDisplay/TwoDimDisplay'
       });
     },
+    /**
+     * Add current outfit to favorites
+     */
     async addToFavorites() {
       if (!this.outfitImageUrl) {
         uni.showToast({ title: '没有可收藏的图片', icon: 'none' });
@@ -170,6 +189,9 @@ export default {
         uni.hideLoading();
       }
     },
+    /**
+     * Restart the AI outfit process
+     */
     restartProcess() {
       uni.reLaunch({
         url: '/pages/TwoDimDisplay/TwoDimDisplay'

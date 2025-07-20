@@ -86,7 +86,7 @@ export default {
           uni.hideLoading();
           try {
             const result = JSON.parse(res.data);
-            console.log('任务提交响应:', res);
+            
             if (result.code === 200 && result.data) {
               uni.showToast({ title: '上传成功！', icon: 'success' });
                             uni.setStorageSync('personImageUrl', result.data);

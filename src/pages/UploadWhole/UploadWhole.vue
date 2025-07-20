@@ -1,3 +1,8 @@
+<!--
+  UploadWhole 页面
+  用户可选择并上传上装/下装，支持素材库选择和本地图片上传。
+  包含分区选择、提示图片、分割线等结构。
+-->
 <template>
   <view class="upload-whole-page">
     <!-- 上装选择区 -->
@@ -64,9 +69,22 @@
 </template>
 
 <script>
+/**
+ * UploadWhole 页面逻辑
+ * name: UploadWhole
+ * methods:
+ *   - selectFromResources(type): 选择上/下装素材库，已选则弹窗确认覆盖。
+ *   - uploadFrom(sourceType, type): 从相册或相机上传图片，跳转到试衣页面。
+ *   - uploadFromAlbum(type): 上传上/下装（相册）。
+ *   - uploadFromCamera(type): 上传上/下装（相机）。
+ */
 export default {
   name: 'UploadWhole',
   methods: {
+    /**
+     * 选择上/下装素材库，已选则弹窗确认覆盖
+     * @param {'top'|'bottom'} type 衣物类型
+     */
     selectFromResources(type) {
             const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
       const garmentUrl = uni.getStorageSync(key);
@@ -90,6 +108,11 @@ export default {
         });
       }
     },
+    /**
+     * 从相册或相机上传图片，跳转到试衣页面
+     * @param {'album'|'camera'} sourceType 来源
+     * @param {'top'|'bottom'} type 衣物类型
+     */
     uploadFrom(sourceType, type) {
       uni.chooseImage({
         count: 1,
@@ -107,9 +130,17 @@ export default {
         }
       });
     },
+    /**
+     * 上传上/下装（相册）
+     * @param {'top'|'bottom'} type 衣物类型
+     */
     uploadFromAlbum(type) {
       this.uploadFrom('album', type);
     },
+    /**
+     * 上传上/下装（相机）
+     * @param {'top'|'bottom'} type 衣物类型
+     */
     uploadFromCamera(type) {
       this.uploadFrom('camera', type);
     }
@@ -118,6 +149,19 @@ export default {
 </script>
 
 <style scoped>
+/*
+  页面样式：
+  - .upload-whole-page：整体布局，垂直居中，背景色
+  - .section-block：分区横向排列，居中
+  - .section-icon：分区图标尺寸与间距
+  - .btn-group：按钮组纵向排列，间距
+  - .btn：按钮样式，圆角、字体、布局
+  - .btn-icon：按钮图标尺寸与间距
+  - .btn-primary：主按钮配色
+  - .tips-block：提示图片区布局
+  - .tips-pic：提示图片尺寸
+  - .divider：分割线样式
+*/
 .upload-whole-page {
   min-height: 100vh;
   background: #fafbfc;

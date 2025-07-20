@@ -17,6 +17,10 @@ import UserInfoNotLogin from '../UserInfoNotLogin/UserInfoNotLogin.vue';
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
+/**
+ * UserInfoEntry page
+ * Dynamically displays user info or login prompt based on authentication status.
+ */
 export default {
   components: {
     UserInfo,
@@ -24,30 +28,36 @@ export default {
   },
   data() {
     return {
-            isLoggedIn: false,
-            isChecking: false 
+      isLoggedIn: false,
+      isChecking: false
     };
   },
-    onShow() {
+  onShow() {
     this.checkLoginStatus();
   },
   methods: {
-        handleLogout() {
-            this.isLoggedIn = false;
+    /**
+     * Handle logout event from child component
+     */
+    handleLogout() {
+      this.isLoggedIn = false;
     },
-        async checkLoginStatus() {
+    /**
+     * Check login status by validating token and requesting user info
+     */
+    async checkLoginStatus() {
       if (this.isChecking) return;
       this.isChecking = true;
 
       const token = uni.getStorageSync('token');
 
-            if (!token) {
+      if (!token) {
         this.isLoggedIn = false;
         this.isChecking = false;
         return;
       }
 
-            try {
+      try {
                 await request({
           url: `${apiConfig.BASE_URL}/user/getUserInfo`,           method: 'GET'
         });

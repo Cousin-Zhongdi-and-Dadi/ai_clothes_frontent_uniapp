@@ -155,6 +155,10 @@ import request from '../../utils/request.js';
 import apiConfig from '@/utils/api.js';
 import BodyDataEdit from '../../components/BodyDataEdit/BodyDataEdit.vue';
 
+/**
+ * UserInfo page
+ * Displays and edits user profile, body data, avatar, and navigation to history/favorites.
+ */
 export default {
   components: { BodyDataEdit },
   name: 'UserInfo',
@@ -210,14 +214,14 @@ export default {
     }
   },
   created() {
-    // console.log('UserInfo.vue created');
+    
   },
   mounted() {
-    // console.log('UserInfo.vue mounted');
+    
                 this.getUserInfo(); 
       },
   onShow() {
-    // console.log('UserInfo.vue onShow');
+    
                 if (uni.getStorageSync('token')) {
           }
       },
@@ -272,6 +276,9 @@ export default {
         return;
       }
       uni.showLoading({ title: '正在保存...' });
+    /**
+     * Calculate percentage width for progress bars
+     */
       try {
         await request({
           url: `${apiConfig.BASE_URL}/user/updateUsername`,
@@ -285,6 +292,9 @@ export default {
 
       } catch (error) {
         console.error("submitUsernameEdit failed:", error);
+    /**
+     * Fetch user info from backend
+     */
       } finally {
         uni.hideLoading();
       }
@@ -311,8 +321,11 @@ export default {
                     uni.showToast({ title: responseData.message || '上传失败', icon: 'none' });
         }
 
+    /**
+     * Submit username edit to backend
+     */
       } catch (error) {
-                console.log("Avatar selection/upload cancelled or failed:", error);
+                
       } finally {
         uni.hideLoading();
       }
@@ -332,6 +345,9 @@ export default {
         if (modalResult && modalResult.confirm) {
                     uni.removeStorageSync('token');
           
+    /**
+     * Change user avatar by uploading image
+     */
                     this.$emit('logged-out');
         }
               } catch (error) {
@@ -356,6 +372,9 @@ export default {
           else if (res.tapIndex === 2) this.logout();
         }
       });
+    /**
+     * Logout user and emit event
+     */
     },
     showBodyDataEdit() { this.isBodyDataEditVisible = true; },
     closeBodyDataEdit() { this.isBodyDataEditVisible = false; },
@@ -374,6 +393,9 @@ export default {
           height: editedData.height,
           weight: editedData.weight,
           gender: editedData.gender,
+    /**
+     * Handle selection panel navigation
+     */
           bust: editedData.bust,
           waist: editedData.waist,
           hips: editedData.hip,
@@ -381,6 +403,9 @@ export default {
           armLength: editedData.arm,
           legLength: editedData.leg,
           neckCircumference: editedData.neck,
+    /**
+     * Show action menu for avatar, nickname, logout
+     */
         };
 
                 await request({
@@ -391,16 +416,31 @@ export default {
                 this.userHeight = editedData.height;
         this.userWeight = editedData.weight;
         this.userGender = editedData.gender;
+    /**
+     * Show body data edit popup
+     */
         this.userBust = editedData.bust;
+    /**
+     * Close body data edit popup
+     */
         this.userWaist = editedData.waist;
+    /**
+     * Show username edit popup
+     */
         this.userHip = editedData.hip;
         this.userShoulder = editedData.shoulder;
         this.userArm = editedData.arm;
         this.userLeg = editedData.leg;
+    /**
+     * Close username edit popup
+     */
         this.userNeck = editedData.neck;
 
                 this.closeBodyDataEdit();
         uni.showToast({ title: '身材数据更新成功', icon: 'success' });
+    /**
+     * Submit body data edit to backend
+     */
 
       } catch (error) {
         console.error("submitBodyDataEdit failed:", error);
@@ -439,6 +479,9 @@ export default {
   width: 87.754rpx;
   height: 87.754rpx;
   border-radius: 43.877rpx;
+  /**
+     * Show error message from child component
+     */
   opacity: 1;
   background: rgba(109, 109, 109, 1);
 }

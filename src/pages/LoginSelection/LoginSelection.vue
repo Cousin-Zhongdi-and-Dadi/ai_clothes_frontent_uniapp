@@ -27,9 +27,16 @@
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
+/**
+ * LoginSelection page
+ * Provides one-click WeChat login and phone login options.
+ */
 export default {
   name: 'LoginSelection',
   methods: {
+        /**
+         * Handle one-click WeChat login
+         */
         async oneClickLogin() {
     uni.showLoading({
       title: '正在登录...'
@@ -84,6 +91,9 @@ export default {
     }
   },
 
+        /**
+         * Navigate to phone login page
+         */
         phoneLogin() {
       uni.navigateTo({
         url: '/pages/Login/Login'

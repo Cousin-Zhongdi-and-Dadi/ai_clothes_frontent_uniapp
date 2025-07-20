@@ -45,10 +45,8 @@ export default {
     if (options.imageUrl && options.type) {
       this.imageUrl = decodeURIComponent(options.imageUrl);
       this.type = options.type;
-
-            const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+      const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
       uni.setStorageSync(key, this.imageUrl);
-      console.log(`${this.type === 'top' ? '上装' : '下装'}URL已存储:`, this.imageUrl);
     } else {
       console.error('未接收到图片URL或类型');
       uni.showToast({ title: '页面参数错误', icon: 'none' });
@@ -58,13 +56,11 @@ export default {
     onReselect() {
       uni.navigateBack();
     },
-
     onSelectBottom() {
       uni.navigateTo({
         url: '/pages/UploadWhole/UploadWhole'
       });
     },
-
     async startFitting() {
       const personImageUrl = uni.getStorageSync('personImageUrl');
       let topGarmentUrl = uni.getStorageSync('topGarmentUrl');
@@ -78,7 +74,7 @@ export default {
       uni.showLoading({ title: '正在上传衣物图片...' });
 
       try {
-                if (!/^https?:\/\//.test(topGarmentUrl)) {
+        if (!/^https?:\/\//.test(topGarmentUrl)) {
           topGarmentUrl = await new Promise((resolve, reject) => {
             uni.uploadFile({
               url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
@@ -140,7 +136,7 @@ export default {
 
         uni.showLoading({ title: '正在生成搭配...' });
 
-                const res = await request({
+        const res = await request({
           url: `${apiConfig.BASE_URL}/fitting_2d/submit_task`,
           method: 'GET',
           data: {
@@ -170,7 +166,7 @@ export default {
       }
     }
   }
-};
+}
 </script>
 
 <style scoped>

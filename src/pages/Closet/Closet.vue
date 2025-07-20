@@ -140,15 +140,17 @@ export default {
   name: 'Closet',
   data() {
     return {
-            categories: [],
-            activeCategory: null,
+      categories: [],
+      activeCategory: null,
       showModal: false,
       closetItems: [],
       page: 1,
       pageSize: 10,
       isLoading: false,
       hasMore: true,
-      isInitialLoading: true,       isGuest: false     };
+      isInitialLoading: true,
+      isGuest: false
+    };
   },
   computed: {
     loadMoreStatus() {
@@ -161,7 +163,7 @@ export default {
       return 'more';
     }
   },
-    onLoad() {
+  onLoad() {
     const token = uni.getStorageSync('token');
     this.isGuest = !token;
     this.initData();
@@ -169,11 +171,11 @@ export default {
       this.getClosetItems(true);
     });
   },
-    onUnload() {
+  onUnload() {
     uni.$off('closet-refresh');
   },
   methods: {
-        getMockCategories() {
+    getMockCategories() {
       return [
         { id: 1, name: '上衣' },
         { id: 2, name: '裤子' }
@@ -192,7 +194,7 @@ export default {
       }
       return [];
     },
-        async initData() {
+    async initData() {
       this.isInitialLoading = true;
       if (this.isGuest) {
         this.categories = this.getMockCategories();
@@ -203,35 +205,34 @@ export default {
       }
       try {
         await this.getCategories();
-                if (this.categories.length > 0 && this.activeCategory === null) {
+        if (this.categories.length > 0 && this.activeCategory === null) {
           this.activeCategory = this.categories[0].id;
           await this.getClosetItems(true);
         }
       } catch (error) {
-        console.error("Initialization failed:", error);
+        console.error('Initialization failed:', error);
       } finally {
         this.isInitialLoading = false;
       }
     },
-
-        async getCategories() {
+    async getCategories() {
       if (this.isGuest) {
         this.categories = this.getMockCategories();
         return;
       }
       try {
         const data = await request({
-          url: `${apiConfig.BASE_URL}/address/getCategory`,           method: 'GET',
+          url: `${apiConfig.BASE_URL}/address/getCategory`,
+          method: 'GET'
         });
         this.categories = data
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map(item => ({ id: item.id, name: item.categoryName }));
       } catch (error) {
-        console.error("getCategories failed:", error);
+        console.error('getCategories failed:', error);
       }
     },
-
-        async getClosetItems(isRefresh = false) {
+    async getClosetItems(isRefresh = false) {
       if (this.isGuest) {
         this.closetItems = this.getMockClosetItems(this.activeCategory);
         this.hasMore = false;
@@ -240,89 +241,82 @@ export default {
       }
       if (this.activeCategory === null || this.isLoading) return;
       this.isLoading = true;
-
       if (isRefresh) {
         this.page = 1;
         this.closetItems = [];
         this.hasMore = true;
       }
-
       try {
-                const data = await request({
-          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`,           method: 'GET',
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`,
+          method: 'GET',
           data: {
-                        page: this.page,
+            page: this.page,
             pageSize: this.pageSize
           }
         });
-        
-                const newItems = data.map(item => ({
+        const newItems = data.map(item => ({
           id: item.id,
           image: item.imageUrl,
           name: item.brand || `服装ID: ${item.id}`,
           desc: item.color || `分类ID: ${item.categoryId}`
         }));
-
         this.closetItems = isRefresh ? newItems : [...this.closetItems, ...newItems];
         this.hasMore = newItems.length >= this.pageSize;
         if (this.hasMore) {
           this.page++;
         }
       } catch (error) {
-        console.error("getClosetItems failed:", error);
+        console.error('getClosetItems failed:', error);
         this.hasMore = false;
       } finally {
         this.isLoading = false;
       }
     },
-
-        async deleteClosetItem(clothesId) {
+    async deleteClosetItem(clothesId) {
       uni.showLoading({ title: '正在删除...' });
       try {
         await request({
-          url: `${apiConfig.BASE_URL}/closet/delete/${clothesId}`,           method: 'DELETE',
+          url: `${apiConfig.BASE_URL}/closet/delete/${clothesId}`,
+          method: 'DELETE'
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
         this.closetItems = this.closetItems.filter(item => item.id !== clothesId);
       } catch (error) {
-        console.error("deleteClosetItem failed:", error);
+        console.error('deleteClosetItem failed:', error);
       } finally {
         uni.hideLoading();
       }
     },
-
-        async handleUpload(sourceType) {
+    async handleUpload(sourceType) {
       this.closeModal();
       try {
-                const [err, chooseRes] = await uni.chooseImage({
+        const [err, chooseRes] = await uni.chooseImage({
           count: 1,
-          sourceType: sourceType,
+          sourceType: sourceType
         });
-
-                if (err) {
-                    console.error("uni.chooseImage failed:", err);
-                    if (err.errMsg.includes('cancel')) {
-            
+        if (err) {
+          console.error('uni.chooseImage failed:', err);
+          if (err.errMsg.includes('cancel')) {
+            // 用户取消
           } else {
             uni.showToast({ title: '选择图片失败', icon: 'none' });
           }
-          return;         }
-        
-                if (chooseRes && chooseRes.tempFilePaths && chooseRes.tempFilePaths.length > 0) {
+          return;
+        }
+        if (chooseRes && chooseRes.tempFilePaths && chooseRes.tempFilePaths.length > 0) {
           const tempFilePath = chooseRes.tempFilePaths[0];
           uni.navigateTo({
             url: `/pages/ConfirmFromUserUpload/ConfirmFromUserUpload?tempFilePath=${tempFilePath}`
           });
         } else {
-                    
+          // 未选择图片
         }
-        
       } catch (error) {
-                console.error("An unexpected error occurred in handleUpload:", error);
+        console.error('An unexpected error occurred in handleUpload:', error);
       }
     },
-
-        handleLongPress(item) {
+    handleLongPress(item) {
       uni.showModal({
         title: '删除确认',
         content: `确定要删除这件衣服吗？`,
@@ -343,8 +337,7 @@ export default {
         this.getClosetItems();
       }
     },
-
-        handleAdd() {
+    handleAdd() {
       this.showModal = true;
     },
     closeModal() {
@@ -357,11 +350,11 @@ export default {
       this.handleUpload(['camera']);
     },
     selectFromLibrary() {
-                  uni.navigateTo({
+      uni.navigateTo({
         url: '/pages/ResourcesSelection/ResourcesSelection?source=closet'
       });
-            this.closeModal();
-    },
+      this.closeModal();
+    }
   }
 };
 </script>

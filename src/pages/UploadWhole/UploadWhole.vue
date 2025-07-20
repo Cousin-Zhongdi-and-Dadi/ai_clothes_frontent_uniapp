@@ -86,28 +86,28 @@ export default {
      * @param {'top'|'bottom'} type 衣物类型
      */
     selectFromResources(type) {
-            const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
-      const garmentUrl = uni.getStorageSync(key);
-      if (garmentUrl) {
-                uni.showModal({
-          title: '提示',
-          content: type === 'top' ? '已选择过上装，是否覆盖？' : '已选择过下装，是否覆盖？',
-          confirmText: '覆盖',
-          cancelText: '取消',
-          success: (res) => {
-            if (res.confirm) {
-              uni.navigateTo({
-                url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
-              });
-            }
-                      }
-        });
-      } else {
-                uni.navigateTo({
-          url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
-        });
-      }
-    },
+    const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+    const garmentUrl = uni.getStorageSync(key);
+    if (garmentUrl) {
+      uni.showModal({
+        title: '提示',
+        content: type === 'top' ? '已选择过上装，是否覆盖？' : '已选择过下装，是否覆盖？',
+        confirmText: '覆盖',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            uni.navigateTo({
+              url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
+            });
+          }
+        }
+      });
+    } else {
+      uni.navigateTo({
+        url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
+      });
+    }
+  },
     /**
      * 从相册或相机上传图片，跳转到试衣页面
      * @param {'album'|'camera'} sourceType 来源

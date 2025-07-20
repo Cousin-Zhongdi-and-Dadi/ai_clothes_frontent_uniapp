@@ -38,7 +38,7 @@ export default {
   data() {
     return {
       imageUrl: '',
-      type: 'top',
+      type: 'top'
     };
   },
   onLoad(options) {
@@ -65,14 +65,11 @@ export default {
       const personImageUrl = uni.getStorageSync('personImageUrl');
       let topGarmentUrl = uni.getStorageSync('topGarmentUrl');
       let bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || '';
-
       if (!personImageUrl || !topGarmentUrl) {
         uni.showToast({ title: '缺少人物或上装图片', icon: 'none' });
         return;
       }
-
       uni.showLoading({ title: '正在上传衣物图片...' });
-
       try {
         if (!/^https?:\/\//.test(topGarmentUrl)) {
           topGarmentUrl = await new Promise((resolve, reject) => {
@@ -103,7 +100,6 @@ export default {
             });
           });
         }
-
         if (bottomGarmentUrl && !/^https?:\/\//.test(bottomGarmentUrl)) {
           bottomGarmentUrl = await new Promise((resolve, reject) => {
             uni.uploadFile({
@@ -133,9 +129,7 @@ export default {
             });
           });
         }
-
         uni.showLoading({ title: '正在生成搭配...' });
-
         const res = await request({
           url: `${apiConfig.BASE_URL}/fitting_2d/submit_task`,
           method: 'GET',
@@ -145,13 +139,10 @@ export default {
             bottomGarmentUrl: uni.getStorageSync('bottomGarmentUrl') || ''
           }
         });
-
         uni.removeStorageSync('personImageUrl');
         uni.removeStorageSync('topGarmentUrl');
         uni.removeStorageSync('bottomGarmentUrl');
-
         uni.hideLoading();
-
         if (res) {
           uni.redirectTo({
             url: `/pages/TwoDimComment/TwoDimComment?taskId=${res}`

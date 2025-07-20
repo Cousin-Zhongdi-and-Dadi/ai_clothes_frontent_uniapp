@@ -105,7 +105,10 @@ import apiConfig from '@/utils/api.js';
 export default {
   data() {
     return {
-      imagePath: '',       categories: [],       categoryIndex: -1,       formData: {
+      imagePath: '',
+      categories: [],
+      categoryIndex: -1,
+      formData: {
         categoryId: null,
         brand: '',
         size: '',
@@ -116,7 +119,7 @@ export default {
     };
   },
   computed: {
-        selectedCategoryName() {
+    selectedCategoryName() {
       if (this.categoryIndex > -1 && this.categories[this.categoryIndex]) {
         return this.categories[this.categoryIndex].name;
       }
@@ -124,20 +127,20 @@ export default {
     }
   },
   onLoad(options) {
-        if (options.tempFilePath) {
+    if (options.tempFilePath) {
       this.imagePath = options.tempFilePath;
     } else {
       uni.showToast({ title: '图片路径丢失', icon: 'none' });
       uni.navigateBack();
     }
-        this.fetchCategories();
+    this.fetchCategories();
   },
   methods: {
-        async fetchCategories() {
+    async fetchCategories() {
       try {
         const data = await request({
           url: `${apiConfig.BASE_URL}/address/getCategory`,
-          method: 'GET',
+          method: 'GET'
         });
         this.categories = data
           .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -146,33 +149,31 @@ export default {
             name: item.categoryName
           }));
       } catch (error) {
-        console.error("fetchCategories failed:", error);
+        console.error('fetchCategories failed:', error);
       }
     },
-        handleCategoryChange(e) {
+    handleCategoryChange(e) {
       this.categoryIndex = e.detail.value;
       this.formData.categoryId = this.categories[this.categoryIndex].id;
     },
-        previewImage() {
+    previewImage() {
       if (!this.imagePath) return;
       uni.previewImage({
         urls: [this.imagePath],
         current: this.imagePath
       });
     },
-        handleCancel() {
+    handleCancel() {
       uni.navigateBack();
     },
-        async handleSubmit() {
-            if (!this.formData.categoryId) {
+    async handleSubmit() {
+      if (!this.formData.categoryId) {
         uni.showToast({ title: '请选择类别', icon: 'none' });
         return;
       }
-
       uni.showLoading({ title: '正在上传...' });
-
       try {
-                await uploadFile({
+        await uploadFile({
           url: `${apiConfig.BASE_URL}/closet/add`,
           filePath: this.imagePath,
           name: 'file',
@@ -182,21 +183,20 @@ export default {
             size: this.formData.size,
             color: this.formData.color,
             price: this.formData.price,
-            notes: this.formData.notes,
-          },
+            notes: this.formData.notes
+          }
         });
-
         uni.showToast({ title: '上传成功！', icon: 'success' });
-                uni.$emit('closet-refresh');
-                setTimeout(() => {
+        uni.$emit('closet-refresh');
+        setTimeout(() => {
           uni.navigateBack();
         }, 1500);
-              } catch (error) {
-                console.error("Upload failed in handleSubmit:", error);
+      } catch (error) {
+        console.error('Upload failed in handleSubmit:', error);
       } finally {
         uni.hideLoading();
       }
-    },
+    }
   }
 };
 </script>

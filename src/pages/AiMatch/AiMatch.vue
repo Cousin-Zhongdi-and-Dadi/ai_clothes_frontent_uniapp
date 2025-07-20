@@ -91,8 +91,10 @@ export default {
         { label: '运动', value: 'sport' },
         { label: '日常', value: 'daily' }
       ],
-      selectedScene: '',       desc: '',
-      showDialog: false     };
+      selectedScene: '',
+      desc: '',
+      showDialog: false
+    };
   },
   onLoad() {
     uni.$on && uni.$on('ai-match-image-selected', (imgUrl) => {
@@ -119,7 +121,7 @@ export default {
       });
     },
     onAiRecommend() {
-            uni.showToast({ title: 'AI推荐功能待实现', icon: 'none' });
+      uni.showToast({ title: 'AI推荐功能待实现', icon: 'none' });
       uni.navigateTo({
         url: '/pages/AiMatchResult/AiMatchResult'
       });

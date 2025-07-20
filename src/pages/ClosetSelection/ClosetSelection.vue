@@ -227,14 +227,13 @@ export default {
           name: item.brand || `服装ID: ${item.id}`,
           desc: item.color || `分类ID: ${item.categoryId}`
         }));
-
         this.closetItems = isRefresh ? newItems : [...this.closetItems, ...newItems];
         this.hasMore = newItems.length >= this.pageSize;
         if (this.hasMore) {
           this.page++;
         }
       } catch (error) {
-        console.error("getClosetItems failed:", error);
+        console.error('getClosetItems failed:', error);
         this.hasMore = false;
       } finally {
         this.isLoading = false;
@@ -260,7 +259,7 @@ export default {
     },
     confirmSelect() {
       if (!this.selectedItem) return;
-            uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.image);
+      uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.image);
       uni.navigateBack();
     }
   }

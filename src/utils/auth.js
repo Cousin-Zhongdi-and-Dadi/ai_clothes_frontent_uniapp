@@ -5,25 +5,20 @@
  */
 export function checkLoginAndProceed(action) {
     const token = uni.getStorageSync('token');
-
     if (!token) {
         uni.showToast({
             title: '请先登录',
             icon: 'none'
         });
-
         setTimeout(() => {
             uni.navigateTo({
                 url: '/pages/LoginSelection/LoginSelection'
             });
         }, 1500);
-
         return false;
     }
-
     if (action && typeof action === 'function') {
         action();
     }
-
     return true;
 }

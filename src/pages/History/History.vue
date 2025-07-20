@@ -100,7 +100,10 @@ export default {
       pageSize: 15,
       isLoading: false,
       hasMore: true,
-      isManaging: false,       selectedIds: [],         isGuest: false     };
+      isManaging: false,
+      selectedIds: [],
+      isGuest: false
+    };
   },
   computed: {
     groupedHistory() {
@@ -123,10 +126,10 @@ export default {
       return groups;
     },
     loadMoreStatus() {
-      if (this.isLoading && this.page > 1) { return 'loading'; }
-      if (!this.hasMore) { return 'noMore'; }
+      if (this.isLoading && this.page > 1) return 'loading';
+      if (!this.hasMore) return 'noMore';
       return 'more';
-    },
+    }
   },
   onShow() {
     const token = uni.getStorageSync('token');
@@ -142,7 +145,7 @@ export default {
     }
   },
   methods: {
-        getMockHistory() {
+    getMockHistory() {
       return [
         {
           id: 1,
@@ -156,7 +159,7 @@ export default {
         }
       ];
     },
-        async getHistory(isRefresh = false) {
+    async getHistory(isRefresh = false) {
       if (this.isGuest) {
         this.isLoading = false;
         this.historyItems = this.getMockHistory();
@@ -169,8 +172,8 @@ export default {
         this.page = 1;
         this.historyItems = [];
         this.hasMore = true;
-        this.cancelSelectionMode();       }
-
+        this.cancelSelectionMode();
+      }
       try {
         const newItems = await request({
           url: `${apiConfig.BASE_URL}/BrowsingHistory/getHistory`,
@@ -180,22 +183,20 @@ export default {
             pageSize: this.pageSize
           }
         });
-        
         this.historyItems = isRefresh ? newItems : [...this.historyItems, ...newItems];
         this.hasMore = newItems.length === this.pageSize;
         if (this.hasMore) {
           this.page++;
         }
       } catch (error) {
-        console.error("getHistory failed:", error);
+        console.error('getHistory failed:', error);
         this.hasMore = false;
       } finally {
         this.isLoading = false;
         uni.stopPullDownRefresh();
       }
     },
-
-        async deleteHistoryItems() {
+    async deleteHistoryItems() {
       if (this.isGuest) {
         uni.showToast({ title: '请登录后删除', icon: 'none' });
         return;
@@ -205,52 +206,48 @@ export default {
         await request({
           url: `${apiConfig.BASE_URL}/BrowsingHistory/delete`,
           method: 'DELETE',
-          data: this.selectedIds,
+          data: this.selectedIds
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
-                this.historyItems = this.historyItems.filter(
-          item => !this.selectedIds.includes(item.id)
-        );
+        this.historyItems = this.historyItems.filter(item => !this.selectedIds.includes(item.id));
         this.cancelSelectionMode();
       } catch (error) {
-        console.error("deleteHistoryItems failed:", error);
-              } finally {
+        console.error('deleteHistoryItems failed:', error);
+      } finally {
         uni.hideLoading();
       }
     },
-
-        async confirmDelete() {
+    async confirmDelete() {
       if (this.selectedIds.length === 0) return;
       try {
         const res = await uni.showModal({
           title: '删除确认',
-          content: `确定要删除这 ${this.selectedIds.length} 条记录吗？`,
+          content: `确定要删除这 ${this.selectedIds.length} 条记录吗？`
         });
         if (res.confirm) {
           this.deleteHistoryItems();
         }
-      } catch (error) {
-              }
+      } catch (error) {}
     },
-
-        enableSelectionMode(item) {
+    enableSelectionMode(item) {
       this.isManaging = true;
-            if (!this.selectedIds.includes(item.id)) {
+      if (!this.selectedIds.includes(item.id)) {
         this.selectedIds.push(item.id);
       }
     },
-        cancelSelectionMode() {
+    cancelSelectionMode() {
       this.isManaging = false;
       this.selectedIds = [];
     },
-        handleItemClick(item) {
-            if (!this.isManaging) return;
-      
+    handleItemClick(item) {
+      if (!this.isManaging) return;
       const index = this.selectedIds.indexOf(item.id);
       if (index > -1) {
-        this.selectedIds.splice(index, 1);       } else {
-        this.selectedIds.push(item.id);       }
-    },
+        this.selectedIds.splice(index, 1);
+      } else {
+        this.selectedIds.push(item.id);
+      }
+    }
   }
 };
 </script>

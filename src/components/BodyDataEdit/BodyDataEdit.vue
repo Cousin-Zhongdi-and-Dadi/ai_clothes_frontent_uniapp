@@ -69,7 +69,8 @@ export default {
           });
         }
       },
-      immediate: true,       deep: true
+      immediate: true,
+      deep: true
     }
   },
   methods: {
@@ -79,18 +80,16 @@ export default {
     handleSubmit() {
       const heightField = this.formFields.find(f => f.key === 'height');
       const weightField = this.formFields.find(f => f.key === 'weight');
-
       if (!heightField.value || !weightField.value) {
         this.$emit('failed', '身高和体重为必填项');
         return;
       }
-
-            const submittedData = this.formFields.reduce((acc, field) => {
+      const submittedData = this.formFields.reduce((acc, field) => {
         acc[field.key] = field.value;
         return acc;
       }, {});
-
-      this.$emit('success', submittedData);     }
+      this.$emit('success', submittedData);
+    }
   }
 };
 </script>

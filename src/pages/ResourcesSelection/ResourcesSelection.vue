@@ -88,7 +88,8 @@ import apiConfig from '../../utils/api.js';
 export default {
   data() {
     return {
-      pageType: 'top',       source: '',
+      pageType: 'top',
+      source: '',
       tabs: [],
       activeTabId: null,
       itemList: [],
@@ -96,21 +97,24 @@ export default {
       isLoading: false,
       isPopupVisible: false,
       selectedItem: null,
-      parentId: null     };
+      parentId: null
+    };
   },
   onLoad(options) {
-        if (options.type === 'bottom') {
+    if (options.type === 'bottom') {
       this.pageType = 'bottom';
-      this.parentId = 24;     } else {
+      this.parentId = 24;
+    } else {
       this.pageType = 'top';
-      this.parentId = 23;     }
-        if (options.source) {
+      this.parentId = 23;
+    }
+    if (options.source) {
       this.source = options.source;
     }
-        this.fetchSubCategories();
+    this.fetchSubCategories();
   },
   methods: {
-        async fetchSubCategories() {
+    async fetchSubCategories() {
       this.isLoading = true;
       try {
         const data = await request({
@@ -120,29 +124,27 @@ export default {
             parentId: this.parentId
           }
         });
-                const categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
+        const categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
         this.tabs = categories;
-                if (this.tabs.length > 0) {
+        if (this.tabs.length > 0) {
           this.activeTabId = this.tabs[0].id;
           this.fetchItemsForCurrentTab();
         }
       } catch (error) {
-        /**
-         * Fetch sub-categories for tabs
-         */
+        // Fetch sub-categories for tabs
         console.error('Failed to fetch sub categories:', error);
       } finally {
         this.isLoading = false;
       }
     },
 
-        changeTab(tab) {
+    changeTab(tab) {
       if (this.activeTabId === tab.id) return;
       this.activeTabId = tab.id;
       this.fetchItemsForCurrentTab();
     },
 
-        async fetchItemsForCurrentTab() {
+    async fetchItemsForCurrentTab() {
       if (!this.activeTabId) return;
       if (this.itemsCache[this.activeTabId]) {
         this.itemList = this.itemsCache[this.activeTabId];
@@ -152,17 +154,11 @@ export default {
       this.itemList = [];
       try {
         const res = await request({
-        /**
-         * Change active tab and fetch items
-         */
           url: `${apiConfig.BASE_URL}/mall/getProductByTypeId/${this.activeTabId}`,
           method: 'GET',
           data: {
             page: 1,
             pageSize: 20
-        /**
-         * Fetch items for current tab/category
-         */
           }
         });
         const goodsList = Array.isArray(res) ? res : [];
@@ -182,38 +178,28 @@ export default {
       }
     },
 
-        showPopup(item) {
+    showPopup(item) {
       this.selectedItem = item;
       this.isPopupVisible = true;
     },
-    
-        closePopup() {
+    closePopup() {
       this.isPopupVisible = false;
       this.selectedItem = null;
     },
-    
     async confirmSelection() {
       if (!this.selectedItem) return;
-
-            if (this.source === 'AiMatch') {
-        /**
-         * Show confirmation popup for selected item
-         */
-                const pages = getCurrentPages();
+      if (this.source === 'AiMatch') {
+        // Show confirmation popup for selected item
+        const pages = getCurrentPages();
         const prevPage = pages[pages.length - 2];
         if (prevPage) {
-                    uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
-        /**
-         * Close confirmation popup
-         */
+          uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
         }
         uni.navigateBack();
         return;
       }
-        /**
-         * Confirm resource selection and handle navigation/storage
-         */
-            if (this.source === 'closet') {
+      // Confirm resource selection and handle navigation/storage
+      if (this.source === 'closet') {
         uni.showLoading({ title: '正在添加...' });
         try {
           await request({

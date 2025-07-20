@@ -81,7 +81,7 @@ export default {
   onLoad(options) {
     if (options.taskId) {
       this.taskId = options.taskId;
-            this.startPolling();
+      this.startPolling();
     } else {
       console.error('未接收到 taskId');
       this.isLoading = false;
@@ -119,11 +119,10 @@ export default {
      * Fetch AI outfit result from backend
      */
     async fetchResult() {
-      
       try {
         const res = await request({
           url: `${apiConfig.BASE_URL}/fitting_2d/getResult/${this.taskId}`,
-          method: 'GET',
+          method: 'GET'
         });
         if (res && res.imageUrl) {
           if (this.pollingTimer) {

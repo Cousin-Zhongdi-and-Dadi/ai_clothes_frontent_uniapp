@@ -100,14 +100,12 @@ function request(options) {
 export function uploadFile(options) {
     return new Promise((resolve, reject) => {
         const token = uni.getStorageSync('token');
-
         const headers = {
-            ...(options.header || {}),
+            ...(options.header || {})
         };
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-
         let timeoutTimer = null;
         const timeout = options.timeout || 20000;
         if (timeout) {
@@ -121,20 +119,16 @@ export function uploadFile(options) {
                 reject(new Error('上传超时'));
             }, timeout);
         }
-
         let finalFilePath = options.filePath;
         if (finalFilePath && finalFilePath.startsWith('http://tmp/')) {
             console.warn(`检测到临时文件路径: ${finalFilePath}`);
         }
-
-
-
         const uploadTask = uni.uploadFile({
             ...options,
             filePath: finalFilePath,
-            header: headers, success: (uploadRes) => {
+            header: headers,
+            success: (uploadRes) => {
                 if (timeoutTimer) clearTimeout(timeoutTimer);
-
                 if (uploadRes.statusCode < 200 || uploadRes.statusCode >= 300) {
                     const errorMsg = `服务器返回错误状态码: ${uploadRes.statusCode}`;
                     console.error(errorMsg, uploadRes);
@@ -145,7 +139,6 @@ export function uploadFile(options) {
                     });
                     return reject(new Error(errorMsg));
                 }
-
                 if (!uploadRes.data || typeof uploadRes.data !== 'string') {
                     const errorMsg = '服务器返回无效数据';
                     uni.showToast({
@@ -155,7 +148,6 @@ export function uploadFile(options) {
                     });
                     return reject(new Error(errorMsg));
                 }
-
                 let responseData;
                 try {
                     responseData = JSON.parse(uploadRes.data);
@@ -168,12 +160,10 @@ export function uploadFile(options) {
                     });
                     return reject(new Error(errorMsg));
                 }
-
                 if (apiConfig.MOCK_MODE_ENABLED && options.url.includes('apifoxmock.com') && responseData) {
                     console.warn(`[Mock Override] Forcing upload response code to 200 for URL: ${options.url}`);
                     responseData.code = 200;
                 }
-
                 const successCodes = [200];
                 if (responseData && successCodes.includes(responseData.code)) {
                     resolve(responseData.data);
@@ -189,28 +179,29 @@ export function uploadFile(options) {
             },
             fail: (err) => {
                 if (timeoutTimer) clearTimeout(timeoutTimer);
-
                 console.error(`Upload Failed for ${options.url}:`, err);
-
                 let errorMessage = '网络请求异常，请稍后重试';
-
                 if (err.errno) {
                     switch (err.errno) {
-                        case 2: errorMessage = '网络连接失败，请检查网络';
+                        case 2:
+                            errorMessage = '网络连接失败，请检查网络';
                             break;
-                        case 3: errorMessage = '上传超时，请重试';
+                        case 3:
+                            errorMessage = '上传超时，请重试';
                             break;
-                        case 4: errorMessage = '服务器请求失败';
+                        case 4:
+                            errorMessage = '服务器请求失败';
                             break;
-                        case 5: errorMessage = '请求被阻止，请检查配置';
+                        case 5:
+                            errorMessage = '请求被阻止，请检查配置';
                             break;
-                        case 6: errorMessage = '上传被中断';
+                        case 6:
+                            errorMessage = '上传被中断';
                             break;
                         default:
                             break;
                     }
-                }
-                else if (err.errMsg) {
+                } else if (err.errMsg) {
                     if (err.errMsg.includes('timeout')) {
                         errorMessage = '上传超时，请重试';
                     } else if (err.errMsg.includes('fail')) {
@@ -223,13 +214,11 @@ export function uploadFile(options) {
                         errorMessage = '上传已取消';
                     }
                 }
-
                 uni.showToast({
                     title: errorMessage,
                     icon: 'none',
                     duration: 3000
                 });
-
                 const errorInfo = {
                     code: err.errno || -1,
                     message: errorMessage,
@@ -239,9 +228,7 @@ export function uploadFile(options) {
                 reject(errorInfo);
             }
         });
-
         uploadTask.onProgressUpdate((res) => {
-
             if (typeof options.onProgress === 'function') {
                 options.onProgress(res);
             }

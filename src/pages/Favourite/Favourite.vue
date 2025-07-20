@@ -65,7 +65,8 @@ export default {
       page: 1,
       pageSize: 12,
       hasMore: true,
-      isGuest: false     };
+      isGuest: false
+    };
   },
   computed: {
     rows() {
@@ -85,7 +86,7 @@ export default {
       return 'more';
     }
   },
-    onShow() {
+  onShow() {
     const token = uni.getStorageSync('token');
     this.isGuest = !token;
     this.getFavorites(true);
@@ -99,14 +100,14 @@ export default {
     }
   },
   methods: {
-        getMockFavorites() {
+    getMockFavorites() {
       return [
         { id: 1, img: '/static/example_pictures/sample1.png' },
         { id: 2, img: '/static/example_pictures/sample2.png' },
         { id: 3, img: '/static/example_pictures/sample3.png' }
       ];
     },
-        async getFavorites(isRefresh = false) {
+    async getFavorites(isRefresh = false) {
       if (this.isGuest) {
         this.isLoading = false;
         this.images = this.getMockFavorites();
@@ -120,7 +121,6 @@ export default {
         this.images = [];
         this.hasMore = true;
       }
-
       try {
         const data = await request({
           url: `${apiConfig.BASE_URL}/collection/getAll`,
@@ -130,49 +130,45 @@ export default {
             pageSize: this.pageSize
           }
         });
-
         this.images = isRefresh ? data : [...this.images, ...data];
         this.hasMore = data.length === this.pageSize;
         if (this.hasMore) {
           this.page++;
         }
       } catch (error) {
-        console.error("getFavorites failed:", error);
+        console.error('getFavorites failed:', error);
         this.hasMore = false;
       } finally {
         this.isLoading = false;
         uni.stopPullDownRefresh();
       }
     },
-
-        async deleteFavorite(imageId) {
+    async deleteFavorite(imageId) {
       uni.showLoading({ title: '正在删除...' });
       try {
         await request({
           url: `${apiConfig.BASE_URL}/collection/delete/${imageId}`,
-          method: 'DELETE',
+          method: 'DELETE'
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
-                this.images = this.images.filter(img => img.id !== imageId);
+        this.images = this.images.filter(img => img.id !== imageId);
       } catch (error) {
-        console.error("deleteFavorite failed:", error);
-              } finally {
+        console.error('deleteFavorite failed:', error);
+      } finally {
         uni.hideLoading();
       }
     },
-
-        async handleLongPress(item) {
+    async handleLongPress(item) {
       try {
         const res = await uni.showModal({
           title: '删除确认',
-          content: `确定要删除这张收藏吗？`,
+          content: `确定要删除这张收藏吗？`
         });
         if (res.confirm) {
           this.deleteFavorite(item.id);
         }
-      } catch (error) {
-              }
-    },
+      } catch (error) {}
+    }
   }
 };
 </script>

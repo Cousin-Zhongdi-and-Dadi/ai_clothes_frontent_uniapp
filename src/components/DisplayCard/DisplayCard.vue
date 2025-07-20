@@ -50,20 +50,17 @@ export default {
       swipedRight: false,
       startX: 0,
       isFlipped: false,
-      transformX: 0 // 横向位移
-    };
+      transformX: 0     };
   },
   methods: {
     onTouchStart(e) {
-      if (!this.canInteract) return; // 禁用滑动
-      this.startX = e.touches[0].clientX;
+      if (!this.canInteract) return;       this.startX = e.touches[0].clientX;
       this.isSwiping = true;
     },
     onTouchMove(e) {
       if (!this.canInteract) return;
       const deltaX = e.touches[0].clientX - this.startX;
-      this.transformX = deltaX; // 更新横向位移
-    },
+      this.transformX = deltaX;     },
     onTouchEnd(e) {
       if (!this.canInteract) return;
       const deltaX = e.changedTouches[0].clientX - this.startX;
@@ -76,16 +73,13 @@ export default {
         this.swipedRight = true;
         this.$emit('swipeRight');
       } else {
-        this.transformX = 0; // 重置横向位移
-      }
+        this.transformX = 0;       }
     },
     flipCard() {
-      if (!this.canInteract) return; // 禁用翻转
-      this.isFlipped = !this.isFlipped;
+      if (!this.canInteract) return;       this.isFlipped = !this.isFlipped;
     },
     updateTransformX(value) {
-      this.transformX = value; // 更新 transformX 的值
-      console.log(`Transform X updated to: ${value}`);
+      this.transformX = value;       console.log(`Transform X updated to: ${value}`);
     }
   }
 };

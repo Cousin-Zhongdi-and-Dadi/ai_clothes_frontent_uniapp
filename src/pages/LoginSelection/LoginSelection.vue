@@ -24,44 +24,36 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
 export default {
   name: 'LoginSelection',
   methods: {
-    // 2. 改造 oneClickLogin 方法
-    async oneClickLogin() {
+        async oneClickLogin() {
     uni.showLoading({
       title: '正在登录...'
     });
 
     try {
-      // 重构登录凭证获取方式
-      const [loginErr, loginRes] = await uni.login({
+            const [loginErr, loginRes] = await uni.login({
         provider: 'weixin',
-        timeout: 5000 // 增加超时设置
-      });
+        timeout: 5000       });
       
-      // 错误处理优先
-      if (loginErr) {
+            if (loginErr) {
         throw new Error(`微信登录失败: ${loginErr.errMsg || '未知错误'}`);
       }
       
-      // 确保code存在
-      if (!loginRes || !loginRes.code) {
+            if (!loginRes || !loginRes.code) {
         throw new Error('获取登录凭证(code)失败，请重试或检查微信权限');
       }
 
-      // 步骤 2: 使用封装的 request 函数将 code 发送到后端
-      const loginData = await request({
+            const loginData = await request({
         url: `${apiConfig.BASE_URL}/user/login/${loginRes.code}`,
         method: 'GET',
       });
 
-      // 业务成功处理
-      uni.setStorageSync('token', loginData.token);
+            uni.setStorageSync('token', loginData.token);
 
       uni.showToast({
         title: '登录成功',
@@ -78,8 +70,7 @@ export default {
     } catch (error) {
       console.error('登录流程失败:', error);
       
-      // 更友好的错误提示
-      const errorMsg = error.message.includes('微信登录') 
+            const errorMsg = error.message.includes('微信登录') 
         ? error.message 
         : `登录失败: ${error.message || '系统异常'}`;
       
@@ -93,8 +84,7 @@ export default {
     }
   },
 
-    // 手机号登录逻辑保持不变
-    phoneLogin() {
+        phoneLogin() {
       uni.navigateTo({
         url: '/pages/Login/Login'
       });

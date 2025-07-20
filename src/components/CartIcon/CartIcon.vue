@@ -23,12 +23,10 @@ export default {
   name: 'CartIcon',
   methods: {
     goToCart() {
-      // --- 开始修改：使用 switchTab 跳转到 TabBar 页面 ---
-      uni.switchTab({
+            uni.switchTab({
         url: '/pages/Shop/Shop'
       });
-      // --- 结束修改 ---
-    }
+          }
   }
 };
 </script>

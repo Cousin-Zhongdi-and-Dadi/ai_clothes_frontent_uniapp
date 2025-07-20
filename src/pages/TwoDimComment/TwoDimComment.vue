@@ -77,8 +77,7 @@ export default {
   onLoad(options) {
     if (options.taskId) {
       this.taskId = options.taskId;
-      // 重新搭配时，personUrl和garmentUrl已在缓存中，无需清理
-      this.startPolling();
+            this.startPolling();
     } else {
       console.error('未接收到 taskId');
       this.isLoading = false;

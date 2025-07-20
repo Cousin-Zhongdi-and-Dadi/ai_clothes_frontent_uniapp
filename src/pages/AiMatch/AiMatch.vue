@@ -91,10 +91,8 @@ export default {
         { label: '运动', value: 'sport' },
         { label: '日常', value: 'daily' }
       ],
-      selectedScene: '', // 只能单选
-      desc: '',
-      showDialog: false // 控制弹窗显示
-    };
+      selectedScene: '',       desc: '',
+      showDialog: false     };
   },
   onLoad() {
     uni.$on && uni.$on('ai-match-image-selected', (imgUrl) => {
@@ -121,8 +119,7 @@ export default {
       });
     },
     onAiRecommend() {
-      // 这里可添加AI推荐逻辑
-      uni.showToast({ title: 'AI推荐功能待实现', icon: 'none' });
+            uni.showToast({ title: 'AI推荐功能待实现', icon: 'none' });
       uni.navigateTo({
         url: '/pages/AiMatchResult/AiMatchResult'
       });

@@ -88,7 +88,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
@@ -101,10 +100,7 @@ export default {
       pageSize: 15,
       isLoading: false,
       hasMore: true,
-      isManaging: false, // 是否处于选择模式
-      selectedIds: [],   // 选中的ID列表
-      isGuest: false // 新增：是否为游客模式
-    };
+      isManaging: false,       selectedIds: [],         isGuest: false     };
   },
   computed: {
     groupedHistory() {
@@ -146,8 +142,7 @@ export default {
     }
   },
   methods: {
-    // 游客模式静态历史数据
-    getMockHistory() {
+        getMockHistory() {
       return [
         {
           id: 1,
@@ -161,8 +156,7 @@ export default {
         }
       ];
     },
-    // 2. 改造 getHistory 方法
-    async getHistory(isRefresh = false) {
+        async getHistory(isRefresh = false) {
       if (this.isGuest) {
         this.isLoading = false;
         this.historyItems = this.getMockHistory();
@@ -175,8 +169,7 @@ export default {
         this.page = 1;
         this.historyItems = [];
         this.hasMore = true;
-        this.cancelSelectionMode(); // 刷新时确保退出选择模式
-      }
+        this.cancelSelectionMode();       }
 
       try {
         const newItems = await request({
@@ -202,8 +195,7 @@ export default {
       }
     },
 
-    // 3. 改造 deleteHistoryItems 方法
-    async deleteHistoryItems() {
+        async deleteHistoryItems() {
       if (this.isGuest) {
         uni.showToast({ title: '请登录后删除', icon: 'none' });
         return;
@@ -216,21 +208,18 @@ export default {
           data: this.selectedIds,
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
-        // 从UI上直接移除，无需刷新
-        this.historyItems = this.historyItems.filter(
+                this.historyItems = this.historyItems.filter(
           item => !this.selectedIds.includes(item.id)
         );
         this.cancelSelectionMode();
       } catch (error) {
         console.error("deleteHistoryItems failed:", error);
-        // 错误提示已由 request 函数统一处理
-      } finally {
+              } finally {
         uni.hideLoading();
       }
     },
 
-    // 4. 改造 confirmDelete 方法，使用 async/await
-    async confirmDelete() {
+        async confirmDelete() {
       if (this.selectedIds.length === 0) return;
       try {
         const res = await uni.showModal({
@@ -241,34 +230,26 @@ export default {
           this.deleteHistoryItems();
         }
       } catch (error) {
-        // 用户点击取消等操作会进入这里，无需处理
-      }
+              }
     },
 
-    // 新增：长按启用选择模式
-    enableSelectionMode(item) {
+        enableSelectionMode(item) {
       this.isManaging = true;
-      // 自动选中长按的项
-      if (!this.selectedIds.includes(item.id)) {
+            if (!this.selectedIds.includes(item.id)) {
         this.selectedIds.push(item.id);
       }
     },
-    // 新增：取消选择模式
-    cancelSelectionMode() {
+        cancelSelectionMode() {
       this.isManaging = false;
       this.selectedIds = [];
     },
-    // 修改：处理点击事件
-    handleItemClick(item) {
-      // 只有在选择模式下，点击才有效
-      if (!this.isManaging) return;
+        handleItemClick(item) {
+            if (!this.isManaging) return;
       
       const index = this.selectedIds.indexOf(item.id);
       if (index > -1) {
-        this.selectedIds.splice(index, 1); // 如果已选中，则取消选中
-      } else {
-        this.selectedIds.push(item.id); // 如果未选中，则选中
-      }
+        this.selectedIds.splice(index, 1);       } else {
+        this.selectedIds.push(item.id);       }
     },
   }
 };

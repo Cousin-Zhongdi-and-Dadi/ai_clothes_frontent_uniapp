@@ -260,8 +260,7 @@ export default {
     },
     confirmSelect() {
       if (!this.selectedItem) return;
-      // 只处理AiMatch.vue跳转的情况
-      uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.image);
+            uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.image);
       uni.navigateBack();
     }
   }

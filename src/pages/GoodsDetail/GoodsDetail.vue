@@ -148,7 +148,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 import CustomerService from '@/components/CustomerService/CustomerService.vue';
@@ -160,21 +159,14 @@ export default {
   data() {
     return {
       productId: null,
-      productInfo: {}, // 存储商品基本信息
-      styles: [],      // 存储款式信息
-      variations: [],  // 存储规格信息
-      sizes: [],       // 存储所有可用尺码
-      
+      productInfo: {},       styles: [],            variations: [],        sizes: [],             
       quantity: 1,
       selectedStyleIndex: 0,
       selectedSize: '',
       
       showSkuPopup: false,
-      skuAction: '', // 'cart' or 'buy'
-
-      // 新增：图片加载错误处理
-      imageLoadError: [], // 记录每张图片是否加载失败
-    };
+      skuAction: '', 
+            imageLoadError: [],     };
   },
   computed: {
     selectedStyle() {
@@ -199,8 +191,7 @@ export default {
     }
   },
   methods: {
-    // 2. 改造 fetchProductDetails 方法
-    async fetchProductDetails(id) {
+        async fetchProductDetails(id) {
       uni.showLoading({ title: '加载中...' });
       try {
         const productData = await request({
@@ -208,8 +199,7 @@ export default {
           method: 'GET',
         });
 
-        // 业务代码变得极其简洁，直接处理成功后的数据
-        this.productInfo = {
+                this.productInfo = {
           title: productData.productName,
           desc: productData.description,
           price: productData.price,
@@ -222,10 +212,8 @@ export default {
         productData.variations.forEach(v => {
           if (!stylesMap.has(v.colorName)) {
             stylesMap.set(v.colorName, {
-              styleId: v.styleId, // 假设 styleId 能唯一标识款式
-              name: v.colorName,
-              img: v.imageUrl, // 假设每个颜色有代表图
-              price: v.price,
+              styleId: v.styleId,               name: v.colorName,
+              img: v.imageUrl,               price: v.price,
             });
           }
           sizesSet.add(v.sizeName);
@@ -239,13 +227,11 @@ export default {
           stock: v.stockQuantity,
         }));
 
-        // 设置默认选中项
-        if (this.styles.length > 0) {
+                if (this.styles.length > 0) {
           this.selectStyle(0);
         }
         if (this.sizes.length > 0) {
-          // 默认选中第一个可用尺码
-          const firstAvailableSize = this.sizes.find(s => this.isSizeAvailable(s));
+                    const firstAvailableSize = this.sizes.find(s => this.isSizeAvailable(s));
           if (firstAvailableSize) {
             this.selectSize(firstAvailableSize);
           }
@@ -253,15 +239,13 @@ export default {
 
       } catch (error) {
         console.error("fetchProductDetails failed:", error);
-        // 错误提示已由 request 函数处理，这里可以加一些额外逻辑，比如返回上一页
-        setTimeout(() => uni.navigateBack(), 1500);
+                setTimeout(() => uni.navigateBack(), 1500);
       } finally {
         uni.hideLoading();
       }
     },
 
-    // 3. 改造 confirmSku 和增加 addToCart 方法
-    async confirmSku() {
+        async confirmSku() {
       if (!this.selectedSize) {
         uni.showToast({ title: '请选择尺码', icon: 'none' });
         return;
@@ -269,10 +253,8 @@ export default {
       if (this.skuAction === 'cart') {
         await this.addToCart();
       } else if (this.skuAction === 'buy') {
-        // 立即购买逻辑，可以跳转到订单确认页
-        console.log('立即购买');
-        // TODO: 接受一个商品链接，并跳转
-        uni.navigateTo({
+                console.log('立即购买');
+                uni.navigateTo({
           url: `/pages/OuterShop/OuterShop`
         });
       }
@@ -298,8 +280,7 @@ export default {
           },
         });
         uni.showToast({ title: '添加成功', icon: 'success' });
-        // 可选：通知购物车图标更新
-      } catch (error) {
+              } catch (error) {
         console.error("addToCart failed:", error);
       } finally {
         uni.hideLoading();
@@ -320,10 +301,8 @@ export default {
     },
     selectStyle(idx) {
       this.selectedStyleIndex = idx;
-      // 切换款式时，重置尺码选择
-      this.selectedSize = '';
-      // 自动选择新款式下第一个可用的尺码
-      const firstAvailableSize = this.sizes.find(s => this.isSizeAvailable(s));
+            this.selectedSize = '';
+            const firstAvailableSize = this.sizes.find(s => this.isSizeAvailable(s));
       if (firstAvailableSize) {
         this.selectSize(firstAvailableSize);
       }
@@ -348,8 +327,7 @@ export default {
       });
     },
 
-    // 新增：处理图片加载错误
-    onImageError(idx) {
+        onImageError(idx) {
       this.$set(this.imageLoadError, idx, true);
     },
   }

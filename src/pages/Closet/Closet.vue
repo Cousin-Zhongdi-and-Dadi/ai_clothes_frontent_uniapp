@@ -133,7 +133,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
@@ -141,19 +140,15 @@ export default {
   name: 'Closet',
   data() {
     return {
-      // 1. 修改：分类数据默认为空，将由API填充
-      categories: [],
-      // 2. 修改：当前选中的分类ID，初始为null
-      activeCategory: null,
+            categories: [],
+            activeCategory: null,
       showModal: false,
       closetItems: [],
       page: 1,
       pageSize: 10,
       isLoading: false,
       hasMore: true,
-      isInitialLoading: true, // 新增：初始加载状态
-      isGuest: false // 新增：是否为游客模式
-    };
+      isInitialLoading: true,       isGuest: false     };
   },
   computed: {
     loadMoreStatus() {
@@ -166,8 +161,7 @@ export default {
       return 'more';
     }
   },
-  // 3. 修改：页面加载时，首先获取分类
-  onLoad() {
+    onLoad() {
     const token = uni.getStorageSync('token');
     this.isGuest = !token;
     this.initData();
@@ -175,13 +169,11 @@ export default {
       this.getClosetItems(true);
     });
   },
-  // 新增：页面卸载时，移除事件监听
-  onUnload() {
+    onUnload() {
     uni.$off('closet-refresh');
   },
   methods: {
-    // 游客模式静态分类和衣橱数据
-    getMockCategories() {
+        getMockCategories() {
       return [
         { id: 1, name: '上衣' },
         { id: 2, name: '裤子' }
@@ -200,8 +192,7 @@ export default {
       }
       return [];
     },
-    // 0. 改造 initData
-    async initData() {
+        async initData() {
       this.isInitialLoading = true;
       if (this.isGuest) {
         this.categories = this.getMockCategories();
@@ -212,8 +203,7 @@ export default {
       }
       try {
         await this.getCategories();
-        // 如果获取到分类，则默认加载第一个分类的商品
-        if (this.categories.length > 0 && this.activeCategory === null) {
+                if (this.categories.length > 0 && this.activeCategory === null) {
           this.activeCategory = this.categories[0].id;
           await this.getClosetItems(true);
         }
@@ -224,16 +214,14 @@ export default {
       }
     },
 
-    // 1. 改造 getCategories (修正API端点)
-    async getCategories() {
+        async getCategories() {
       if (this.isGuest) {
         this.categories = this.getMockCategories();
         return;
       }
       try {
         const data = await request({
-          url: `${apiConfig.BASE_URL}/address/getCategory`, // 修正API端点
-          method: 'GET',
+          url: `${apiConfig.BASE_URL}/address/getCategory`,           method: 'GET',
         });
         this.categories = data
           .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -243,8 +231,7 @@ export default {
       }
     },
 
-    // 2. 改造 getClosetItems (修正API调用方式)
-    async getClosetItems(isRefresh = false) {
+        async getClosetItems(isRefresh = false) {
       if (this.isGuest) {
         this.closetItems = this.getMockClosetItems(this.activeCategory);
         this.hasMore = false;
@@ -261,20 +248,15 @@ export default {
       }
 
       try {
-        // --- 开始修改：根据API文档，将 categoryId 作为 Path 参数传递 ---
-        const data = await request({
-          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`, // categoryId in path
-          method: 'GET',
+                const data = await request({
+          url: `${apiConfig.BASE_URL}/address/getClothes/${this.activeCategory}`,           method: 'GET',
           data: {
-            // Query参数只保留 page 和 pageSize
-            page: this.page,
+                        page: this.page,
             pageSize: this.pageSize
           }
         });
-        // --- 结束修改 ---
-
-        // 优化数据映射，显示更有意义的信息
-        const newItems = data.map(item => ({
+        
+                const newItems = data.map(item => ({
           id: item.id,
           image: item.imageUrl,
           name: item.brand || `服装ID: ${item.id}`,
@@ -294,13 +276,11 @@ export default {
       }
     },
 
-    // 3. 改造 deleteClosetItem (修正API端点)
-    async deleteClosetItem(clothesId) {
+        async deleteClosetItem(clothesId) {
       uni.showLoading({ title: '正在删除...' });
       try {
         await request({
-          url: `${apiConfig.BASE_URL}/closet/delete/${clothesId}`, // 修正API端点
-          method: 'DELETE',
+          url: `${apiConfig.BASE_URL}/closet/delete/${clothesId}`,           method: 'DELETE',
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
         this.closetItems = this.closetItems.filter(item => item.id !== clothesId);
@@ -311,49 +291,38 @@ export default {
       }
     },
 
-    // 4. 改造 handleUpload
-    async handleUpload(sourceType) {
+        async handleUpload(sourceType) {
       this.closeModal();
       try {
-        // --- 开始修改：使用解构赋值正确获取API返回值 ---
-        const [err, chooseRes] = await uni.chooseImage({
+                const [err, chooseRes] = await uni.chooseImage({
           count: 1,
           sourceType: sourceType,
         });
 
-        // 优先处理错误
-        if (err) {
-          // 捕获到错误，例如用户拒绝授权
-          console.error("uni.chooseImage failed:", err);
-          // 可以根据 err.errMsg 给用户更明确的提示
-          if (err.errMsg.includes('cancel')) {
+                if (err) {
+                    console.error("uni.chooseImage failed:", err);
+                    if (err.errMsg.includes('cancel')) {
             console.log('User cancelled image selection.');
           } else {
             uni.showToast({ title: '选择图片失败', icon: 'none' });
           }
-          return; // 终止后续操作
-        }
+          return;         }
         
-        // 确保用户确实选择了图片
-        if (chooseRes && chooseRes.tempFilePaths && chooseRes.tempFilePaths.length > 0) {
+                if (chooseRes && chooseRes.tempFilePaths && chooseRes.tempFilePaths.length > 0) {
           const tempFilePath = chooseRes.tempFilePaths[0];
           uni.navigateTo({
             url: `/pages/ConfirmFromUserUpload/ConfirmFromUserUpload?tempFilePath=${tempFilePath}`
           });
         } else {
-          // 虽然没有err，但也没有返回图片路径，也视为取消
-          console.log('User cancelled image selection (no file path returned).');
+                    console.log('User cancelled image selection (no file path returned).');
         }
-        // --- 结束修改 ---
-
+        
       } catch (error) {
-        // 一般的JS语法错误等会进入这里
-        console.error("An unexpected error occurred in handleUpload:", error);
+                console.error("An unexpected error occurred in handleUpload:", error);
       }
     },
 
-    // 5. 简化事件处理函数
-    handleLongPress(item) {
+        handleLongPress(item) {
       uni.showModal({
         title: '删除确认',
         content: `确定要删除这件衣服吗？`,
@@ -375,8 +344,7 @@ export default {
       }
     },
 
-    // 无需修改的本地方法
-    handleAdd() {
+        handleAdd() {
       this.showModal = true;
     },
     closeModal() {
@@ -389,13 +357,10 @@ export default {
       this.handleUpload(['camera']);
     },
     selectFromLibrary() {
-      // --- 开始修改 ---
-      // 跳转到素材库，并告知来源是衣橱
-      uni.navigateTo({
+                  uni.navigateTo({
         url: '/pages/ResourcesSelection/ResourcesSelection?source=closet'
       });
-      // --- 结束修改 ---
-      this.closeModal();
+            this.closeModal();
     },
   }
 };

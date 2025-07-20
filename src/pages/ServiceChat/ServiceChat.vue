@@ -84,7 +84,6 @@
 </template>
 
 <script>
-// 3. 导入依赖
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
@@ -92,32 +91,23 @@ export default {
   name: 'ServiceChatPage',
   data() {
     return {
-      messages: [], // 消息列表从空数组开始
-      userInput: '',  // 用户输入
-      isSending: false, // 是否正在发送消息
-      scrollTop: 0,   // 滚动条位置
-      robotAvatarSrc: '/static/icon/icon-04.png',
-      userAvatarSrc: '', // 假设从用户信息中获取
-    };
+      messages: [],       userInput: '',        isSending: false,       scrollTop: 0,         robotAvatarSrc: '/static/icon/icon-04.png',
+      userAvatarSrc: '',     };
   },
-  // 4. 页面加载时，获取欢迎语
-  created() {
+    created() {
     this.getWelcomeMessage();
   },
   methods: {
-    // 5. 新增：获取欢迎语或初始化对话
-    async getWelcomeMessage() {
+        async getWelcomeMessage() {
       this.isSending = true;
       try {
-        // 假设有一个获取欢迎消息的API
-        const welcomeMsg = await request({
+                const welcomeMsg = await request({
           url: `${apiConfig.BASE_URL}/chat/welcome`,
           method: 'GET',
         });
         this.messages.push({ type: 'robot', ...welcomeMsg });
       } catch (error) {
-        // 如果获取欢迎语失败，显示一个默认消息
-        this.messages.push({
+                this.messages.push({
           type: 'robot',
           content: '您好，有什么可以帮助您？',
           buttons: ['功能咨询', '订单问题', '商务合作'],
@@ -129,35 +119,29 @@ export default {
       }
     },
 
-    // 6. 新增：发送消息的核心方法
-    async sendMessage() {
+        async sendMessage() {
       if (!this.userInput.trim() || this.isSending) return;
 
       const userMessageContent = this.userInput;
       this.isSending = true;
 
-      // a. 将用户消息立即显示在界面上
-      this.messages.push({
+            this.messages.push({
         type: 'user',
         content: userMessageContent,
         time: new Date().toISOString(),
       });
-      this.userInput = ''; // 清空输入框
-      this.scrollToBottom();
+      this.userInput = '';       this.scrollToBottom();
 
       try {
-        // b. 调用后端API发送消息
-        const replyMsg = await request({
+                const replyMsg = await request({
           url: `${apiConfig.BASE_URL}/chat/send`,
           method: 'POST',
           data: { message: userMessageContent },
         });
         
-        // c. 将机器人回复显示在界面上
-        this.messages.push({ type: 'robot', ...replyMsg });
+                this.messages.push({ type: 'robot', ...replyMsg });
       } catch (error) {
-        // d. 如果API失败，也显示一条错误提示消息
-        this.messages.push({
+                this.messages.push({
           type: 'robot',
           content: '抱歉，服务暂时遇到问题，请稍后再试。',
         });
@@ -168,18 +152,14 @@ export default {
       }
     },
 
-    // 7. 新增：处理快捷回复按钮点击
-    handleQuickReply(text) {
+        handleQuickReply(text) {
       this.userInput = text;
       this.sendMessage();
     },
 
-    // 8. 新增：滚动到底部的方法
-    scrollToBottom() {
+        scrollToBottom() {
       this.$nextTick(() => {
-        // 通过设置一个很大的值来确保滚动到底部
-        this.scrollTop = this.messages.length * 200; // 估算值
-      });
+                this.scrollTop = this.messages.length * 200;       });
     }
   }
 };

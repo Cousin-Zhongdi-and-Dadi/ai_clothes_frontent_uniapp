@@ -42,7 +42,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
@@ -59,11 +58,8 @@ export default {
       isLoading: false,
     };
   },
-  // 5. 修改：onLoad 中并行获取分类和商品，提升加载速度
-  async onLoad() {
-    await this.fetchCategories(); // 必须先获取分类
-    this.refresh(); // 然后根据默认分类刷新商品
-  },
+    async onLoad() {
+    await this.fetchCategories();     this.refresh();   },
   onReachBottom() {
     this.fetchGoods(true);
   },
@@ -78,8 +74,7 @@ export default {
         url: `/pages/GoodsDetail/GoodsDetail?id=${id}`,
       });
     },
-    // 2. 改造 fetchCategories 方法
-    async fetchCategories() {
+        async fetchCategories() {
       try {
         const res = await request({
           url: `${apiConfig.BASE_URL}/mall/getCategory`,
@@ -94,14 +89,12 @@ export default {
             name: cat.categoryName,
           }));
         this.tabs = [{ name: '推荐', id: null }, ...categories];
-        // 修复：初始时设置 activeTabId，确保商品能正常显示
-        if (this.activeTabId === null && this.tabs.length > 0) {
+                if (this.activeTabId === null && this.tabs.length > 0) {
           this.activeTabId = this.tabs[0].id;
         }
       } catch (error) {
         console.error("fetchCategories failed:", error);
-        // 错误提示已由 request 函数处理，这里只做降级处理
-        if (this.tabs.length === 0) {
+                if (this.tabs.length === 0) {
           this.tabs = [{ name: '推荐', id: null }];
         }
       }
@@ -111,8 +104,7 @@ export default {
       this.activeTabId = tab.id;
       this.refresh();
     },
-    // 3. 改造 fetchGoods 方法
-    async fetchGoods(loadMore = false) {
+        async fetchGoods(loadMore = false) {
       if (this.isLoading || (loadMore && !this.hasMore)) {
         return;
       }
@@ -138,22 +130,18 @@ export default {
           id: item.id,
           name: item.productName,
           desc: item.description,
-          image: item.imageGif, // 恢复为接口返回的图片字段
-          price: item.price,
+          image: item.imageGif,           price: item.price,
         }));
 
-        // 新增：输出前十条图片url到控制台
-        newItems.slice(0, 10).forEach((item, idx) => {
+                newItems.slice(0, 10).forEach((item, idx) => {
           console.log(`图片${idx + 1}:`, item.image);
         });
 
         if (loadMore) {
           this.goods = [...this.goods, ...newItems];
-          this.page++; // 下一页自增
-        } else {
+          this.page++;         } else {
           this.goods = newItems;
-          this.page = 1; // 首次加载后，下一页应为1
-        }
+          this.page = 1;         }
         this.hasMore = newItems.length === this.pageSize;
       } catch (error) {
         console.error("fetchGoods failed:", error);
@@ -161,10 +149,8 @@ export default {
         this.isLoading = false;
       }
     },
-    // 4. refresh 方法
-    async refresh() {
-      this.page = 0; // 从第0页开始
-      this.goods = [];
+        async refresh() {
+      this.page = 0;       this.goods = [];
       this.hasMore = true;
       await this.fetchGoods();
     },

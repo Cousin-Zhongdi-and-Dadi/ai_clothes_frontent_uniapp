@@ -30,14 +30,10 @@ export default {
   name: 'AiMatchResult',
   data() {
     return {
-      imageUrl: '', // 图片链接
-      title: '夏日运动休闲搭配', // 示例标题
-      tags: '运动 / 日常 / 清爽', // 示例标签
-    };
+      imageUrl: '',       title: '夏日运动休闲搭配',       tags: '运动 / 日常 / 清爽',     };
   },
   methods: {
-    // 可扩展：如需动态获取数据
-  }
+      }
 };
 </script>
 

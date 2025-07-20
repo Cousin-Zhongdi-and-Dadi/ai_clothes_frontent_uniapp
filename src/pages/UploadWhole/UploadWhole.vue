@@ -68,12 +68,10 @@ export default {
   name: 'UploadWhole',
   methods: {
     selectFromResources(type) {
-      // 判断是否已选择过上装或下装
-      const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+            const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
       const garmentUrl = uni.getStorageSync(key);
       if (garmentUrl) {
-        // 已选择过，弹窗询问是否覆盖
-        uni.showModal({
+                uni.showModal({
           title: '提示',
           content: type === 'top' ? '已选择过上装，是否覆盖？' : '已选择过下装，是否覆盖？',
           confirmText: '覆盖',
@@ -84,12 +82,10 @@ export default {
                 url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
               });
             }
-            // 取消则不做任何操作
-          }
+                      }
         });
       } else {
-        // 未选择过，直接跳转
-        uni.navigateTo({
+                uni.navigateTo({
           url: `/pages/ResourcesSelection/ResourcesSelection?type=${type}&source=UploadWhole`
         });
       }

@@ -84,8 +84,7 @@ import apiConfig from '../../utils/api.js';
 export default {
   data() {
     return {
-      pageType: 'top', // 'top' or 'bottom'
-      source: '',
+      pageType: 'top',       source: '',
       tabs: [],
       activeTabId: null,
       itemList: [],
@@ -93,28 +92,21 @@ export default {
       isLoading: false,
       isPopupVisible: false,
       selectedItem: null,
-      parentId: null // 新增：用于记录父分类id
-    };
+      parentId: null     };
   },
   onLoad(options) {
-    // 判断是选择上装还是下装
-    if (options.type === 'bottom') {
+        if (options.type === 'bottom') {
       this.pageType = 'bottom';
-      this.parentId = 24; // 下装
-    } else {
+      this.parentId = 24;     } else {
       this.pageType = 'top';
-      this.parentId = 23; // 上装
-    }
-    // 识别来源
-    if (options.source) {
+      this.parentId = 23;     }
+        if (options.source) {
       this.source = options.source;
     }
-    // 只获取对应父分类的子类tab
-    this.fetchSubCategories();
+        this.fetchSubCategories();
   },
   methods: {
-    // 获取上下装子类tab
-    async fetchSubCategories() {
+        async fetchSubCategories() {
       this.isLoading = true;
       try {
         const data = await request({
@@ -124,11 +116,9 @@ export default {
             parentId: this.parentId
           }
         });
-        // data为数组，按sortOrder排序
-        const categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
+                const categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
         this.tabs = categories;
-        // 默认激活第一个tab
-        if (this.tabs.length > 0) {
+                if (this.tabs.length > 0) {
           this.activeTabId = this.tabs[0].id;
           this.fetchItemsForCurrentTab();
         }
@@ -139,15 +129,13 @@ export default {
       }
     },
 
-    // 切换tab
-    changeTab(tab) {
+        changeTab(tab) {
       if (this.activeTabId === tab.id) return;
       this.activeTabId = tab.id;
       this.fetchItemsForCurrentTab();
     },
 
-    // 获取当前tab下的商品
-    async fetchItemsForCurrentTab() {
+        async fetchItemsForCurrentTab() {
       if (!this.activeTabId) return;
       if (this.itemsCache[this.activeTabId]) {
         this.itemList = this.itemsCache[this.activeTabId];
@@ -181,14 +169,12 @@ export default {
       }
     },
 
-    // Show the confirmation popup
-    showPopup(item) {
+        showPopup(item) {
       this.selectedItem = item;
       this.isPopupVisible = true;
     },
     
-    // Close the confirmation popup
-    closePopup() {
+        closePopup() {
       this.isPopupVisible = false;
       this.selectedItem = null;
     },
@@ -196,20 +182,16 @@ export default {
     async confirmSelection() {
       if (!this.selectedItem) return;
 
-      // === 新增：从AiMatch跳转时，选择后返回图片url ===
-      if (this.source === 'AiMatch') {
-        // 通过事件通道返回图片url
-        const pages = getCurrentPages();
+            if (this.source === 'AiMatch') {
+                const pages = getCurrentPages();
         const prevPage = pages[pages.length - 2];
         if (prevPage) {
-          // 兼容uni-app写法
-          uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
+                    uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
         }
         uni.navigateBack();
         return;
       }
-      // === 原有逻辑 ===
-      if (this.source === 'closet') {
+            if (this.source === 'closet') {
         uni.showLoading({ title: '正在添加...' });
         try {
           await request({
@@ -241,8 +223,7 @@ export default {
       }
     }
   },
-  // 新增：监听页面返回，AiMatch.vue 需监听图片选择事件
-  onUnload() {
+    onUnload() {
     if (this.source === 'AiMatch') {
       uni.$off && uni.$off('ai-match-image-selected');
     }

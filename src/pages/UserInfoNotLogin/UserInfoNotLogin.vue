@@ -14,8 +14,7 @@
 export default {
     methods: {
         login() {
-            // 跳转到登录页面
-            uni.navigateTo({
+                        uni.navigateTo({
                 url: '/pages/LoginSelection/LoginSelection'
             });
         }

@@ -151,7 +151,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '@/utils/api.js';
 import BodyDataEdit from '../../components/BodyDataEdit/BodyDataEdit.vue';
@@ -215,43 +214,29 @@ export default {
   },
   mounted() {
     // console.log('UserInfo.vue mounted');
-    // --- 开始修改：将数据获取逻辑移回到 mounted ---
-    // 当组件被 v-if 渲染并挂载到页面上时，mounted 会被调用。
-    // 这是获取初始数据的正确时机。
-    this.getUserInfo(); 
-    // --- 结束修改 ---
-  },
+                this.getUserInfo(); 
+      },
   onShow() {
     // console.log('UserInfo.vue onShow');
-    // --- 开始修改：可以保留 onShow 用于页面切换时的数据刷新 ---
-    // 比如用户修改了信息从其他页面返回时，可以在这里重新获取数据保证同步
-    // 但首次加载必须依赖 mounted
-    if (uni.getStorageSync('token')) {
-      // this.getUserInfo(); // 首次加载的调用已移至 mounted
-    }
-    // --- 结束修改 ---
-  },
+                if (uni.getStorageSync('token')) {
+          }
+      },
   methods: {
-    // --- 开始修改：新增缺失的辅助函数 ---
-    percentageWidth(min, max, value) {
-      // 确保 value 是一个有效的数字
-      const numValue = Number(value);
+        percentageWidth(min, max, value) {
+            const numValue = Number(value);
       if (isNaN(numValue) || numValue <= min) {
         return 0;
       }
       if (numValue >= max) {
         return 100;
       }
-      // 避免除以零
-      if (max === min) {
+            if (max === min) {
         return 0;
       }
       return ((numValue - min) / (max - min)) * 100;
     },
-    // --- 结束修改 ---
-
-    // 3. 改造 getUserInfo 方法
-    async getUserInfo() {
+    
+        async getUserInfo() {
       try {
         const userData = await request({
           url: `${apiConfig.BASE_URL}/user/getUserInfo`,
@@ -263,34 +248,25 @@ export default {
           return;
         }
 
-        // --- 开始修改：根据API报文格式，更新所有字段的赋值 ---
-        this.userName = userData.username;
+                this.userName = userData.username;
         this.userAvatar = userData.avatarUrl || '/static/logo.png';
         this.userGender = userData.gender;
         this.userHeight = userData.height;
         this.userWeight = userData.weight;
         this.userBust = userData.bust;
         this.userWaist = userData.waist;
-        // API返回的是 hips，组件使用的是 userHip
-        this.userHip = userData.hips; 
-        // API返回的是 shoulderWidth，组件使用的是 userShoulder
-        this.userShoulder = userData.shoulderWidth; 
-        // API返回的是 armLength，组件使用的是 userArm
-        this.userArm = userData.armLength; 
-        // API返回的是 legLength，组件使用的是 userLeg
-        this.userLeg = userData.legLength; 
-        // API返回的是 neckCircumference，组件使用的是 userNeck
-        this.userNeck = userData.neckCircumference; 
-        // --- 结束修改 ---
-
+                this.userHip = userData.hips; 
+                this.userShoulder = userData.shoulderWidth; 
+                this.userArm = userData.armLength; 
+                this.userLeg = userData.legLength; 
+                this.userNeck = userData.neckCircumference; 
+        
       } catch (error) {
         console.error("getUserInfo failed:", error);
-        // 错误提示已由 request 函数统一处理
-      }
+              }
     },
 
-    // 4. 改造 submitUsernameEdit 方法
-    async submitUsernameEdit() {
+        async submitUsernameEdit() {
       if (!this.newUserName.trim()) {
         uni.showToast({ title: '昵称不能为空', icon: 'none' });
         return;
@@ -314,8 +290,7 @@ export default {
       }
     },
 
-    // 5. 改造 changeAvatar 方法
-    async changeAvatar() {
+        async changeAvatar() {
       try {
         const chooseRes = await uni.chooseImage({ count: 1, sourceType: ['album', 'camera'] });
         const tempFilePath = chooseRes.tempFilePaths[0];
@@ -323,64 +298,49 @@ export default {
         uni.showLoading({ title: '正在上传...' });
 
         const uploadRes = await uni.uploadFile({
-          url: `${apiConfig.BASE_URL}/user/uploadAvatar`, // 假设的上传头像API
-          filePath: tempFilePath,
+          url: `${apiConfig.BASE_URL}/user/uploadAvatar`,           filePath: tempFilePath,
           name: 'file',
           header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` },
         });
 
-        // uni.uploadFile 返回的是字符串，需要解析
-        const responseData = JSON.parse(uploadRes.data);
+                const responseData = JSON.parse(uploadRes.data);
         
-        // 判断业务 code
-        if (responseData.code === 200) {
-          this.userAvatar = responseData.data.avatarUrl; // 更新为新头像URL
-          uni.showToast({ title: '头像更换成功', icon: 'success' });
+                if (responseData.code === 200) {
+          this.userAvatar = responseData.data.avatarUrl;           uni.showToast({ title: '头像更换成功', icon: 'success' });
         } else {
-          // 手动处理上传接口的业务失败
-          uni.showToast({ title: responseData.message || '上传失败', icon: 'none' });
+                    uni.showToast({ title: responseData.message || '上传失败', icon: 'none' });
         }
 
       } catch (error) {
-        // uni.chooseImage 用户取消等情况会进入这里
-        console.log("Avatar selection/upload cancelled or failed:", error);
+                console.log("Avatar selection/upload cancelled or failed:", error);
       } finally {
         uni.hideLoading();
       }
     },
 
-    // 6. 改造 logout 方法
-    async logout() {
+        async logout() {
       try {
         const res = await uni.showModal({ title: '提示', content: '确定要退出登录吗？' });
         
-        // --- 开始修改：兼容不同的返回值格式 ---
-        // 处理可能的数组格式返回值
-        let modalResult;
+                        let modalResult;
         if (Array.isArray(res)) {
-          // 如果返回的是数组格式 [error, result]
-          modalResult = res[1];
+                    modalResult = res[1];
         } else {
-          // 如果返回的是直接的对象格式
-          modalResult = res;
+                    modalResult = res;
         }
         
         if (modalResult && modalResult.confirm) {
-          // 1. 清除本地的 token
-          uni.removeStorageSync('token');
+                    uni.removeStorageSync('token');
           
-          // 2. 发出一个 'logged-out' 事件，通知父组件（UserInfoEntry）状态已改变
-          this.$emit('logged-out');
+                    this.$emit('logged-out');
         }
-        // --- 结束修改 ---
-      } catch (error) {
+              } catch (error) {
         console.error("Logout failed:", error);
         uni.showToast({ title: '退出失败，请稍后再试', icon: 'none' });
       }
     },
 
-    // 7. 其他方法
-    handleSelection(item) {
+        handleSelection(item) {
       if (item.text === '浏览历史') {
         uni.navigateTo({ url: '/pages/History/History' });
       } else if (item.text === '收藏穿搭') {
@@ -410,8 +370,7 @@ export default {
     async submitBodyDataEdit(editedData) {
       uni.showLoading({ title: '正在保存...' });
       try {
-        // 1. 构建API请求所需的数据结构，注意字段映射
-        const apiData = {
+                const apiData = {
           height: editedData.height,
           weight: editedData.weight,
           gender: editedData.gender,
@@ -424,15 +383,12 @@ export default {
           neckCircumference: editedData.neck,
         };
 
-        // 2. 发送POST请求到更新身材数据的接口
-        await request({
-          url: `${apiConfig.BASE_URL}/user/updateBodyData`, // 假设的API端点
-          method: 'POST',
+                await request({
+          url: `${apiConfig.BASE_URL}/user/updateBodyData`,           method: 'POST',
           data: apiData
         });
 
-        // 3. 请求成功后，更新本地数据
-        this.userHeight = editedData.height;
+                this.userHeight = editedData.height;
         this.userWeight = editedData.weight;
         this.userGender = editedData.gender;
         this.userBust = editedData.bust;
@@ -443,14 +399,12 @@ export default {
         this.userLeg = editedData.leg;
         this.userNeck = editedData.neck;
 
-        // 4. 关闭弹窗并提示成功
-        this.closeBodyDataEdit();
+                this.closeBodyDataEdit();
         uni.showToast({ title: '身材数据更新成功', icon: 'success' });
 
       } catch (error) {
         console.error("submitBodyDataEdit failed:", error);
-        // 错误提示已由 request 函数统一处理
-      } finally {
+              } finally {
         uni.hideLoading();
       }
     },

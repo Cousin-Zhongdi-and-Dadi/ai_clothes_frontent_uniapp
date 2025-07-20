@@ -12,7 +12,6 @@ export function checkLoginAndProceed(action) {
             icon: 'none'
         });
 
-        // 延迟后跳转到登录页
         setTimeout(() => {
             uni.navigateTo({
                 url: '/pages/LoginSelection/LoginSelection'
@@ -22,7 +21,6 @@ export function checkLoginAndProceed(action) {
         return false;
     }
 
-    // 如果已登录，执行回调或返回 true
     if (action && typeof action === 'function') {
         action();
     }

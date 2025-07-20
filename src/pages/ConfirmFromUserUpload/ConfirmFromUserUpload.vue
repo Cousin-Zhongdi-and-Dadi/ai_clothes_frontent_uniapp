@@ -99,18 +99,13 @@
 </template>
 
 <script>
-// --- 开始修改：导入封装的 uploadFile 函数 ---
 import request, { uploadFile } from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
-// --- 结束修改 ---
 
 export default {
   data() {
     return {
-      imagePath: '', // 从上一页接收的图片临时路径
-      categories: [], // 从API获取的分类列表
-      categoryIndex: -1, // 当前选中的分类索引
-      formData: {
+      imagePath: '',       categories: [],       categoryIndex: -1,       formData: {
         categoryId: null,
         brand: '',
         size: '',
@@ -121,8 +116,7 @@ export default {
     };
   },
   computed: {
-    // 计算属性，用于显示当前选中的分类名称
-    selectedCategoryName() {
+        selectedCategoryName() {
       if (this.categoryIndex > -1 && this.categories[this.categoryIndex]) {
         return this.categories[this.categoryIndex].name;
       }
@@ -130,19 +124,16 @@ export default {
     }
   },
   onLoad(options) {
-    // 页面加载时，获取从上个页面传来的图片路径
-    if (options.tempFilePath) {
+        if (options.tempFilePath) {
       this.imagePath = options.tempFilePath;
     } else {
       uni.showToast({ title: '图片路径丢失', icon: 'none' });
       uni.navigateBack();
     }
-    // 同时获取分类列表
-    this.fetchCategories();
+        this.fetchCategories();
   },
   methods: {
-    // 获取分类列表
-    async fetchCategories() {
+        async fetchCategories() {
       try {
         const data = await request({
           url: `${apiConfig.BASE_URL}/address/getCategory`,
@@ -158,27 +149,22 @@ export default {
         console.error("fetchCategories failed:", error);
       }
     },
-    // 处理分类选择器的变化
-    handleCategoryChange(e) {
+        handleCategoryChange(e) {
       this.categoryIndex = e.detail.value;
       this.formData.categoryId = this.categories[this.categoryIndex].id;
     },
-    // 新增：点击图片预览
-    previewImage() {
+        previewImage() {
       if (!this.imagePath) return;
       uni.previewImage({
         urls: [this.imagePath],
         current: this.imagePath
       });
     },
-    // 处理取消操作
-    handleCancel() {
+        handleCancel() {
       uni.navigateBack();
     },
-    // 处理提交操作
-    async handleSubmit() {
-      // 验证必填项
-      if (!this.formData.categoryId) {
+        async handleSubmit() {
+            if (!this.formData.categoryId) {
         uni.showToast({ title: '请选择类别', icon: 'none' });
         return;
       }
@@ -186,8 +172,7 @@ export default {
       uni.showLoading({ title: '正在上传...' });
 
       try {
-        // --- 开始修改：使用封装的 uploadFile 函数 ---
-        await uploadFile({
+                await uploadFile({
           url: `${apiConfig.BASE_URL}/closet/add`,
           filePath: this.imagePath,
           name: 'file',
@@ -202,16 +187,12 @@ export default {
         });
 
         uni.showToast({ title: '上传成功！', icon: 'success' });
-        // 通知衣橱页面刷新
-        uni.$emit('closet-refresh');
-        // 延时后返回，确保Toast能被看到
-        setTimeout(() => {
+                uni.$emit('closet-refresh');
+                setTimeout(() => {
           uni.navigateBack();
         }, 1500);
-        // --- 结束修改 ---
-      } catch (error) {
-        // 错误提示已由 uploadFile 函数统一处理
-        console.error("Upload failed in handleSubmit:", error);
+              } catch (error) {
+                console.error("Upload failed in handleSubmit:", error);
       } finally {
         uni.hideLoading();
       }

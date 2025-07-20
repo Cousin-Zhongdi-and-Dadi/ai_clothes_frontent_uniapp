@@ -46,8 +46,7 @@ export default {
       this.imageUrl = decodeURIComponent(options.imageUrl);
       this.type = options.type;
 
-      // 将选择的衣物URL存入缓存，供后续2D试衣使用
-      const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+            const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
       uni.setStorageSync(key, this.imageUrl);
       console.log(`${this.type === 'top' ? '上装' : '下装'}URL已存储:`, this.imageUrl);
     } else {
@@ -79,8 +78,7 @@ export default {
       uni.showLoading({ title: '正在上传衣物图片...' });
 
       try {
-        // 只上传本地临时路径，云端链接直接用
-        if (!/^https?:\/\//.test(topGarmentUrl)) {
+                if (!/^https?:\/\//.test(topGarmentUrl)) {
           topGarmentUrl = await new Promise((resolve, reject) => {
             uni.uploadFile({
               url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
@@ -142,8 +140,7 @@ export default {
 
         uni.showLoading({ title: '正在生成搭配...' });
 
-        // 这里参数全部为云端链接
-        const res = await request({
+                const res = await request({
           url: `${apiConfig.BASE_URL}/fitting_2d/submit_task`,
           method: 'GET',
           data: {

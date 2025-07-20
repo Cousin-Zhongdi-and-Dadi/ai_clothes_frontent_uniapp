@@ -60,8 +60,7 @@ export default {
           });
         }
       },
-      immediate: true, // 立即执行一次
-      deep: true
+      immediate: true,       deep: true
     }
   },
   methods: {
@@ -74,14 +73,12 @@ export default {
         return;
       }
 
-      // 将表单数据转换为父组件需要的格式
-      const submittedData = this.formFields.reduce((acc, field) => {
+            const submittedData = this.formFields.reduce((acc, field) => {
         acc[field.key] = field.value;
         return acc;
       }, {});
 
-      this.$emit('success', submittedData); // 使用 $emit 发送事件和数据
-    }
+      this.$emit('success', submittedData);     }
   }
 };
 </script>

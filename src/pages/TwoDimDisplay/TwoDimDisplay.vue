@@ -66,8 +66,7 @@ export default {
   components: { CustomerService },
   name: 'TwoDimDisplay',
   methods: {
-    // 选择图片后直接跳转，传递临时文件路径
-    uploadFromAlbum() {
+        uploadFromAlbum() {
       uni.chooseImage({
         count: 1,
         sourceType: ['album'],
@@ -87,8 +86,7 @@ export default {
         }
       });
     },
-    // 跳转到确认页，传递原始图片路径
-    navigateToConfirm(tempFilePath) {
+        navigateToConfirm(tempFilePath) {
       uni.navigateTo({
         url: `/pages/ConfirmModel/ConfirmModel?tempFilePath=${encodeURIComponent(tempFilePath)}`
       });

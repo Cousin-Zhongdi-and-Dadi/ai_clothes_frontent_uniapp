@@ -26,8 +26,7 @@
         :frontImage="card.frontImage"
         :backText="card.backText"
         :style="{ 
-          top: `${index * 100}rpx`, // 增加垂直偏移量
-          transform: `scale(${1 - index * 0.05})`,
+          top: `${index * 100}rpx`,           transform: `scale(${1 - index * 0.05})`,
           zIndex: cards.length - index 
         }"
         :canInteract="index === 0"
@@ -48,7 +47,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 import CartIcon from '@/components/CartIcon/CartIcon.vue';
@@ -62,8 +60,7 @@ export default {
       cards: [],
       isLoading: true,
       emptyMessage: '今日推荐已看完',
-      isGuest: false // 新增：是否为游客模式
-    };
+      isGuest: false     };
   },
   created() {
     const token = uni.getStorageSync('token');
@@ -71,8 +68,7 @@ export default {
     this.loadInitialStack();
   },
   methods: {
-    // 游客模式静态推荐数据
-    getMockRecommendations() {
+        getMockRecommendations() {
       return [
         {
           id: 1,
@@ -101,22 +97,18 @@ export default {
         }
       ];
     },
-    // 2. 改造 loadInitialStack 和 fetchRecommendation
-    async loadInitialStack() {
+        async loadInitialStack() {
       this.isLoading = true;
       if (this.isGuest) {
-        // 游客模式：加载本地静态数据
-        this.cards = this.getMockRecommendations();
+                this.cards = this.getMockRecommendations();
         this.isLoading = false;
         this.emptyMessage = '游客模式下仅展示部分静态推荐';
         return;
       }
-      // 并行发起5个请求
-      const promises = Array(5).fill(null).map(() => this.fetchRecommendation());
+            const promises = Array(5).fill(null).map(() => this.fetchRecommendation());
       try {
         const newCards = await Promise.all(promises);
-        // 过滤掉请求失败的结果 (null)
-        this.cards = newCards.filter(card => card !== null);
+                this.cards = newCards.filter(card => card !== null);
       } catch (error) {
         console.error("Error loading initial stack:", error);
         this.cards = [];
@@ -130,30 +122,25 @@ export default {
 
     async fetchRecommendation() {
       if (this.isGuest) {
-        // 游客模式下不请求后端
-        return null;
+                return null;
       }
       try {
         const data = await request({
           url: `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`,
           method: 'GET',
         });
-        // 业务成功，request 函数直接返回了 data
-        return {
+                return {
           frontImage: data.imageUrl,
           backText: data.description,
-          // 使用后端返回的ID或一个随机ID作为key
-          id: data.id || Date.now() + Math.random()
+                    id: data.id || Date.now() + Math.random()
         };
       } catch (error) {
         console.error("fetchRecommendation failed:", error);
-        // 任何错误（网络或业务）发生时，返回 null，以便 Promise.all 可以继续
-        return null;
+                return null;
       }
     },
 
-    // 3. 改造 addToFavorites 方法
-    async addToFavorites(imageUrl) {
+        async addToFavorites(imageUrl) {
       if (this.isGuest) {
         uni.showToast({ title: '请登录后收藏', icon: 'none' });
         return;
@@ -163,21 +150,17 @@ export default {
         return;
       }
       try {
-        // 根据原代码逻辑，POST方法的参数在URL中
-        await request({
+                await request({
           url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(imageUrl)}`,
           method: 'POST',
         });
         console.log('收藏成功:', imageUrl);
-        // 成功时静默处理，不打扰用户
-      } catch (error) {
+              } catch (error) {
         console.error('Favorite request failed:', error);
-        // 错误提示已由 request 函数统一处理
-      }
+              }
     },
 
-    // 4. handleSwipeLeft 调用改造后的 addToFavorites
-    handleSwipeLeft(index) {
+        handleSwipeLeft(index) {
       if (index === 0) {
         const likedCard = this.cards[0];
         if (!likedCard) return;

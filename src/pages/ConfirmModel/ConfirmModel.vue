@@ -52,40 +52,28 @@ export default {
   components: { CustomerService },
   data() {
     return {
-      imageUrl: '',      // 用于图片显示的临时路径
-      tempFilePath: '',  // 存储原始的临时文件路径 (从上个页面传来)
-      imageBase64: '',   // 用于上传的Base64数据
-      // 注意：这里保留 compressedFilePath 是为了兼容 onConfirm 中的逻辑
-      // 它现在和 tempFilePath 是同一个值
-      compressedFilePath: '' 
+      imageUrl: '',            tempFilePath: '',        imageBase64: '',                     compressedFilePath: '' 
     }
   },
   onLoad(options) {
-    // 1. 直接接收并解码上个页面传来的图片路径
-    if (options.tempFilePath) {
+        if (options.tempFilePath) {
       const filePath = decodeURIComponent(options.tempFilePath);
       
-      // 2. 将路径赋值给相关变量
-      this.tempFilePath = filePath;
-      this.compressedFilePath = filePath; // 图片已经是压缩过的
-      
-      // 3. 直接调用 displayImage 显示图片，不再进行二次压缩
-      this.displayImage(filePath);
+            this.tempFilePath = filePath;
+      this.compressedFilePath = filePath;       
+            this.displayImage(filePath);
     }
   },
   methods: {
-    // 显示图片
-    displayImage(filePath) {
+        displayImage(filePath) {
       this.imageUrl = filePath;
     },
     
-    // 重新挑选，返回上一页
-    onRetry() {
+        onRetry() {
       uni.navigateBack();
     },
     
-    // 确认上传
-    async onConfirm() {
+        async onConfirm() {
       const filePath = this.compressedFilePath || this.tempFilePath;
       if (!filePath) {
         uni.showToast({ title: '没有可上传的图片', icon: 'none' });
@@ -93,19 +81,15 @@ export default {
       }
       uni.showLoading({ title: '正在上传...', mask: true });
       uni.uploadFile({
-        url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`, // 新接口
-        filePath: filePath,
-        name: 'file', // 参数名必须为 file
-        formData: {}, // 可加其它参数
-        success: (res) => {
+        url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,         filePath: filePath,
+        name: 'file',         formData: {},         success: (res) => {
           uni.hideLoading();
           try {
             const result = JSON.parse(res.data);
             console.log('任务提交响应:', res);
             if (result.code === 200 && result.data) {
               uni.showToast({ title: '上传成功！', icon: 'success' });
-              // 保存人物图片的存储链接
-              uni.setStorageSync('personImageUrl', result.data);
+                            uni.setStorageSync('personImageUrl', result.data);
               setTimeout(() => {
                 uni.navigateTo({ url: `/pages/UploadWhole/UploadWhole?imgUrl=${encodeURIComponent(result.data)}` });
               }, 1500);
@@ -124,8 +108,7 @@ export default {
       });
     },
     
-    // 将文件转换为Base64
-    fileToBase64(filePath) {
+        fileToBase64(filePath) {
       return new Promise((resolve, reject) => {
         uni.getFileSystemManager().readFile({
           filePath,

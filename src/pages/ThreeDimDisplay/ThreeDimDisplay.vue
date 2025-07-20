@@ -18,7 +18,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '@/utils/api.js';
 
@@ -26,16 +25,12 @@ export default {
   name: 'ThreeDimDisplay',
   data() {
     return {
-      // 4. url 初始为空
-      url: '',
-      // 5. 新增加载状态
-      isLoading: true
+            url: '',
+            isLoading: true
     };
   },
-  // 6. 页面加载时触发
-  onLoad(options) {
-    // 从页面跳转的参数中获取 styleId
-    if (options.styleId) {
+    onLoad(options) {
+        if (options.styleId) {
       this.fetchModelUrl(options.styleId);
     } else {
       console.error('No styleId provided to ThreeDimDisplay page.');
@@ -47,25 +42,19 @@ export default {
     }
   },
   methods: {
-    // 7. 新增：根据 styleId 获取模型URL的方法
-    async fetchModelUrl(styleId) {
+        async fetchModelUrl(styleId) {
       this.isLoading = true;
       try {
-        // 使用封装的 request 函数
-        const modelUrl = await request({
+                const modelUrl = await request({
           url: `${apiConfig.BASE_URL}/fitting_3d/getLink/${styleId}`,
           method: 'GET',
         });
         
-        // 业务成功，request 函数直接返回了 URL
-        this.url = modelUrl;        
+                this.url = modelUrl;        
       } catch (error) {
-        // 错误提示已由 request 函数统一处理
-        console.error('Fetch 3D URL failed:', error);
-        // this.url 保持为空，模板会自动显示错误提示
-      } finally {
-        // 无论成功或失败，都隐藏加载提示
-        this.isLoading = false;
+                console.error('Fetch 3D URL failed:', error);
+              } finally {
+                this.isLoading = false;
       }
     },
     copyUrl() {

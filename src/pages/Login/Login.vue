@@ -46,7 +46,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
@@ -55,13 +54,10 @@ export default {
     return {
       phone: '',
       code: '',
-      isGettingCode: false, // 防止重复点击获取验证码
-      countdown: 0,       // 倒计时秒数
-    };
+      isGettingCode: false,       countdown: 0,           };
   },
   methods: {
-    // 2. 改造 getCode 方法
-    async getCode() {
+        async getCode() {
       if (this.isGettingCode) return;
 
       if (!this.phone) {
@@ -77,8 +73,7 @@ export default {
       uni.showLoading({ title: '正在发送...' });
 
       try {
-        // 假设获取验证码的API
-        await request({
+                await request({
           url: `${apiConfig.BASE_URL}/user/sendCode`,
           method: 'POST',
           data: { phone: this.phone }
@@ -86,8 +81,7 @@ export default {
 
         uni.showToast({ title: '验证码已发送', icon: 'success' });
         
-        // 开始倒计时
-        this.countdown = 60;
+                this.countdown = 60;
         const timer = setInterval(() => {
           this.countdown--;
           if (this.countdown <= 0) {
@@ -98,14 +92,12 @@ export default {
 
       } catch (error) {
         console.error("getCode failed:", error);
-        this.isGettingCode = false; // 失败时允许用户重试
-      } finally {
+        this.isGettingCode = false;       } finally {
         uni.hideLoading();
       }
     },
 
-    // 3. 改造 login 方法
-    async login() {
+        async login() {
       if (!this.phone) {
         uni.showToast({ title: '请输入手机号', icon: 'none' });
         return;
@@ -127,13 +119,11 @@ export default {
           },
         });
 
-        // 业务成功，request 函数直接返回了包含 token 的对象
-        uni.setStorageSync('token', loginData.token);
+                uni.setStorageSync('token', loginData.token);
         
         uni.showToast({ title: '登录成功', icon: 'success' });
 
-        // 跳转到个人中心入口
-        setTimeout(() => {
+                setTimeout(() => {
           uni.switchTab({
             url: '/pages/UserInfoEntry/UserInfoEntry'
           });
@@ -141,8 +131,7 @@ export default {
 
       } catch (error) {
         console.error("login failed:", error);
-        // 错误提示已由 request 函数统一处理
-      } finally {
+              } finally {
         uni.hideLoading();
       }
     }

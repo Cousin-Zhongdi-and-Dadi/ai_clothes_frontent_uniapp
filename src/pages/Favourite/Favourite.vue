@@ -53,7 +53,6 @@
 </template>
 
 <script>
-// 1. 导入封装的 request 函数和 apiConfig
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 
@@ -66,8 +65,7 @@ export default {
       page: 1,
       pageSize: 12,
       hasMore: true,
-      isGuest: false // 新增：是否为游客模式
-    };
+      isGuest: false     };
   },
   computed: {
     rows() {
@@ -87,8 +85,7 @@ export default {
       return 'more';
     }
   },
-  // onShow 会在页面每次显示时触发，比 onLoad 更适合刷新数据
-  onShow() {
+    onShow() {
     const token = uni.getStorageSync('token');
     this.isGuest = !token;
     this.getFavorites(true);
@@ -102,16 +99,14 @@ export default {
     }
   },
   methods: {
-    // 游客模式静态收藏数据
-    getMockFavorites() {
+        getMockFavorites() {
       return [
         { id: 1, img: '/static/example_pictures/sample1.png' },
         { id: 2, img: '/static/example_pictures/sample2.png' },
         { id: 3, img: '/static/example_pictures/sample3.png' }
       ];
     },
-    // 2. 改造 getFavorites 方法
-    async getFavorites(isRefresh = false) {
+        async getFavorites(isRefresh = false) {
       if (this.isGuest) {
         this.isLoading = false;
         this.images = this.getMockFavorites();
@@ -150,8 +145,7 @@ export default {
       }
     },
 
-    // 3. 改造 deleteFavorite 方法
-    async deleteFavorite(imageId) {
+        async deleteFavorite(imageId) {
       uni.showLoading({ title: '正在删除...' });
       try {
         await request({
@@ -159,18 +153,15 @@ export default {
           method: 'DELETE',
         });
         uni.showToast({ title: '删除成功', icon: 'success' });
-        // 从UI上直接移除，无需刷新
-        this.images = this.images.filter(img => img.id !== imageId);
+                this.images = this.images.filter(img => img.id !== imageId);
       } catch (error) {
         console.error("deleteFavorite failed:", error);
-        // 错误提示已由 request 函数统一处理
-      } finally {
+              } finally {
         uni.hideLoading();
       }
     },
 
-    // 4. 改造 handleLongPress 方法，使用 async/await
-    async handleLongPress(item) {
+        async handleLongPress(item) {
       try {
         const res = await uni.showModal({
           title: '删除确认',
@@ -180,8 +171,7 @@ export default {
           this.deleteFavorite(item.id);
         }
       } catch (error) {
-        // 用户点击取消等操作会进入这里，无需处理
-      }
+              }
     },
   }
 };

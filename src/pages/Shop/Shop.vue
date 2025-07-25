@@ -23,7 +23,7 @@
         <image
           :src="item.image"
           class="goods-image"
-          mode="aspectFill"
+          mode="aspectFit"
         />
         <view class="goods-info">
           <text class="goods-name">{{ item.name }}</text>
@@ -224,7 +224,7 @@ export default {
   padding: 20rpx 20rpx 0 20rpx;
 }
 .goods-item {
-  width: 47%;
+  width: 49%;
   background: #fff;
   border-radius: 16rpx;
   margin-bottom: 24rpx;
@@ -233,34 +233,63 @@ export default {
   flex-direction: column;
   align-items: center;
   padding-bottom: 20rpx;
+  height: 500rpx; /* 固定高度 */
+  position: relative;
+  overflow: hidden;
 }
 .goods-image {
   width: 100%;
-  height: 240rpx;
+  height: 100%;
+  aspect-ratio: 1 / 1; /* 保证容器为正方形，部分平台支持 */
   border-radius: 16rpx 16rpx 0 0;
-  object-fit: cover;
+  background: #f5f5f5;
+  display: block;
+  object-fit: contain;
 }
 .goods-info {
   width: 90%;
   margin: 16rpx 0 0 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* 新增：为价格留出空间，避免与描述重叠 */
+  padding-bottom: 40rpx;
 }
 .goods-name {
   font-size: 26rpx;
   color: #222;
   font-weight: 500;
-  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 2;
+  max-height: 64rpx;
+  margin-bottom: 4rpx;
 }
 .goods-desc {
   font-size: 22rpx;
   color: #888;
-  margin-top: 4rpx;
-  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 2;
+  max-height: 80rpx;
 }
 .goods-price {
-  color: #6753e7;
+  color: #333;
   font-size: 28rpx;
   font-weight: bold;
-  margin-top: 12rpx;
+  position: absolute;
+  left: 20rpx;
+  bottom: 16rpx;
+  margin-top: 0;
+  background: #fff;
+  z-index: 2;
 }
 .bottom-status {
   width: 100%;

@@ -140,7 +140,7 @@ export default {
       }
     },
 
-        async addToFavorites(imageUrl) {
+    async addToFavorites(imageUrl) {
       if (this.isGuest) {
         uni.showToast({ title: '请登录后收藏', icon: 'none' });
         return;
@@ -150,31 +150,26 @@ export default {
         return;
       }
       try {
-                await request({
+        await request({
           url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(imageUrl)}`,
           method: 'POST',
         });
-        
-              } catch (error) {
+      } catch (error) {
         console.error('Favorite request failed:', error);
-              }
+      }
     },
 
-        handleSwipeLeft(index) {
+    handleSwipeLeft(index) {
       if (index === 0) {
         const likedCard = this.cards[0];
         if (!likedCard) return;
-
-        
         this.addToFavorites(likedCard.frontImage);
-
         this.cards.shift();
         this.$nextTick(() => this.resetCardPosition());
       }
     },
     handleSwipeRight(index) {
       if (index === 0) {
-        
         this.cards.shift();
         this.$nextTick(() => this.resetCardPosition());
       }
@@ -257,5 +252,40 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* 新增 RecommendationPopup 相关样式 */
+.recommendation-popup-mask {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(120, 120, 120, 0.5); /* 通用灰色半透明 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.recommendation-popup-content {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 40rpx 20rpx 20rpx 20rpx;
+  min-width: 600rpx;
+  min-height: 600rpx;
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  overflow: auto;
+}
+.close-btn {
+  position: absolute;
+  right: 24rpx;
+  top: 16rpx;
+  font-size: 48rpx;
+  color: #888;
+  z-index: 10;
+  cursor: pointer;
 }
 </style>

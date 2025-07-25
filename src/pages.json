@@ -1,6 +1,12 @@
 {
 	"pages": [ 
         {
+			"path": "pages/Shop/Shop",
+			"style": {
+				"navigationBarTitleText": "素材库"
+			}
+		},    
+        {
             "path": "pages/UserInfoEntry/UserInfoEntry",
             "style": {
                 "navigationBarTitleText": "个人中心"
@@ -34,12 +40,6 @@
 			"path": "pages/UserInfo/UserInfo",
 			"style": {
 				"navigationBarTitleText": "个人中心"
-			}
-		},
-        {
-			"path": "pages/Shop/Shop",
-			"style": {
-				"navigationBarTitleText": "素材库"
 			}
 		},
         {
@@ -151,29 +151,23 @@
 		"backgroundColor": "#fff",
 		"borderStyle": "black",
 		"list": [
-			{
-				"pagePath": "pages/Recommendation/Recommendation",
-				"iconPath": "static/icon/icon-09.png",
-				"selectedIconPath": "static/icon/icon-10.png",
-				"text": "每日推荐"
+            {
+				"pagePath": "pages/Shop/Shop",
+				"iconPath": "static/icon/icon-05.png",
+				"selectedIconPath": "static/icon/icon-06.png",
+				"text": "总素材库"
+			},
+            {
+				"pagePath": "pages/TryOnContainer/TryOnContainer",
+				"iconPath": "static/icon/icon-03.png",
+				"selectedIconPath": "static/icon/icon-04.png",
+				"text": "试衣搭配"
 			},
             {
 				"pagePath": "pages/Closet/Closet",
 				"iconPath": "static/icon/icon-01.png",
 				"selectedIconPath": "static/icon/icon-02.png",
 				"text": "我的衣橱"
-			},
-			{
-				"pagePath": "pages/TryOnContainer/TryOnContainer",
-				"iconPath": "static/icon/icon-03.png",
-				"selectedIconPath": "static/icon/icon-04.png",
-				"text": "试衣搭配"
-			},
-			{
-				"pagePath": "pages/Shop/Shop",
-				"iconPath": "static/icon/icon-05.png",
-				"selectedIconPath": "static/icon/icon-06.png",
-				"text": "总素材库"
 			},
 			{
 				"pagePath": "pages/UserInfoEntry/UserInfoEntry",

@@ -13,9 +13,9 @@
       <view class="card-face card-front">
         <image
           :src="frontImage"
-          mode="aspectFill"
           class="card-image"
-        ></image>
+          @error="onImgError"
+        />
       </view>
       <!-- 卡片背面文字及详情按钮 -->
       <view class="card-face card-back">
@@ -107,6 +107,12 @@ export default {
      */
     updateTransformX(value) {
       this.transformX = value;
+    },
+    /**
+     * Handle image error event
+     */
+    onImgError() {
+      console.log('图片加载失败', this.frontImage);
     }
   }
 };

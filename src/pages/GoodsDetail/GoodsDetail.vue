@@ -150,11 +150,10 @@
 <script>
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
-import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import CartIcon from '@/components/CartIcon/CartIcon.vue';
 
 export default {
-  components: { CustomerService, CartIcon },
+  components: { CartIcon },
   name: 'GoodsDetail',
   data() {
     return {

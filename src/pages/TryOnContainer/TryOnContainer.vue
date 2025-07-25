@@ -19,10 +19,7 @@
 </template>
 
 <script>
-import CustomerService from '@/components/CustomerService/CustomerService.vue';
-
 export default {
-  components: { CustomerService },
   name: 'TryOnContainer',
   methods: {
     goToAiMatch() {

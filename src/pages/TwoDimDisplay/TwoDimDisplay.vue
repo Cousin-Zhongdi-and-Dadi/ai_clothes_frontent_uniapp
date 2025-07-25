@@ -59,11 +59,9 @@
 </template>
 
 <script>
-import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import apiConfig from '@/utils/api.js';
 
 export default {
-  components: { CustomerService },
   name: 'TwoDimDisplay',
   methods: {
         uploadFromAlbum() {

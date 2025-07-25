@@ -38,7 +38,8 @@
     >
       <text class="bottom-status-text">到底了</text>
     </view>
-    <recommendation-popup
+    <recommendation-icon @show-recommendation="showRecommendation = true" />
+    <recommendation
       :visible="showRecommendation"
       @close="showRecommendation = false"
     />
@@ -48,11 +49,12 @@
 <script>
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
-import RecommendationPopup from '@/components/RecommendationPopup.vue';
+import Recommendation from '@/components/Recommendation/Recommendation.vue';
+import RecommendationIcon from '@/components/RecommendationIcon/RecommendationIcon.vue';
 
 export default {
   name: 'ShopPage',
-  components: { RecommendationPopup },
+  components: { Recommendation, RecommendationIcon },
   data() {
     return {
       tabs: [],

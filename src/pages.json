@@ -43,12 +43,6 @@
 			}
 		},
         {
-			"path": "pages/Recommendation/Recommendation",
-			"style": {
-				"navigationBarTitleText": "每日推荐"
-			}
-		},    
-        {
 			"path": "pages/ThreeDimDisplay/ThreeDimDisplay",
 			"style": {
 				"navigationBarTitleText": "3D试衣"

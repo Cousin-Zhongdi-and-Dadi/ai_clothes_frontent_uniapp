@@ -1,20 +1,13 @@
 <template>
-  <view class="container">
-    <!-- <customer-service /> -->
-    <cart-icon />
-
-    <!-- 1. 加载状态 -->
+  <view
+    v-if="visible"
+    class="recommendation-fullscreen-mask"
+  >
     <view
-      v-if="isLoading"
-      class="status-view"
-    >
-      <view class="loading-animation"></view>
-      <text>正在加载今日推荐...</text>
-    </view>
-
-    <!-- 2. 卡片堆栈 -->
+      class="close-btn"
+      @click="$emit('close')"
+    >×</view>
     <view
-      v-else-if="cards.length > 0"
       class="card-stack"
       ref="cardStack"
     >
@@ -25,42 +18,60 @@
         class="display_card"
         :frontImage="card.frontImage"
         :backText="card.backText"
-        :style="{ 
-          top: `${index * 100}rpx`,           transform: `scale(${1 - index * 0.05})`,
-          zIndex: cards.length - index 
+        :style="{
+          top: `${index * 100}rpx`,
+          transform: `scale(${1 - index * 0.05})`,
+          zIndex: cards.length - index
         }"
         :canInteract="index === 0"
         @swipeLeft="handleSwipeLeft(index)"
         @swipeRight="handleSwipeRight(index)"
         @click="handleCardClick(index)"
       />
-    </view>
-
-    <!-- 3. 空状态或加载失败状态 -->
-    <view
-      v-else
-      class="status-view"
-    >
-      <text>{{ emptyMessage }}</text>
+      <view
+        v-if="isLoading"
+        class="status-view"
+      >
+        <view class="loading-animation"></view>
+        <text>正在加载今日推荐...</text>
+      </view>
+      <view
+        v-else-if="cards.length === 0"
+        class="status-view"
+      >
+        <text>{{ emptyMessage }}</text>
+      </view>
     </view>
   </view>
 </template>
 
 <script>
+import DisplayCard from '@/components/DisplayCard/DisplayCard.vue';
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
-import CartIcon from '@/components/CartIcon/CartIcon.vue';
-import CustomerService from '@/components/CustomerService/CustomerService.vue';
-import DisplayCard from '@/components/DisplayCard/DisplayCard.vue';
 
 export default {
-  components: { DisplayCard, CustomerService, CartIcon },
+  components: { DisplayCard },
+  props: {
+    visible: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       cards: [],
       isLoading: true,
       emptyMessage: '今日推荐已看完',
-      isGuest: false     };
+      isGuest: false
+    };
+  },
+  watch: {
+    visible(val) {
+      if (val) {
+        this.loadInitialStack();
+      }
+    }
   },
   created() {
     const token = uni.getStorageSync('token');
@@ -68,49 +79,40 @@ export default {
     this.loadInitialStack();
   },
   methods: {
-        getMockRecommendations() {
-      return [
-        {
-          id: 1,
-          frontImage: '/static/example_pictures/sample1.jpg',
-          backText: '欢迎体验游客模式！'
-        },
-        {
-          id: 2,
-          frontImage: '/static/example_pictures/sample2.jpg',
-          backText: '登录后可获得更多个性化推荐。'
-        },
-        {
-          id: 3,
-          frontImage: '/static/example_pictures/sample1.jpg',
-          backText: '登录后可获得更多个性化推荐。'
-        },
-        {
-          id: 4,
-          frontImage: '/static/example_pictures/sample2.jpg',
-          backText: '登录后可获得更多个性化推荐。'
-        },
-        {
-          id: 5,
-          frontImage: '/static/example_pictures/sample1.jpg',
-          backText: '登录后可获得更多个性化推荐。'
-        }
-      ];
-    },
-        async loadInitialStack() {
+    async loadInitialStack() {
       this.isLoading = true;
+      const processedIds = this.getProcessedIds();
       if (this.isGuest) {
-                this.cards = this.getMockRecommendations();
+        this.cards = [
+          {
+            id: 1,
+            frontImage: '/static/example_pictures/sample1.jpg',
+            backText: '示例推荐1'
+          },
+          {
+            id: 2,
+            frontImage: '/static/example_pictures/sample2.jpg',
+            backText: '示例推荐2'
+          }
+        ].filter(card => !processedIds.includes(card.id));
         this.isLoading = false;
         this.emptyMessage = '游客模式下仅展示部分静态推荐';
         return;
       }
-            const promises = Array(5).fill(null).map(() => this.fetchRecommendation());
       try {
-        const newCards = await Promise.all(promises);
-                this.cards = newCards.filter(card => card !== null);
+        const res = await request({
+          url: `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`,
+          method: 'GET',
+        });
+        let dataArr = Array.isArray(res) ? res : res.data;
+        let newCards = (dataArr || []).filter(card => card && !processedIds.includes(card.id))
+          .map(card => ({
+            frontImage: card.imageGif,
+            backText: card.description || '',
+            id: card.id
+          }));
+        this.cards = newCards;
       } catch (error) {
-        console.error("Error loading initial stack:", error);
         this.cards = [];
       } finally {
         this.isLoading = false;
@@ -119,173 +121,95 @@ export default {
         }
       }
     },
-
-    async fetchRecommendation() {
-      if (this.isGuest) {
-                return null;
-      }
-      try {
-        const data = await request({
-          url: `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`,
-          method: 'GET',
-        });
-                return {
-          frontImage: data.imageUrl,
-          backText: data.description,
-                    id: data.id || Date.now() + Math.random()
-        };
-      } catch (error) {
-        console.error("fetchRecommendation failed:", error);
-                return null;
-      }
+    getTodayStr() {
+      return new Date().toISOString().slice(0, 10);
     },
-
-    async addToFavorites(imageUrl) {
-      if (this.isGuest) {
-        uni.showToast({ title: '请登录后收藏', icon: 'none' });
-        return;
-      }
-      if (!imageUrl) {
-        console.error('没有可收藏的图片URL');
-        return;
-      }
-      try {
-        await request({
-          url: `${apiConfig.BASE_URL}/collection/add?imageUrl=${encodeURIComponent(imageUrl)}`,
-          method: 'POST',
-        });
-      } catch (error) {
-        console.error('Favorite request failed:', error);
-      }
+    getProcessedIds() {
+      const today = this.getTodayStr();
+      const map = uni.getStorageSync('recommendation_processed_map') || {};
+      return map[today] || [];
     },
-
+    addProcessedId(id) {
+      const today = this.getTodayStr();
+      let map = uni.getStorageSync('recommendation_processed_map') || {};
+      if (!map[today]) map[today] = [];
+      if (!map[today].includes(id)) map[today].push(id);
+      uni.setStorageSync('recommendation_processed_map', map);
+    },
     handleSwipeLeft(index) {
       if (index === 0) {
         const likedCard = this.cards[0];
         if (!likedCard) return;
-        this.addToFavorites(likedCard.frontImage);
+        this.addProcessedId(likedCard.id);
         this.cards.shift();
         this.$nextTick(() => this.resetCardPosition());
       }
     },
     handleSwipeRight(index) {
       if (index === 0) {
+        const card = this.cards[0];
+        if (card) this.addProcessedId(card.id);
         this.cards.shift();
         this.$nextTick(() => this.resetCardPosition());
       }
     },
-    resetCardPosition() {
-      if (this.cards.length === 0) return;
-      const refName = `card-0`;
-      const cardRefs = this.$refs[refName];
-      if (cardRefs && cardRefs.length > 0) {
-        const nextCardRef = cardRefs[0];
-        if (nextCardRef) {
-          nextCardRef.isSwiping = false;
-          nextCardRef.swipedLeft = false;
-          nextCardRef.swipedRight = false;
-          nextCardRef.isFlipped = false;
-          nextCardRef.transformX = 0;
-        }
-      }
-    },
     handleCardClick(index) {
-      if (index === 0) {
-        
-      }
+      // 可选：弹出详情或其它操作
+    },
+    resetCardPosition() {
+      // 可选：重置卡片动画
     }
   }
 };
 </script>
 
 <style scoped>
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 100rpx;
-  width: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
-  background-color: #f7f7f7;
-}
-
-.card-stack {
-  position: relative;
-  width: 100%;
-  height: 800rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.display_card {
-  position: absolute;
-  width: 100%;
-  max-width: 600rpx;
-  transition: transform 0.3s ease, top 0.3s ease;
-}
-
-.status-view {
-  width: 100%;
-  text-align: center;
-  margin-top: 200rpx;
-  color: #666;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-animation {
-  width: 60rpx;
-  height: 60rpx;
-  border: 6rpx solid #e0e0e0;
-  border-top-color: #6c63ff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20rpx;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* 新增 RecommendationPopup 相关样式 */
-.recommendation-popup-mask {
+.recommendation-fullscreen-mask {
   position: fixed;
   z-index: 9999;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(120, 120, 120, 0.5); /* 通用灰色半透明 */
+  background: rgba(120, 120, 120, 0.5); /* 项目通用灰色半透明 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.close-btn {
+  position: absolute;
+  right: 40rpx;
+  top: 40rpx;
+  font-size: 60rpx;
+  color: #fff;
+  z-index: 10;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  width: 80rpx;
+  height: 80rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.recommendation-popup-content {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 40rpx 20rpx 20rpx 20rpx;
-  min-width: 600rpx;
-  min-height: 600rpx;
-  max-width: 90vw;
-  max-height: 90vh;
+.card-stack {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
-  overflow: auto;
 }
-.close-btn {
+.display_card {
   position: absolute;
-  right: 24rpx;
-  top: 16rpx;
-  font-size: 48rpx;
-  color: #888;
-  z-index: 10;
-  cursor: pointer;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.status-view {
+  color: #fff;
+  font-size: 32rpx;
+  text-align: center;
 }
 </style>

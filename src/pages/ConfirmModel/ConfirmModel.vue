@@ -44,12 +44,10 @@
 </template>
 
 <script>
-import CustomerService from '@/components/CustomerService/CustomerService.vue';
 import apiConfig from '@/utils/api.js';
 import request from '@/utils/request.js';
 
 export default {
-  components: { CustomerService },
   data() {
     return {
       imageUrl: '',            tempFilePath: '',        imageBase64: '',                     compressedFilePath: '' 

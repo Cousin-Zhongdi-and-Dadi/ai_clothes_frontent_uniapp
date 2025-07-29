@@ -11,7 +11,13 @@
         class="tryon-btn ai-match"
         @click="goToAiMatch"
       >
-        <text class="tryon-btn-text">衣搭AI</text>
+        <text class="tryon-btn-text">互补推荐</text>
+      </view>
+      <view
+        class="tryon-btn ai-match"
+        @click="goToChat"
+      >
+        <text class="tryon-btn-text">对话式推荐</text>
       </view>
     </view>
     <!-- <customer-service /> -->
@@ -27,6 +33,9 @@ export default {
     },
     goTo2D() {
       uni.navigateTo({ url: '/pages/TwoDimDisplay/TwoDimDisplay' });
+    },
+    goToChat() {
+      uni.navigateTo({ url: '/pages/ServiceChat/ServiceChat' });
     }
   }
 }

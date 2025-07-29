@@ -2,14 +2,15 @@
   <view class="container">
     <!-- Tabs: Dynamically rendered from API -->
     <view class="tabs">
-      <view
-        v-for="tab in tabs"
-        :key="tab.id"
-        class="tab"
-        :class="{ active: activeTabId === tab.id }"
-        @click="changeTab(tab)"
-      >
-        {{ tab.categoryName }}
+      <view class="shop-tabs">
+        <text
+          v-for="tab in tabs"
+          :key="tab.id"
+          :class="['tab', { active: activeTabId === tab.id }]"
+          @click="changeTab(tab)"
+        >
+          {{ tab.categoryName }}
+        </text>
       </view>
     </view>
 
@@ -264,30 +265,32 @@ export default {
   overflow-x: auto;
   white-space: nowrap;
 }
+.shop-tabs {
+  display: flex;
+  flex-direction: row;
+  background: #fff;
+  padding: 0 20rpx;
+  border-bottom: 1rpx solid #eee;
+  overflow-x: auto;
+  white-space: nowrap;
+  height: 70rpx;
+  align-items: center;
+}
 .tab {
   display: inline-block;
-  text-align: center;
-  padding: 20rpx 30rpx;
-  font-size: 30rpx;
-  color: #888;
-  position: relative;
-  flex-shrink: 0;
+  font-size: 28rpx;
+  color: #999;
+  margin-right: 32rpx;
+  padding: 0 8rpx;
+  line-height: 48rpx;
+  height: 48rpx;
+  white-space: nowrap;
+  border-bottom: 4rpx solid transparent;
 }
 .tab.active {
-  color: #333;
+  color: #6753e7;
   font-weight: bold;
-}
-.tab.active::after {
-  content: "";
-  display: block;
-  width: 60rpx;
-  height: 4rpx;
-  background: #333;
-  border-radius: 2rpx;
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
+  border-bottom: 4rpx solid #6753e7;
 }
 .grid {
   display: flex;

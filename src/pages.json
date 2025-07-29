@@ -137,6 +137,12 @@
             "style": {
                 "navigationBarTitleText": "从我的衣橱选择"
             }
+        },
+        {
+            "path": "pages/ServiceChat/ServiceChat",
+            "style": {
+                "navigationBarTitleText": "对话式推荐"
+            }
         }
 	],
 	"tabBar": {

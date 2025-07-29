@@ -275,6 +275,12 @@ export default {
   white-space: nowrap;
   height: 70rpx;
   align-items: center;
+
+  scrollbar-width: none; /* Firefox 隐藏滚动条 */
+  -ms-overflow-style: none; /* IE/Edge 隐藏滚动条 */
+}
+.shop-tabs::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/微信小程序等隐藏滚动条 */
 }
 .tab {
   display: inline-block;

@@ -21,9 +21,13 @@ export default {
      * Navigate to login selection page
      */
     login() {
-      uni.navigateTo({
-        url: '/pages/LoginSelection/LoginSelection'
+      uni.showToast({
+        title: '功能完善中……',
+        icon: 'none'
       });
+      // uni.navigateTo({
+      //   url: '/pages/LoginSelection/LoginSelection'
+      // });
     }
   }
 }

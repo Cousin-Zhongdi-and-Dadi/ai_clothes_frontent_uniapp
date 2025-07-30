@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import UserInfo from '../UserInfo/UserInfo.vue';
-import UserInfoNotLogin from '../UserInfoNotLogin/UserInfoNotLogin.vue';
+import UserInfo from '@/components/UserInfo/UserInfo.vue';
+import UserInfoNotLogin from '@/components/UserInfoNotLogin/UserInfoNotLogin.vue';
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
 

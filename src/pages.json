@@ -15,10 +15,7 @@
     {
       "path": "pages/UserInfoEntry/UserInfoEntry",
       "style": { "navigationBarTitleText": "个人中心" }
-    },
-    { "path": "pages/UserInfo/UserInfo", "style": { "navigationBarTitleText": "个人中心" } },
-    { "path": "pages/UserInfoNotLogin/UserInfoNotLogin", "style": { "navigationBarTitleText": "登录" } }
-
+    }
   ],
   "subPackages": [
     {

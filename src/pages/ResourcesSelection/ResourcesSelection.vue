@@ -190,12 +190,11 @@ export default {
     async confirmSelection() {
       if (!this.selectedItem) return;
       if (this.source === 'AiMatch') {
-        // Show confirmation popup for selected item
-        const pages = getCurrentPages();
-        const prevPage = pages[pages.length - 2];
-        if (prevPage) {
-          uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
-        }
+        // 临时存储
+        uni.setStorageSync('ai-match-image', this.selectedItem.img);
+        uni.setStorageSync('ai-match-product', this.selectedItem.id);
+        uni.$emit && uni.$emit('ai-match-product-selected', this.selectedItem.id);
+        uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
         uni.navigateBack();
         return;
       }

@@ -25,6 +25,7 @@
               mode="aspectFill"
               @error="onImageError(idx)"
               :style="{ opacity: imageLoadError[idx] ? 0 : 1 }"
+              @click="openImagePreview(idx)"
             />
             <!-- 图片加载失败时显示占位 -->
             <view
@@ -44,6 +45,19 @@
           </view>
         </swiper-item>
       </swiper>
+    </view>
+
+    <!-- 大图预览弹窗 -->
+    <view
+      v-if="showImagePreview"
+      class="image-preview-mask"
+      @click="closeImagePreview"
+    >
+      <image
+        :src="productInfo.images[previewImageIndex]"
+        class="image-preview-big"
+        mode="aspectFit"
+      />
     </view>
 
     <!-- 商品参数区 (添加 v-if) -->
@@ -158,14 +172,20 @@ export default {
   data() {
     return {
       productId: null,
-      productInfo: {},       styles: [],            variations: [],        sizes: [],             
+      productInfo: {},
+      styles: [],
+      variations: [],
+      sizes: [],
       quantity: 1,
       selectedStyleIndex: 0,
       selectedSize: '',
-      
+
       showSkuPopup: false,
-      skuAction: '', 
-            imageLoadError: [],     };
+      skuAction: '',
+      imageLoadError: [],
+      showImagePreview: false,      // 新增：控制大图预览显示
+      previewImageIndex: 0          // 新增：当前预览图片索引
+    };
   },
   computed: {
     selectedStyle() {
@@ -183,7 +203,7 @@ export default {
     if (options.id) {
       this.productId = options.id;
       this.fetchProductDetails(this.productId);
-      
+
     } else {
       uni.showToast({ title: '商品不存在', icon: 'none' });
       uni.navigateBack();
@@ -198,7 +218,8 @@ export default {
           method: 'GET',
         });
 
-                this.productInfo = {
+
+        this.productInfo = {
           title: productData.productName,
           desc: productData.description,
           price: productData.price,
@@ -207,7 +228,7 @@ export default {
 
         const stylesMap = new Map();
         const sizesSet = new Set();
-        
+
         productData.variations.forEach(v => {
           if (!stylesMap.has(v.colorName)) {
             stylesMap.set(v.colorName, {
@@ -328,6 +349,13 @@ export default {
 
         onImageError(idx) {
       this.$set(this.imageLoadError, idx, true);
+    },
+    openImagePreview(idx) {
+      this.previewImageIndex = idx;
+      this.showImagePreview = true;
+    },
+    closeImagePreview() {
+      this.showImagePreview = false;
     },
   }
 };
@@ -624,5 +652,25 @@ export default {
 .image-fallback-text {
   color: #bbb;
   font-size: 28rpx;
+}
+.image-preview-mask {
+  position: fixed;
+  z-index: 3000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-preview-big {
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: 24rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.18);
+  display: block;
 }
 </style>

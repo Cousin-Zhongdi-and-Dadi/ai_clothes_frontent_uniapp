@@ -29,11 +29,7 @@ export default {
   name: 'TryOnContainer',
   methods: {
     goToAiMatch() {
-      uni.showToast({
-        title: '功能完善中……',
-        icon: 'none'
-      });
-      // uni.navigateTo({ url: '/pages/AiMatch/AiMatch' });
+      uni.navigateTo({ url: '/pages/AiMatch/AiMatch' });
     },
     goTo2D() {
       uni.navigateTo({ url: '/pages/TwoDimDisplay/TwoDimDisplay' });

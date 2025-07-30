@@ -7,7 +7,8 @@
           v-if="imageUrl"
           :src="imageUrl"
           class="preview-image"
-          mode="aspectFill"
+          mode="aspectFit"
+          @click="showPreview = true"
         />
         <view
           v-else
@@ -20,6 +21,19 @@
         class="upload-btn"
         @click="showUploadDialog"
       >上传图片</button>
+    </view>
+
+    <!-- 大图预览弹窗 -->
+    <view
+      v-if="showPreview"
+      class="image-preview-mask"
+      @click="showPreview = false"
+    >
+      <image
+        :src="imageUrl"
+        class="image-preview-big"
+        mode="aspectFit"
+      />
     </view>
 
     <!-- 场景选择 -->
@@ -82,36 +96,68 @@
 </template>
 
 <script>
+import request from '@/utils/request.js';
+
 export default {
   name: 'AiMatch',
   data() {
     return {
       imageUrl: '',
       scenes: [
-        { label: '运动', value: 'sport' },
-        { label: '日常', value: 'daily' }
+        { label: '运动', value: 'sports' },
+        { label: '日常', value: 'casual' }
       ],
       selectedScene: '',
       desc: '',
-      showDialog: false
+      showDialog: false,
+      productId: null,
+      showPreview: false // 控制大图预览
     };
   },
-  onLoad() {
+  onLoad(options) {
+    // 清除AI推荐相关缓存，保证每次进入页面为干净状态
+    this.imageUrl = '';
+    this.selectedScene = '';
+    this.desc = '';
+    this.productId = null;
+    this.showPreview = false;
+  },
+  onShow() {
+    // 先解绑，防止重复绑定
+    uni.$off && uni.$off('ai-match-image-selected');
+    uni.$off && uni.$off('ai-match-product-selected');
+    // 重新绑定
     uni.$on && uni.$on('ai-match-image-selected', (imgUrl) => {
       this.imageUrl = imgUrl;
     });
+    uni.$on && uni.$on('ai-match-product-selected', (productId) => {
+      this.productId = productId;
+    });
+
+    // 关键：优先读取缓存
+    const img = uni.getStorageSync('ai-match-image');
+    const pid = uni.getStorageSync('ai-match-product');
+    if (img) {
+      this.imageUrl = img;
+      uni.removeStorageSync('ai-match-image');
+    }
+    if (pid) {
+      this.productId = pid;
+      uni.removeStorageSync('ai-match-product');
+    }
   },
-  onUnload() {
+  onHide() {
     uni.$off && uni.$off('ai-match-image-selected');
+    uni.$off && uni.$off('ai-match-product-selected');
   },
   methods: {
     showUploadDialog() {
       this.showDialog = true;
     },
     goCloset() {
-      this.showDialog = false;
-      uni.navigateTo({
-        url: '/pages/ClosetSelection/ClosetSelection'
+      uni.showToast({
+        title: '功能完善中……',
+        icon: 'none'
       });
     },
     goResource() {
@@ -120,11 +166,39 @@ export default {
         url: '/pages/ResourcesSelection/ResourcesSelection?source=AiMatch'
       });
     },
-    onAiRecommend() {
-      uni.showToast({ title: 'AI推荐功能待实现', icon: 'none' });
-      uni.navigateTo({
-        url: '/pages/AiMatchResult/AiMatchResult'
-      });
+    async onAiRecommend() {
+      if (!this.productId) {
+        uni.showToast({ title: '请先选择商品', icon: 'none' });
+        return;
+      }
+      if (!this.selectedScene) {
+        uni.showToast({ title: '请选择场景', icon: 'none' });
+        return;
+      }
+      uni.showLoading({ title: 'AI推荐中...' });
+      const requestBody = {
+        product_id: this.productId,
+        scene: this.selectedScene
+      };
+      console.log('AI推荐请求体:', requestBody); // 打印请求体内容
+      try {
+        const data = await request({
+          url: 'https://remotely-one-javelin.ngrok-free.app/api/recommend_best_item',
+          method: 'POST',
+          data: requestBody,
+          header: {
+            'content-type': 'application/json'
+          }
+        });
+        uni.hideLoading();
+        uni.showToast({ title: '推荐成功', icon: 'success' });
+        uni.navigateTo({
+          url: `/pages/AiMatchResult/AiMatchResult?productId=${data.product_id}`
+        });
+      } catch (e) {
+        uni.hideLoading();
+        // 错误提示已由 request.js 统一处理
+      }
     },
     onSceneChange(e) {
       this.selectedScene = e.detail.value;
@@ -139,16 +213,20 @@ export default {
 }
 .preview-image-wrapper {
   width: 100%;
-  height: 600rpx;
+  height: 600rpx; /* 调高图片容器高度，原为400rpx */
   position: relative;
   margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .preview-image {
   width: 100%;
   height: 100%;
   border-radius: 16rpx;
-  object-fit: cover;
+  object-fit: contain;
   border: 1rpx solid #eee;
+  background: #fff;
 }
 .preview-placeholder {
   width: 100%;
@@ -179,13 +257,6 @@ export default {
   padding: 16rpx 48rpx;
   margin-bottom: 16rpx;
   width: 100%;
-}
-.preview-image {
-  width: 100%;
-  height: 400rpx;
-  border-radius: 16rpx;
-  object-fit: cover;
-  border: 1rpx solid #eee;
 }
 .section-label {
   font-size: 28rpx;
@@ -272,5 +343,27 @@ export default {
   border-radius: 8rpx;
   font-size: 28rpx;
   padding: 20rpx 0;
+  width: 100%;
+}
+
+/* 大图预览样式 */
+.image-preview-mask {
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-preview-big {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 16rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.18);
 }
 </style>

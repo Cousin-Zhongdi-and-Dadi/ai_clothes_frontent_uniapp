@@ -35,11 +35,7 @@ export default {
       uni.navigateTo({ url: '/pages/TwoDimDisplay/TwoDimDisplay' });
     },
     goToChat() {
-      uni.showToast({
-        title: '功能完善中……',
-        icon: 'none'
-      });
-      // uni.navigateTo({ url: '/pages/ServiceChat/ServiceChat' });
+      uni.navigateTo({ url: '/pages/ServiceChat/ServiceChat' });
     }
   }
 }

@@ -22,12 +22,28 @@
             :src="robotAvatarSrc"
           />
           <view class="robot-msg">
-            <view class="robot-msg-title">{{ msg.content }}</view>
+            <!-- 修改：渲染markdown内容 -->
+            <view class="robot-msg-title">
+              <rich-text :nodes="renderMarkdown(msg.content)" />
+            </view>
+            <!-- 推荐商品图片展示 -->
+            <view
+              v-if="msg.productImages && msg.productImages.length"
+              class="robot-product-list"
+            >
+              <image
+                v-for="item in msg.productImages"
+                :key="item.productId"
+                :src="item.imageUrl"
+                class="robot-product-img"
+                mode="aspectFill"
+                @click="goToGoodsDetail(item.productId)"
+              />
+            </view>
             <view
               class="robot-btn-list"
               v-if="msg.buttons && msg.buttons.length > 0"
             >
-              <!-- 1. 绑定点击事件 -->
               <view
                 v-for="(btn, bidx) in msg.buttons"
                 :key="bidx"
@@ -56,17 +72,12 @@
           <view class="user-msg-wrap">
             <view class="user-msg">{{ msg.content }}</view>
           </view>
-          <image
-            class="user-avatar"
-            :src="userAvatarSrc"
-          />
         </view>
       </view>
     </scroll-view>
 
     <!-- 底部输入栏 -->
     <view class="chat-input-bar">
-      <!-- 2. 绑定 v-model 和事件 -->
       <input
         class="chat-input"
         placeholder="请输入内容"
@@ -87,64 +98,103 @@
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
 
+// 引入marked（需在项目中 npm install marked 并在uni-app配置中允许使用npm包）
+import * as marked from 'marked';
+
 export default {
   name: 'ServiceChatPage',
   data() {
     return {
-      messages: [],       userInput: '',        isSending: false,       scrollTop: 0,         robotAvatarSrc: '/static/icon/icon-04.png',
-      userAvatarSrc: '',     };
+      messages: [],
+      userInput: '',
+      isSending: false,
+      scrollTop: 0,
+      robotAvatarSrc: '/static/icon/icon-04.png',
+      userAvatarSrc: '',
+    };
   },
-    created() {
+  created() {
+    // 进入页面时清空消息记录
+    uni.removeStorageSync('service-chat-messages');
+    this.messages = [];
     this.getWelcomeMessage();
   },
+  onUnload() {
+    // 离开页面时清空消息记录
+    uni.removeStorageSync('service-chat-messages');
+    this.messages = [];
+  },
   methods: {
-        async getWelcomeMessage() {
-      this.isSending = true;
-      try {
-                const welcomeMsg = await request({
-          url: `${apiConfig.BASE_URL}/chat/welcome`,
-          method: 'GET',
-        });
-        this.messages.push({ type: 'robot', ...welcomeMsg });
-      } catch (error) {
-                this.messages.push({
-          type: 'robot',
-          content: '您好，有什么可以帮助您？',
-          buttons: ['功能咨询', '订单问题', '商务合作'],
-        });
-        console.error("getWelcomeMessage failed:", error);
-      } finally {
-        this.isSending = false;
-        this.scrollToBottom();
-      }
+    async getWelcomeMessage() {
+      this.messages.push({
+        type: 'robot',
+        content: '欢迎来到对话式推荐，请问有什么可以帮助您的？',
+        time: new Date().toISOString(),
+      });
     },
 
-        async sendMessage() {
+    async sendMessage() {
       if (!this.userInput.trim() || this.isSending) return;
 
       const userMessageContent = this.userInput;
       this.isSending = true;
 
-            this.messages.push({
+      this.messages.push({
         type: 'user',
         content: userMessageContent,
         time: new Date().toISOString(),
       });
-      this.userInput = '';       this.scrollToBottom();
+      this.userInput = '';
+      this.saveMessages();
+      this.scrollToBottom();
 
       try {
-                const replyMsg = await request({
-          url: `${apiConfig.BASE_URL}/chat/send`,
+        const data = await request({
+          url: 'https://bee-touched-mink.ngrok-free.app/recommend',
           method: 'POST',
-          data: { message: userMessageContent },
+          data: { question: userMessageContent },
+          header: {
+            'Content-Type': 'application/json'
+          }
         });
-        
-                this.messages.push({ type: 'robot', ...replyMsg });
-      } catch (error) {
-                this.messages.push({
+
+        let productImages = [];
+        if (Array.isArray(data.indexes) && data.indexes.length > 0) {
+          const api = require('@/utils/api.js').default;
+          const detailPromises = data.indexes.map(productId =>
+            request({
+              url: `${api.BASE_URL}/mall/getProductDetail/${productId}`,
+              method: 'GET'
+            }).then(res => {
+              let img = '';
+              if (res && res.imageUrl) {
+                img = Array.isArray(res.imageUrl) ? res.imageUrl[0] : res.imageUrl;
+              }
+              return {
+                productId,
+                imageUrl: img
+              };
+            }).catch(() => ({
+              productId,
+              imageUrl: ''
+            }))
+          );
+          productImages = await Promise.all(detailPromises);
+        }
+
+        this.messages.push({
           type: 'robot',
-          content: '抱歉，服务暂时遇到问题，请稍后再试。',
+          content: data.answer || '暂无回复',
+          indexes: data.indexes || [],
+          productImages
         });
+        this.saveMessages();
+      } catch (error) {
+        this.messages.push({
+          type: 'robot',
+          content: error.message || '抱歉，服务暂时遇到问题，请稍后再试。',
+        });
+        this.saveMessages();
         console.error("sendMessage failed:", error);
       } finally {
         this.isSending = false;
@@ -152,14 +202,28 @@ export default {
       }
     },
 
-        handleQuickReply(text) {
-      this.userInput = text;
-      this.sendMessage();
+    scrollToBottom() {
+      this.$nextTick(() => {
+        this.scrollTop = this.messages.length * 200;
+      });
     },
 
-        scrollToBottom() {
-      this.$nextTick(() => {
-                this.scrollTop = this.messages.length * 200;       });
+    saveMessages() {
+      uni.setStorageSync('service-chat-messages', this.messages);
+    },
+
+    goToGoodsDetail(productId) {
+      uni.navigateTo({
+        url: `/pages/GoodsDetail/GoodsDetail?id=${productId}`
+      });
+    },
+
+    // 新增：markdown转nodes方法
+    renderMarkdown(md) {
+      if (!md) return [];
+      // marked.default 兼容不同打包环境
+      const html = (marked.default || marked).parse(md);
+      return html;
     }
   }
 };
@@ -177,6 +241,7 @@ export default {
   padding: 24rpx 0;
   overflow-y: auto;
   box-sizing: border-box;
+  padding-bottom: 200rpx; /* 新增，值略大于输入栏高度，适配安全区 */
 }
 .chat-row-wrapper {
   margin-bottom: 32rpx;
@@ -195,6 +260,10 @@ export default {
 }
 .robot-avatar {
   margin-right: 16rpx;
+  background: #fff;
+  object-fit: contain;
+  padding: 8rpx; /* 新增内边距，保证图片完整显示在圆形容器内 */
+  box-sizing: border-box;
 }
 .user-avatar {
   margin-left: 16rpx;
@@ -284,5 +353,19 @@ export default {
 .send-btn[disabled] {
   background-color: #ccc;
   color: #fff;
+}
+.robot-product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin: 16rpx 0 0 0;
+}
+.robot-product-img {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+  object-fit: cover;
+  border: 1rpx solid #eee;
 }
 </style>

@@ -23,7 +23,7 @@
     </view>
     <!-- 描述信息 -->
     <view class="desc-box">
-      <text>{{ description || '正在加载搭配建议...' }}</text>
+      <rich-text :nodes="renderMarkdown(description || '正在加载搭配建议...')" />
     </view>
     <!-- 按钮 -->
     <button
@@ -60,11 +60,9 @@
 <script>
 import request from '../../utils/request.js';
 import apiConfig from '../../utils/api.js';
+// 引入marked（需 yarn add marked）
+import * as marked from 'marked';
 
-/**
- * TwoDimComment page
- * Displays AI outfit suggestions, polling for results and allowing favorites.
- */
 export default {
   data() {
     return {
@@ -95,6 +93,14 @@ export default {
     }
   },
   methods: {
+    /**
+     * markdown渲染
+     */
+    renderMarkdown(md) {
+      if (!md) return [];
+      const html = (marked.default || marked).parse(md);
+      return html;
+    },
     /**
      * Start polling for AI outfit result
      */

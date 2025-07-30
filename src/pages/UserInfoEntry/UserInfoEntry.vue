@@ -14,8 +14,8 @@
 <script>
 import UserInfo from '../UserInfo/UserInfo.vue';
 import UserInfoNotLogin from '../UserInfoNotLogin/UserInfoNotLogin.vue';
-import request from '../../utils/request.js';
-import apiConfig from '../../utils/api.js';
+import request from '@/utils/request.js';
+import apiConfig from '@/utils/api.js';
 
 /**
  * UserInfoEntry page

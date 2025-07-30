@@ -307,7 +307,7 @@ export default {
         if (chooseRes && chooseRes.tempFilePaths && chooseRes.tempFilePaths.length > 0) {
           const tempFilePath = chooseRes.tempFilePaths[0];
           uni.navigateTo({
-            url: `/pages/ConfirmFromUserUpload/ConfirmFromUserUpload?tempFilePath=${tempFilePath}`
+            url: `/subpackages/confirm/ConfirmFromUserUpload/ConfirmFromUserUpload?tempFilePath=${tempFilePath}`
           });
         } else {
           // 未选择图片
@@ -351,7 +351,7 @@ export default {
     },
     selectFromLibrary() {
       uni.navigateTo({
-        url: '/pages/ResourcesSelection/ResourcesSelection?source=closet'
+        url: '/subpackages/resources/ResourcesSelection/ResourcesSelection?source=closet'
       });
       this.closeModal();
     }

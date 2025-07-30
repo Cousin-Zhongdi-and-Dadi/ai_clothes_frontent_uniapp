@@ -87,7 +87,7 @@ export default {
   methods: {
     goToDetail(id) {
       uni.navigateTo({
-        url: `/pages/GoodsDetail/GoodsDetail?id=${id}`,
+        url: `/subpackages/shop/GoodsDetail/GoodsDetail?id=${id}`,
       });
     },
         async fetchCategories() {

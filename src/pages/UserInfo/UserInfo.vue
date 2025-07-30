@@ -151,9 +151,9 @@
 </template>
 
 <script>
-import request from '../../utils/request.js';
+import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
-import BodyDataEdit from '../../components/BodyDataEdit/BodyDataEdit.vue';
+import BodyDataEdit from '@/components/BodyDataEdit/BodyDataEdit.vue';
 
 /**
  * UserInfo page
@@ -358,9 +358,9 @@ export default {
 
         handleSelection(item) {
       if (item.text === '浏览历史') {
-        uni.navigateTo({ url: '/pages/History/History' });
+        uni.navigateTo({ url: '/subpackages/history/History/History' });
       } else if (item.text === '收藏穿搭') {
-        uni.navigateTo({ url: '/pages/Favourite/Favourite' });
+        uni.navigateTo({ url: '/subpackages/shop/Favourite/Favourite' });
       }
     },
     showActionMenu() {

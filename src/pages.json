@@ -1,192 +1,152 @@
 {
-	"pages": [ 
-        {
-			"path": "pages/Shop/Shop",
-			"style": {
-				"navigationBarTitleText": "素材库"
-			}
-		},    
-        {
-            "path": "pages/UserInfoEntry/UserInfoEntry",
-            "style": {
-                "navigationBarTitleText": "个人中心"
+    "pages": [
+    {
+      "path": "pages/Shop/Shop",
+      "style": { "navigationBarTitleText": "素材库" }
+    },
+    {
+      "path": "pages/TryOnContainer/TryOnContainer",
+      "style": { "navigationBarTitleText": "试衣搭配" }
+    },
+    {
+      "path": "pages/Closet/Closet",
+      "style": { "navigationBarTitleText": "我的衣橱" }
+    },
+    {
+      "path": "pages/UserInfoEntry/UserInfoEntry",
+      "style": { "navigationBarTitleText": "个人中心" }
+    },
+    { "path": "pages/UserInfo/UserInfo", "style": { "navigationBarTitleText": "个人中心" } },
+    { "path": "pages/UserInfoNotLogin/UserInfoNotLogin", "style": { "navigationBarTitleText": "登录" } }
+
+  ],
+  "subPackages": [
+    {
+      "root": "subpackages/user",
+      "pages": [
+        { "path": "Login/Login", "style": { "navigationBarTitleText": "登录" } },
+        { "path": "LoginSelection/LoginSelection", "style": { "navigationBarTitleText": "登录" } }
+      ]
+    },
+    {
+      "root": "subpackages/tryon",
+      "pages": [
+        { "path": "AiMatch/AiMatch", "style": { "navigationBarTitleText": "上传单品" } },
+        { "path": "AiMatchResult/AiMatchResult", "style": { "navigationBarTitleText": "推荐搭配单品" } }
+      ]
+    },
+    {
+      "root": "subpackages/closet",
+      "pages": [
+        { "path": "ClosetSelection/ClosetSelection", "style": { "navigationBarTitleText": "从我的衣橱选择" } }
+      ]
+    },
+    {
+      "root": "subpackages/shop",
+      "pages": [
+        { "path": "GoodsDetail/GoodsDetail", "style": { "navigationBarTitleText": "详情" } },
+        { "path": "Favourite/Favourite", "style": { "navigationBarTitleText": "收藏搭配" } }
+      ]
+    },
+    {
+      "root": "subpackages/comment",
+      "pages": [
+        { "path": "TwoDimComment/TwoDimComment", "style": { "navigationBarTitleText": "AI评价", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
+      ]
+    },
+    {
+      "root": "subpackages/chat",
+      "pages": [
+        { "path": "ServiceChat/ServiceChat", "style": { "navigationBarTitleText": "对话式推荐", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
+      ]
+    },
+    {
+      "root": "subpackages/history",
+      "pages": [
+        { "path": "History/History", "style": { "navigationBarTitleText": "浏览历史" } }
+      ]
+    },
+    {
+      "root": "subpackages/confirm",
+      "pages": [
+        { "path": "ConfirmModel/ConfirmModel", "style": { "navigationBarTitleText": "确认模特" } },
+        { "path": "ConfirmCloth/ConfirmCloth", "style": { "navigationBarTitleText": "确认衣物" } },
+        { "path": "ConfirmFromUserUpload/ConfirmFromUserUpload", "style": { "navigationBarTitleText": "确认上传信息" } }
+      ]
+    },
+    {
+      "root": "subpackages/resources",
+      "pages": [
+        { "path": "ResourcesSelection/ResourcesSelection", "style": { "navigationBarTitleText": "从素材库选择" } }
+      ]
+    },
+    {
+      "root": "subpackages/threedim",
+      "pages": [
+        { "path": "ThreeDimDisplay/ThreeDimDisplay", "style": { "navigationBarTitleText": "3D试衣" } }
+      ]
+    },
+    {
+      "root": "subpackages/twodim",
+      "pages": [
+        { "path": "TwoDimDisplay/TwoDimDisplay", "style": { "navigationBarTitleText": "上传模特" } }
+      ]
+    },
+    {
+      "root": "subpackages/upload",
+      "pages": [
+        { "path": "UploadWhole/UploadWhole", "style": { "navigationBarTitleText": "上传衣物" } }
+      ]
+    },
+    {
+      "root": "subpackages/outershop",
+      "pages": [
+        { "path": "OuterShop/OuterShop", "style": { "navigationBarTitleText": "外部商店" } }
+      ]
+    }
+  ],
+    "tabBar": {
+        "color": "#888",
+        "selectedColor": "#6753e7",
+        "backgroundColor": "#fff",
+        "borderStyle": "black",
+        "list": [
+            {
+                "pagePath": "pages/Shop/Shop",
+                "iconPath": "static/icon/icon-05.png",
+                "selectedIconPath": "static/icon/icon-06.png",
+                "text": "总素材库"
+            },
+            {
+                "pagePath": "pages/TryOnContainer/TryOnContainer",
+                "iconPath": "static/icon/icon-03.png",
+                "selectedIconPath": "static/icon/icon-04.png",
+                "text": "试衣搭配"
+            },
+            {
+                "pagePath": "pages/Closet/Closet",
+                "iconPath": "static/icon/icon-01.png",
+                "selectedIconPath": "static/icon/icon-02.png",
+                "text": "我的衣橱"
+            },
+            {
+                "pagePath": "pages/UserInfoEntry/UserInfoEntry",
+                "iconPath": "static/icon/icon-07.png",
+                "selectedIconPath": "static/icon/icon-08.png",
+                "text": "个人中心"
             }
-        },
-        {
-			"path": "pages/UserInfoNotLogin/UserInfoNotLogin",
-			"style": {
-				"navigationBarTitleText": "登录"
-			}
-		},
-        {
-			"path": "pages/LoginSelection/LoginSelection",
-			"style": {
-				"navigationBarTitleText": "登录"
-			}
-		},
-        {
-			"path": "pages/Login/Login",
-			"style": {
-				"navigationBarTitleText": "登录"
-			}
-		},
-        {
-			"path": "pages/GoodsDetail/GoodsDetail",
-			"style": {
-				"navigationBarTitleText": "详情"
-			}
-		},
-        {
-			"path": "pages/UserInfo/UserInfo",
-			"style": {
-				"navigationBarTitleText": "个人中心"
-			}
-		},
-        {
-			"path": "pages/ThreeDimDisplay/ThreeDimDisplay",
-			"style": {
-				"navigationBarTitleText": "3D试衣"
-			}
-		},
-        {
-            "path": "pages/Closet/Closet",
-			"style": {
-				"navigationBarTitleText": "我的衣橱"
-			}
-        },
-        {
-            "path": "pages/TwoDimDisplay/TwoDimDisplay",
-            "style": {
-                "navigationBarTitleText": "上传模特"
-            }
-        },
-        {
-            "path": "pages/UploadWhole/UploadWhole",
-            "style": {
-                "navigationBarTitleText": "上传衣物"
-            }
-        },
-        {
-            "path": "pages/History/History",
-            "style": {
-                "navigationBarTitleText": "浏览历史"
-            }
-        },
-        {
-            "path": "pages/Favourite/Favourite",
-            "style": {
-                "navigationBarTitleText": "收藏搭配"
-            }
-        },
-        {
-            "path": "pages/ConfirmModel/ConfirmModel",
-            "style": {
-                "navigationBarTitleText": "确认模特"
-            }
-        },
-        {
-            "path": "pages/ConfirmCloth/ConfirmCloth",
-            "style": {
-                "navigationBarTitleText": "确认衣物"
-            }
-        },
-        {
-            "path": "pages/ResourcesSelection/ResourcesSelection",
-            "style": {
-                "navigationBarTitleText": "从素材库选择"
-            }
-        },
-        {
-            "path": "pages/TwoDimComment/TwoDimComment",
-            "style": {
-                "navigationBarTitleText": "AI评价"
-            }
-        },
-        {
-            "path": "pages/ConfirmFromUserUpload/ConfirmFromUserUpload",
-            "style": {
-                "navigationBarTitleText": "确认上传信息"
-            }
-        },
-        {
-            "path": "pages/OuterShop/OuterShop",
-            "style": {
-                "navigationBarTitleText": "外部商店"
-            }
-        },
-        {
-            "path": "pages/AiMatch/AiMatch",
-            "style": {
-                "navigationBarTitleText": "上传单品"
-            }
-        },
-        {
-            "path": "pages/AiMatchResult/AiMatchResult",
-            "style": {
-                "navigationBarTitleText": "推荐搭配单品"
-            }
-        },
-        {
-            "path": "pages/TryOnContainer/TryOnContainer",
-            "style": {
-                "navigationBarTitleText": "试衣搭配"
-            }
-        },
-        {
-            "path": "pages/ClosetSelection/ClosetSelection",
-            "style": {
-                "navigationBarTitleText": "从我的衣橱选择"
-            }
-        },
-        {
-            "path": "pages/ServiceChat/ServiceChat",
-            "style": {
-                "navigationBarTitleText": "对话式推荐"
-            }
+        ]
+    },
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "uni-app",
+        "navigationBarBackgroundColor": "#F8F8F8",
+        "backgroundColor": "#F8F8F8"
+    },
+    "easycom": {
+        "autoscan": true,
+        "custom": {
+            "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
         }
-	],
-	"tabBar": {
-		"color": "#888",
-		"selectedColor": "#6753e7",
-		"backgroundColor": "#fff",
-		"borderStyle": "black",
-		"list": [
-            {
-				"pagePath": "pages/Shop/Shop",
-				"iconPath": "static/icon/icon-05.png",
-				"selectedIconPath": "static/icon/icon-06.png",
-				"text": "总素材库"
-			},
-            {
-				"pagePath": "pages/TryOnContainer/TryOnContainer",
-				"iconPath": "static/icon/icon-03.png",
-				"selectedIconPath": "static/icon/icon-04.png",
-				"text": "试衣搭配"
-			},
-            {
-				"pagePath": "pages/Closet/Closet",
-				"iconPath": "static/icon/icon-01.png",
-				"selectedIconPath": "static/icon/icon-02.png",
-				"text": "我的衣橱"
-			},
-			{
-				"pagePath": "pages/UserInfoEntry/UserInfoEntry",
-				"iconPath": "static/icon/icon-07.png",
-				"selectedIconPath": "static/icon/icon-08.png",
-				"text": "个人中心"
-			}
-		]
-	},
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	},
-	"easycom": {
-		"autoscan": true,
-		"custom": {
-			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
-		}
-	}
+    }
 }

@@ -12,7 +12,7 @@ export function checkLoginAndProceed(action) {
         });
         setTimeout(() => {
             uni.navigateTo({
-                url: '/pages/LoginSelection/LoginSelection'
+                url: '/subpackages/user/LoginSelection/LoginSelection'
             });
         }, 1500);
         return false;

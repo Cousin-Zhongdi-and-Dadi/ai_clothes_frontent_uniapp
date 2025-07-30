@@ -29,13 +29,13 @@ export default {
   name: 'TryOnContainer',
   methods: {
     goToAiMatch() {
-      uni.navigateTo({ url: '/pages/AiMatch/AiMatch' });
+      uni.navigateTo({ url: '/subpackages/tryon/AiMatch/AiMatch' });
     },
     goTo2D() {
-      uni.navigateTo({ url: '/pages/TwoDimDisplay/TwoDimDisplay' });
+      uni.navigateTo({ url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay' });
     },
     goToChat() {
-      uni.navigateTo({ url: '/pages/ServiceChat/ServiceChat' });
+      uni.navigateTo({ url: '/subpackages/chat/ServiceChat/ServiceChat' });
     }
   }
 }

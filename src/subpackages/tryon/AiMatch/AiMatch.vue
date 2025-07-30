@@ -193,7 +193,7 @@ export default {
         uni.hideLoading();
         uni.showToast({ title: '推荐成功', icon: 'success' });
         uni.navigateTo({
-          url: `/pages/AiMatchResult/AiMatchResult?productId=${data.product_id}`
+          url: `/subpackages/tryon/AiMatchResult/AiMatchResult?productId=${data.product_id}`
         });
       } catch (e) {
         uni.hideLoading();

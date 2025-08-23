@@ -22,11 +22,13 @@
       "root": "subpackages/user",
       "pages": [
         { "path": "Login/Login", "style": { "navigationBarTitleText": "登录" } },
-        { "path": "LoginSelection/LoginSelection", "style": { "navigationBarTitleText": "登录" } }
+        { "path": "LoginSelection/LoginSelection", "style": { "navigationBarTitleText": "登录" } },
+        { "path": "History/History", "style": { "navigationBarTitleText": "浏览历史" } },
+        { "path": "Favourite/Favourite", "style": { "navigationBarTitleText": "收藏搭配" } }
       ]
     },
     {
-      "root": "subpackages/tryon",
+      "root": "subpackages/match",
       "pages": [
         { "path": "AiMatch/AiMatch", "style": { "navigationBarTitleText": "上传单品" } },
         { "path": "AiMatchResult/AiMatchResult", "style": { "navigationBarTitleText": "推荐搭配单品" } }
@@ -41,26 +43,13 @@
     {
       "root": "subpackages/shop",
       "pages": [
-        { "path": "GoodsDetail/GoodsDetail", "style": { "navigationBarTitleText": "详情" } },
-        { "path": "Favourite/Favourite", "style": { "navigationBarTitleText": "收藏搭配" } }
-      ]
-    },
-    {
-      "root": "subpackages/comment",
-      "pages": [
-        { "path": "TwoDimComment/TwoDimComment", "style": { "navigationBarTitleText": "AI评价", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
+        { "path": "GoodsDetail/GoodsDetail", "style": { "navigationBarTitleText": "详情" } }
       ]
     },
     {
       "root": "subpackages/chat",
       "pages": [
         { "path": "ServiceChat/ServiceChat", "style": { "navigationBarTitleText": "对话式推荐", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
-      ]
-    },
-    {
-      "root": "subpackages/history",
-      "pages": [
-        { "path": "History/History", "style": { "navigationBarTitleText": "浏览历史" } }
       ]
     },
     {
@@ -86,7 +75,8 @@
     {
       "root": "subpackages/twodim",
       "pages": [
-        { "path": "TwoDimDisplay/TwoDimDisplay", "style": { "navigationBarTitleText": "上传模特" } }
+        { "path": "TwoDimDisplay/TwoDimDisplay", "style": { "navigationBarTitleText": "上传模特" } },
+        { "path": "TwoDimComment/TwoDimComment", "style": { "navigationBarTitleText": "AI评价", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
       ]
     },
     {

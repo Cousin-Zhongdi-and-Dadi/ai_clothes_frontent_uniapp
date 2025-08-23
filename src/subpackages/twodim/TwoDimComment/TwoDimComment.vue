@@ -196,8 +196,8 @@ export default {
      * Restart the AI outfit process
      */
     restartProcess() {
-      uni.reLaunch({
-        url: '/pages/TwoDimDisplay/TwoDimDisplay'
+      uni.redirectTo({
+        url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay'
       });
     }
   }

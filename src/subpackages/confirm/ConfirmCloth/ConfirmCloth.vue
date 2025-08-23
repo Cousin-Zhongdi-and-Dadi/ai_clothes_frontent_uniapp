@@ -65,8 +65,22 @@ export default {
       const personImageUrl = uni.getStorageSync('personImageUrl');
       let topGarmentUrl = uni.getStorageSync('topGarmentUrl');
       let bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || '';
-      if (!personImageUrl || !topGarmentUrl) {
-        uni.showToast({ title: '缺少人物或上装图片', icon: 'none' });
+      if (!personImageUrl) {
+        uni.showToast({ title: '缺少人物图片', icon: 'none' });
+        setTimeout(() => {
+          uni.redirectTo({
+            url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay'
+          });
+        }, 1200);
+        return;
+      }
+      if (!topGarmentUrl) {
+        uni.showToast({ title: '上装未上传', icon: 'none' });
+        setTimeout(() => {
+          uni.redirectTo({
+            url: '/subpackages/upload/UploadWhole/UploadWhole'
+          });
+        }, 1200);
         return;
       }
       uni.showLoading({ title: '正在上传衣物图片...' });
@@ -145,7 +159,7 @@ export default {
         uni.hideLoading();
         if (res) {
           uni.redirectTo({
-            url: `/subpackages/comment/TwoDimComment/TwoDimComment?taskId=${res}`
+            url: `/subpackages/twodim/TwoDimComment/TwoDimComment?taskId=${res}`
           });
         } else {
           uni.showToast({ title: '任务提交失败', icon: 'none' });

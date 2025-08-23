@@ -49,12 +49,6 @@
         mode="widthFix"
       />
     </view>
-
-    <!-- <customer-service /> -->
-    <canvas
-      canvas-id="compressCanvas"
-      style="width:1px;height:1px;position:absolute;left:-9999px;top:-9999px;"
-    />
   </view>
 </template>
 

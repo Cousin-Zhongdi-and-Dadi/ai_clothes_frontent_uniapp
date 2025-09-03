@@ -1,5 +1,62 @@
 <template>
   <view class="closet-page">
+    <!-- 顶部头图区域 -->
+    <view class="closet-header">
+      <image
+        class="header-bg"
+        src="/static/icon/我的衣橱/Group_62.png"
+        mode="widthFix"
+      />
+    </view>
+
+    <!-- 分类图标导航栏 -->
+    <view class="category-tabs">
+      <view
+        v-for="category in categories"
+        :key="category.id"
+        class="category-tab"
+        :class="{ active: activeCategory === category.id }"
+        @click="selectCategory(category.id)"
+      >
+        <image
+          class="category-icon"
+          :src="category.icon"
+          mode="aspectFit"
+        />
+        <text class="category-name">{{ category.name }}</text>
+      </view>
+    </view>
+
+    <!-- 副选单：根据主选单变化显示 -->
+    <view
+      class="subcategory-tabs"
+      v-if="subCategories[activeCategory] && subCategories[activeCategory].length"
+    >
+      <scroll-view
+        scroll-x
+        class="sub-scroll"
+        show-scrollbar="false"
+      >
+        <view class="sub-list">
+          <view
+            v-for="sub in subCategories[activeCategory]"
+            :key="sub.id"
+            class="sub-item"
+            :class="{ active: activeSubCategory === sub.id }"
+            @click="selectSubCategory(sub.id)"
+          >
+            <text class="sub-name">{{ sub.name }}</text>
+            <image
+              class="sub-underline"
+              src="/static/icon/我的衣橱/Rectangle_20.png"
+              mode="widthFix"
+              :style="{ opacity: activeSubCategory === sub.id ? 1 : 0 }"
+            />
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
     <!-- 新增：初始加载动画 -->
     <view
       v-if="isInitialLoading"
@@ -13,20 +70,6 @@
       class="main-content"
       v-else
     >
-      <!-- 左侧分类栏 -->
-      <view class="sidebar">
-        <view
-          v-for="category in categories"
-          :key="category.id"
-          class="sidebar-item"
-          :class="{ active: activeCategory === category.id }"
-          @click="selectCategory(category.id)"
-        >
-          {{ category.name }}
-        </view>
-      </view>
-
-      <!-- 右侧商品展示区 -->
       <view class="content-grid">
         <scroll-view
           scroll-y
@@ -43,7 +86,6 @@
               <view class="add-icon-plus">+</view>
               <text class="add-text">上传到我的衣橱</text>
             </view>
-
             <!-- 商品列表 -->
             <view
               v-for="item in closetItems"
@@ -51,24 +93,18 @@
               class="goods-card"
               @longpress="handleLongPress(item)"
             >
-              <image
-                :src="item.image"
-                class="goods-image"
-                mode="aspectFill"
-              />
+              <!-- 使用占位容器保证方形比率，image 绝对填充容器 -->
+              <view class="image-wrapper">
+                <image
+                  :src="item.image"
+                  class="goods-image"
+                  mode="aspectFill"
+                />
+              </view>
               <text class="goods-name">{{ item.name }}</text>
               <text class="goods-desc">{{ item.desc }}</text>
             </view>
           </view>
-
-          <!-- 新增：空状态提示 -->
-          <view
-            class="empty-state"
-            v-if="!isLoading && closetItems.length === 0"
-          >
-            <text class="empty-text">这个分类下还没有衣服哦</text>
-          </view>
-
           <!-- 列表底部的加载状态 -->
           <view
             class="load-more-status"
@@ -142,6 +178,9 @@ export default {
     return {
       categories: [],
       activeCategory: null,
+  // 副选单数据，按主分类 id 存数组
+  subCategories: {},
+  activeSubCategory: null,
       showModal: false,
       closetItems: [],
       page: 1,
@@ -175,10 +214,65 @@ export default {
     uni.$off('closet-refresh');
   },
   methods: {
+    // mock 的副分类映射，实际项目会由后端提供 API
+    getMockSubCategories(mainCategoryId) {
+      const map = {
+        1: [
+          { id: 's1', name: '衬衫' },
+          { id: 's2', name: 'T恤/Polo' },
+          { id: 's3', name: '风衣' },
+          { id: 's4', name: '连衣裙' },
+          { id: 's5', name: '针织毛衫' },
+          { id: 's6', name: '外套' }
+        ],
+        2: [
+          { id: 'b1', name: '牛仔裤' },
+          { id: 'b2', name: '休闲裤' },
+          { id: 'b3', name: '短裤' }
+        ],
+        3: [
+          { id: 'sh1', name: '运动鞋' },
+          { id: 'sh2', name: '皮鞋' }
+        ],
+        4: [
+          { id: 'o1', name: '配饰' },
+          { id: 'o2', name: '其他' }
+        ]
+      };
+      return map[mainCategoryId] || [];
+    },
+
+    // 获取副选单（占位）。后续请用真实 API 替换内部实现。
+    async getSubCategories(mainCategoryId) {
+      if (this.isGuest) {
+        this.$set(this.subCategories, mainCategoryId, this.getMockSubCategories(mainCategoryId));
+        const subs = this.subCategories[mainCategoryId];
+        this.activeSubCategory = subs && subs.length ? subs[0].id : null;
+        return;
+      }
+      try {
+        // 占位 API path，后续由后端提供真实接口
+        const data = await request({
+          url: `${apiConfig.BASE_URL}/address/getSubCategory/${mainCategoryId}`,
+          method: 'GET'
+        });
+        // 假设返回数组 [{id, name}, ...]
+        this.$set(this.subCategories, mainCategoryId, data);
+        const subs = this.subCategories[mainCategoryId];
+        this.activeSubCategory = subs && subs.length ? subs[0].id : null;
+      } catch (error) {
+        console.error('getSubCategories failed:', error);
+        // 失败时保持为空数组
+        this.$set(this.subCategories, mainCategoryId, []);
+        this.activeSubCategory = null;
+      }
+    },
     getMockCategories() {
       return [
-        { id: 1, name: '上衣' },
-        { id: 2, name: '裤子' }
+        { id: 1, name: '上衣', icon: '/static/icon/我的衣橱/上衣.png' },
+        { id: 2, name: '下装', icon: '/static/icon/我的衣橱/下装.png' },
+        { id: 3, name: '裙子', icon: '/static/icon/我的衣橱/收藏.png' },
+        { id: 4, name: '其他', icon: '/static/icon/我的衣橱/其他.png' }
       ];
     },
     getMockClosetItems(categoryId) {
@@ -199,6 +293,8 @@ export default {
       if (this.isGuest) {
         this.categories = this.getMockCategories();
         this.activeCategory = this.categories[0].id;
+        // 预加载副选单（mock）
+        await this.getSubCategories(this.activeCategory);
         this.closetItems = this.getMockClosetItems(this.activeCategory);
         this.isInitialLoading = false;
         return;
@@ -207,6 +303,8 @@ export default {
         await this.getCategories();
         if (this.categories.length > 0 && this.activeCategory === null) {
           this.activeCategory = this.categories[0].id;
+          // 预加载对应的副选单
+          await this.getSubCategories(this.activeCategory);
           await this.getClosetItems(true);
         }
       } catch (error) {
@@ -252,7 +350,9 @@ export default {
           method: 'GET',
           data: {
             page: this.page,
-            pageSize: this.pageSize
+            pageSize: this.pageSize,
+            // 预留 subCategory 参数给后端筛选
+            subCategory: this.activeSubCategory
           }
         });
         const newItems = data.map(item => ({
@@ -330,6 +430,17 @@ export default {
     selectCategory(id) {
       if (this.activeCategory === id) return;
       this.activeCategory = id;
+      // 切换主分类时加载对应副选单并重置子分类选择
+      this.getSubCategories(id).then(() => {
+        // 在副选单加载后刷新衣橱列表（后端可以根据 subCategory 返回不同结果）
+        this.getClosetItems(true);
+      });
+    },
+
+    selectSubCategory(subId) {
+      if (this.activeSubCategory === subId) return;
+      this.activeSubCategory = subId;
+      // 根据副选单筛选衣橱
       this.getClosetItems(true);
     },
     handleScrollToLower() {
@@ -361,10 +472,11 @@ export default {
 
 <style scoped>
 .closet-page {
-  height: 100vh;
+  /* 不使用 100vh，避免包含状态栏/导航高度 */
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  min-height: 100%;
 }
 .main-content {
   display: flex;
@@ -402,22 +514,25 @@ export default {
 }
 
 .grid-container {
-  width: 80%;
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, 280rpx);
+  /* 响应式两列：每列占可用宽度的一半，保证每行两个商品 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20rpx;
   box-sizing: border-box;
-  padding-bottom: 20rpx;
+  padding: 0 10rpx 20rpx 10rpx;
 }
 .goods-card {
   display: flex;
   flex-direction: column;
   width: 100%;
+  box-sizing: border-box;
+  padding: 10rpx;
 }
 .add-card {
   display: flex;
   flex-direction: column;
-  height: 320rpx;
+  height: 400rpx;
   width: 100%;
   border: 2rpx dashed #dcdcdc;
   border-radius: 16rpx;
@@ -431,25 +546,58 @@ export default {
   font-weight: lighter;
   line-height: 1;
 }
-.add-text {
-  margin-top: 20rpx;
-  font-size: 24rpx;
-  color: #6c5ce7;
+.image-wrapper {
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* 保持正方形占位 */
+  position: relative;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background-color: #eee; /* 占位背景色 */
 }
 .goods-image {
+  position: absolute;
+  left: 0;
+  top: 0;
   width: 100%;
-  height: 240rpx;
-  border-radius: 16rpx;
-  background-color: #eee;
+  height: 100%;
+  /* mode="aspectFill" 已在 template 设置，object-fit 作为保底 */
+  object-fit: cover;
+  border-radius: 0; /* 圆角由 wrapper 控制，避免重复裁切差异 */
 }
-.goods-name {
-  font-size: 26rpx;
+.sub-item {
+  background: transparent;
+  padding: 8rpx 14rpx;
+  border-radius: 20rpx;
   color: #333;
-  margin-top: 10rpx;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.sub-item .sub-name {
+  font-size: 22rpx;
+  color: #666;
+}
+.sub-item.active .sub-name {
+  color: #222;
+  font-weight: 700;
+}
+.sub-underline {
+  position: absolute;
+  bottom: -6rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56rpx;
+  height: auto;
+  transition: opacity 180ms ease, transform 180ms ease;
+  opacity: 0;
+}
+.sub-item.active .sub-underline {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 .goods-desc {
   font-size: 22rpx;
@@ -524,4 +672,129 @@ export default {
   font-size: 24rpx;
   width: 100%;
 }
+
+.closet-header {
+  width: 100%;
+  /* 将底部内边距留出空间供选单覆盖 */
+  margin-bottom: 0rpx;
+  padding: 0 0 40rpx 0;
+  position: relative;
+  z-index: 1;
+}
+.header-bg {
+  width: 100%;
+  height: auto;
+  display: block; /* 去掉 inline baseline 空隙 */
+}
+
+.category-tabs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* 背景使用透明，单独的 tab 会有颜色块用于识别 */
+  background: transparent;
+  padding: 10rpx 20rpx;
+  /* 上移，使其部分覆盖头图 */
+  margin-top: -100rpx;
+  margin-bottom: 10rpx;
+  overflow-x: auto;
+  position: relative;
+  z-index: 20; /* 确保在头图之上 */
+  box-sizing: border-box;
+  /* 微妙阴影以增强可读性和分层感 */
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 副选单样式 */
+.subcategory-tabs {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10rpx 8rpx;
+  box-sizing: border-box;
+  margin-bottom: 6rpx;
+}
+.sub-scroll {
+  width: 100%;
+}
+.sub-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14rpx;
+  padding: 6rpx 10rpx;
+}
+.sub-item {
+  background: rgba(0, 0, 0, 0.03);
+  padding: 10rpx 18rpx;
+  border-radius: 20rpx;
+  color: #333;
+  cursor: pointer;
+}
+.sub-item .sub-name {
+  font-size: 22rpx;
+  color: #666;
+}
+.sub-item.active {
+  background: #fff;
+  box-shadow: 0 6rpx 14rpx rgba(0, 0, 0, 0.06);
+}
+.sub-item.active .sub-name {
+  color: #222;
+  font-weight: 700;
+}
+.category-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  /* 固定为正方形，宽高一致 */
+  width: 120rpx;
+  height: 120rpx;
+  padding: 12rpx 12rpx;
+  border-radius: 28rpx; /* 圆角背景 */
+  background: #6c5ce7; /* 未选中时紫色背景 */
+  border: 6rpx solid rgba(255, 255, 255, 0.95); /* 白色边框 */
+  cursor: pointer;
+  /* 移除 min-width，使用固定尺寸保证正方形 */
+  box-sizing: border-box;
+  overflow: hidden; /* 保持卡片为正方形，缩放时内容随卡片一起缩放 */
+  /* 让整体卡片支持缩放（包括背景和边框） */
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  transform-origin: center center;
+  transform: scale(1);
+}
+.category-tab:last-child {
+  margin-right: 0;
+}
+.category-tab.active {
+  background: #000; /* 选中时黑色背景 */
+  /* 激活态微妙阴影，增加层级感 */
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.12);
+  border: 6rpx solid rgba(255, 255, 255, 0.95);
+  transform: scale(1.06); /* 放大整个卡片，包括背景和文字 */
+}
+
+/* 未选中时整体略微缩小，突出激活项 */
+.category-tab:not(.active) {
+  transform: scale(0.94);
+}
+.category-icon {
+  width: 56rpx;
+  height: 56rpx;
+  margin-bottom: 8rpx;
+  /* 保持图标固定大小，整体缩放交给 .category-tab 实现 */
+  transition: opacity 180ms ease;
+}
+.category-name {
+  font-size: 20rpx;
+  color: #fff; /* 文字在有色背景上为白色 */
+}
+.category-tab.active .category-name {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* 若需要为未选中和选中增加阴影或边框，可在此处扩展 */
+/* .category-tab { box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.06); } */
 </style>

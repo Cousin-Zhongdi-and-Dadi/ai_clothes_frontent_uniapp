@@ -75,14 +75,7 @@
     {
       "root": "subpackages/twodim",
       "pages": [
-        { "path": "TwoDimDisplay/TwoDimDisplay", "style": { "navigationBarTitleText": "上传模特" } },
         { "path": "TwoDimComment/TwoDimComment", "style": { "navigationBarTitleText": "AI评价", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
-      ]
-    },
-    {
-      "root": "subpackages/upload",
-      "pages": [
-        { "path": "UploadWhole/UploadWhole", "style": { "navigationBarTitleText": "上传衣物" } }
       ]
     },
     {

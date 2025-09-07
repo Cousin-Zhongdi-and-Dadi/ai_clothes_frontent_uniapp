@@ -153,6 +153,7 @@
 <script>
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
+import uploadFile from '@/utils/upload.js';
 import BodyDataEdit from '@/components/BodyDataEdit/BodyDataEdit.vue';
 
 /**
@@ -307,18 +308,28 @@ export default {
         
         uni.showLoading({ title: '正在上传...' });
 
-        const uploadRes = await uni.uploadFile({
-          url: `${apiConfig.BASE_URL}/user/uploadAvatar`,           filePath: tempFilePath,
-          name: 'file',
-          header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` },
-        });
-
-                const responseData = JSON.parse(uploadRes.data);
-        
-                if (responseData.code === 200) {
-          this.userAvatar = responseData.data.avatarUrl;           uni.showToast({ title: '头像更换成功', icon: 'success' });
-        } else {
-                    uni.showToast({ title: responseData.message || '上传失败', icon: 'none' });
+        try {
+          const resp = await uploadFile({
+            url: `${apiConfig.BASE_URL}/user/uploadAvatar`,
+            filePath: tempFilePath,
+            name: 'file',
+            header: { 'Authorization': `Bearer ${uni.getStorageSync('token')}` }
+          });
+          // uploadFile resolves with the backend data
+          // uploadFile 已做返回标准化：通常返回字符串 URL 或 data 对象
+          if (typeof resp === 'string') {
+            this.userAvatar = resp;
+            uni.showToast({ title: '头像更换成功', icon: 'success' });
+          } else if (resp && typeof resp === 'object') {
+            // 若是对象，尝试提取常见字段
+            this.userAvatar = resp.avatarUrl || resp.url || resp.fileUrl || this.userAvatar;
+            uni.showToast({ title: '头像更换成功', icon: 'success' });
+          } else {
+            uni.showToast({ title: '上传成功，但响应解析异常', icon: 'none' });
+          }
+        } catch (err) {
+          console.error('changeAvatar upload failed', err);
+          uni.showToast({ title: err && err.message ? err.message : '上传失败', icon: 'none' });
         }
 
     /**

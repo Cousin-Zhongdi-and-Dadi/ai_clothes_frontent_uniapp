@@ -46,6 +46,7 @@
 <script>
 import apiConfig from '@/utils/api.js';
 import request from '@/utils/request.js';
+import uploadFile from '@/utils/upload.js';
 
 export default {
   data() {
@@ -78,32 +79,27 @@ export default {
         return;
       }
       uni.showLoading({ title: '正在上传...', mask: true });
-      uni.uploadFile({
-        url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,         filePath: filePath,
-        name: 'file',         formData: {},         success: (res) => {
-          uni.hideLoading();
-          try {
-            const result = JSON.parse(res.data);
-            
-            if (result.code === 200 && result.data) {
-              uni.showToast({ title: '上传成功！', icon: 'success' });
-                            uni.setStorageSync('personImageUrl', result.data);
-              setTimeout(() => {
-                uni.navigateTo({ url: `/subpackages/upload/UploadWhole/UploadWhole?imgUrl=${encodeURIComponent(result.data)}` });
-              }, 1500);
-            } else {
-              uni.showToast({ title: result.message || '上传失败', icon: 'none' });
-            }
-          } catch (e) {
-            uni.showToast({ title: '服务器响应解析失败', icon: 'none' });
-          }
-        },
-        fail: (err) => {
-          uni.hideLoading();
-          uni.showToast({ title: '上传失败，请重试', icon: 'none' });
-          console.error('上传失败:', err);
-        }
-      });
+      try {
+        const uploaded = await uploadFile({
+          url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
+          filePath: filePath,
+          name: 'file',
+        });
+        uni.hideLoading();
+        uni.showToast({ title: '上传成功！', icon: 'success' });
+        const uploadedUrl = typeof uploaded === 'string' ? uploaded : (uploaded && (uploaded.url || uploaded.fileUrl || uploaded.path || uploaded.src || uploaded.file || uploaded.avatarUrl));
+        const storeVal = uploadedUrl || uploaded;
+            // 将上传后的图片 URL/路径写入本地缓存，供 TryOnContainer 读取
+            uni.setStorageSync('personImageUrl', storeVal);
+            // 返回到上一个页面（通常是 TryOnContainer），触发其 onShow 以刷新展示
+            setTimeout(() => {
+              uni.navigateBack({ delta: 1 });
+            }, 600);
+      } catch (err) {
+        uni.hideLoading();
+        uni.showToast({ title: err && err.message ? err.message : '上传失败，请重试', icon: 'none' });
+        console.error('上传失败:', err);
+      }
     },
     
         fileToBase64(filePath) {

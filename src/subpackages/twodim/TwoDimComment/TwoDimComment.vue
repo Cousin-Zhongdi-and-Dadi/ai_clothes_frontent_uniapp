@@ -1,40 +1,109 @@
 <template>
-  <view class="container">
-    <view class="chat-title">AI 搭配建议</view>
-    <!-- 加载/图片/失败提示 -->
-    <view
-      v-if="isLoading"
-      class="image-placeholder loading-state"
-    >
-      <view class="loading-animation"></view>
-      <text class="loading-text">AI搭配生成中，请稍候...</text>
+  <view class="page-root">
+    <!-- result card -->
+    <view class="result-card">
+      <!-- 右上角评分图标占位 -->
+      <image
+        class="result-icon"
+        src="/static/icon/ai评价/y.png"
+        mode="widthFix"
+      />
+      <view class="left">
+        <view
+          class="image-wrap"
+          :class="{ loading: isLoading }"
+        >
+          <image
+            v-if="outfitImageUrl && !isLoading"
+            :src="outfitImageUrl"
+            class="avatar"
+            mode="aspectFill"
+          />
+          <view
+            v-else
+            class="avatar placeholder"
+          >
+            <view
+              class="loading-animation-small"
+              v-if="isLoading"
+            ></view>
+            <text
+              v-else
+              class="placeholder-text"
+            >无图片</text>
+          </view>
+          <button
+            class="replace-btn"
+            @click="restartProcess"
+          >更换</button>
+          <button
+            class="fav-btn"
+            @click="addToFavorites"
+          >❤</button>
+        </view>
+      </view>
+      <view class="right">
+        <view class="rating">
+          <view class="stars">
+            <text class="star active">★</text>
+            <text class="star active">★</text>
+            <text class="star active">★</text>
+            <text class="star active">★</text>
+            <text class="star">☆</text>
+          </view>
+          <text class="score">4.0</text>
+        </view>
+
+        <view class="tags two-line">
+          <view class="tag-row">
+            <view class="pill">上衣</view>
+            <view
+              v-if="topGarmentCategory"
+              class="attr"
+            >{{ topGarmentCategory }}</view>
+          </view>
+          <view class="tag-row">
+            <view class="pill">下装</view>
+            <view
+              v-if="bottomGarmentCategory"
+              class="attr"
+            >{{ bottomGarmentCategory }}</view>
+          </view>
+        </view>
+      </view>
     </view>
-    <image
-      v-else-if="outfitImageUrl"
-      :src="outfitImageUrl"
-      class="image-placeholder"
-      mode="aspectFit"
-    />
-    <view
-      v-else
-      class="image-placeholder error-state"
-    >
-      <text>生成失败，请重试</text>
+
+    <!-- recommendation box -->
+    <view class="recommend-box">
+      <view class="rec-title">AI搭配建议</view>
+      <view class="rec-content">
+        <towxml :nodes="$towxmlFun(description || '正在加载搭配建议...', 'markdown')" />
+      </view>
     </view>
-    <!-- 描述信息 -->
-    <view class="desc-box">
-      <towxml :nodes="$towxmlFun(description || '正在加载搭配建议...', 'markdown')" />
-    </view>
-    <!-- 按钮 -->
-    <button
-      class="btn btn-grey"
-      @click="restartProcess"
-    >重新搭配</button>
-    <button
-      class="btn btn-primary"
-      @click="addToFavorites"
-    >收藏穿搭</button>
-    <!-- 重试弹窗 -->
+
+    <!-- other comments horizontal list
+    <view class="other-section">
+      <view class="other-title">其他搭配评价</view>
+      <scroll-view
+        class="other-list"
+        scroll-x="true"
+        show-scrollbar="false"
+      >
+        <view
+          class="other-item"
+          v-for="(img, idx) in [1,2,3]"
+          :key="idx"
+        >
+          <image
+            :src="`/static/example_pictures/sample${idx}.jpg`"
+            class="other-img"
+            mode="aspectFill"
+          />
+        </view>
+      </scroll-view>
+    </view> -->
+
+    <!-- existing modal (keep unchanged) -->
     <view
       v-if="showRetryModal"
       class="modal-mask"
@@ -67,6 +136,8 @@ export default {
       taskId: null,
       outfitImageUrl: '',
       description: '',
+  topGarmentCategory: '',
+  bottomGarmentCategory: '',
       isLoading: true,
       pollingTimer: null,
       pollingCount: 0,
@@ -137,6 +208,13 @@ export default {
           this.outfitImageUrl = res.imageUrl;
           this.description = res.description;
           this.showRetryModal = false;
+          // 同步读取上/下装分类，以便展示
+          try {
+            this.topGarmentCategory = uni.getStorageSync('topGarmentCategory') || '';
+            this.bottomGarmentCategory = uni.getStorageSync('bottomGarmentCategory') || '';
+          } catch (e) {
+            console.warn('读取分类失败', e);
+          }
         }
       } catch (error) {
         console.error('Result request failed:', error);
@@ -197,7 +275,7 @@ export default {
      */
     restartProcess() {
       uni.redirectTo({
-        url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay'
+        url: '/pages/TryOnContainer/TryOnContainer'
       });
     }
   }
@@ -205,98 +283,252 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  background: #fafafa;
+:root {
+  --purple: #6c63ff;
+  --light-purple: #efeaff;
+  --muted: #666;
+}
+.page-root {
+  background: #faf8ff;
   min-height: 100vh;
-  padding: 0 32rpx;
+  padding: 24rpx;
   box-sizing: border-box;
+}
+.header {
+  height: 88rpx;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  padding: 0 8rpx;
 }
-.chat-title {
-  font-size: 34rpx;
-  font-weight: 500;
-  text-align: center;
-  margin-top: 32rpx;
-  margin-bottom: 32rpx;
-  color: #222;
+.back {
+  font-size: 44rpx;
+  color: var(--purple);
+  width: 88rpx;
 }
-.image-placeholder {
-  width: 440rpx;
-  height: 560rpx;
-  background: #e0e0e0;
-  border-radius: 24rpx;
-  margin-bottom: 32rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+.title {
+  font-size: 36rpx;
+  color: #3b3b3b;
+  font-weight: 600;
 }
-.desc-box {
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 24rpx 20rpx;
-  font-size: 26rpx;
-  color: #222;
-  margin-bottom: 48rpx;
-  line-height: 1.6;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.02);
-  width: 100%;
-  max-width: 520rpx;
-  box-sizing: border-box;
-  min-height: 100rpx;
-}
-.btn {
-  width: 100%;
-  max-width: 520rpx;
-  height: 80rpx;
-  line-height: 80rpx;
-  border-radius: 16rpx;
-  font-size: 30rpx;
-  margin-bottom: 24rpx;
-  border: none;
-}
-.btn::after {
-  border: none;
-}
-.btn-grey {
-  background: #e5e5e5;
-  color: #333;
-}
-.btn-primary {
-  background: #6c63ff;
-  color: #fff;
-  margin-bottom: 20rpx;
+.header-spacer {
+  width: 88rpx;
 }
 
-.loading-state {
-  color: #888;
+.result-card {
+  background: var(--light-purple);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  display: flex;
+  gap: 20rpx;
+  align-items: flex-start;
+  box-shadow: 0 8rpx 24rpx rgba(108, 99, 255, 0.08);
+  margin-bottom: 28rpx;
+  position: relative; /* 为右上角图标留出定位上下文 */
 }
-.loading-text {
-  margin-top: 20rpx;
+.left {
+  width: 240rpx;
+}
+.image-wrap {
+  position: relative;
+  width: 240rpx;
+  height: 320rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  border: 6rpx solid var(--light-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+.image-wrap.loading {
+  opacity: 0.85;
+}
+.avatar {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.placeholder-text {
+  color: #999;
   font-size: 26rpx;
 }
-.loading-animation {
-  width: 80rpx;
-  height: 80rpx;
-  border: 8rpx solid #f3f3f3;
-  border-top: 8rpx solid #6c63ff;
+.loading-animation-small {
+  width: 40rpx;
+  height: 40rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid var(--purple);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.replace-btn {
+  position: absolute;
+  left: 12rpx;
+  bottom: 12rpx;
+  background: var(--purple);
+  padding: 0 14rpx;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  color: #fff;
+  border: none;
 }
-.error-state {
-  color: #ff4d4f;
+.fav-btn {
+  position: absolute;
+  right: 12rpx;
+  top: 12rpx;
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
   font-size: 28rpx;
+  color: var(--purple);
+  border: none;
+
+  /* 新增：去掉原生按钮的灰色背景和圆角 */
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  appearance: none;
+  -webkit-appearance: none;
+  /* 如果希望完全用图标/文字代替 button，也可改为 display:flex 保持垂直居中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* 右上角评分图标 */
+.result-icon {
+  position: absolute;
+  right: 20rpx;
+  top: 18rpx;
+  width: 400rpx;
+  z-index: 10;
+}
+
+/* 给右侧内容留出空间，避免被右上角图标遮挡 */
+.right {
+  padding-right: 80rpx;
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.stars {
+  display: flex;
+  gap: 6rpx;
+}
+.star {
+  font-size: 28rpx;
+  color: #ddd;
+}
+.star.active {
+  color: var(--purple);
+}
+.score {
+  font-size: 28rpx;
+  color: var(--muted);
+}
+
+.tags {
+  display: block;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+.pill {
+  background: var(--purple);
+  color: #fff;
+  padding: 8rpx 14rpx;
+  border-radius: 16rpx;
+  font-size: 22rpx;
+}
+.attr {
+  display: inline-block;
+  background: #f3f4f8;
+  color: #444;
+  padding: 8rpx 12rpx;
+  border-radius: 14rpx;
+  font-size: 22rpx;
+  margin-left: 12rpx;
+}
+
+/* 两行标签的行容器 */
+.tags.two-line .tag-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.summary {
+  color: #444;
+  font-size: 26rpx;
+  line-height: 1.6;
+  margin-top: 6rpx;
+}
+
+.recommend-box {
+  background: linear-gradient(180deg, #f6f3ff 0%, #f0ebff 100%);
+  border-radius: 20rpx;
+  padding: 22rpx;
+  box-shadow: 0 6rpx 20rpx rgba(108, 99, 255, 0.06);
+  margin-bottom: 28rpx;
+}
+.rec-title {
+  font-size: 30rpx;
+  color: var(--purple);
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+.rec-content {
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 18rpx;
+  color: #333;
+  font-size: 26rpx;
+  line-height: 1.8;
+}
+
+.other-section {
+  margin-bottom: 60rpx;
+}
+.other-title {
+  font-size: 30rpx;
+  color: #444;
+  margin-bottom: 14rpx;
+}
+.other-list {
+  display: flex;
+  height: 180rpx;
+}
+.other-item {
+  width: 160rpx;
+  height: 160rpx;
+  margin-right: 16rpx;
+  border-radius: 14rpx;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.04);
+}
+.other-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .modal-mask {
   position: fixed;
   left: 0;
@@ -315,30 +547,27 @@ export default {
   padding: 48rpx 32rpx;
   width: 80vw;
   max-width: 480rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
   text-align: center;
 }
 .modal-title {
   font-size: 32rpx;
-  font-weight: bold;
-  margin-bottom: 24rpx;
+  font-weight: 700;
+  margin-bottom: 18rpx;
 }
 .modal-desc {
-  font-size: 26rpx;
   color: #666;
-  margin-bottom: 40rpx;
+  font-size: 26rpx;
+  margin-bottom: 28rpx;
 }
 .modal-btns {
   display: flex;
-  justify-content: space-between;
-  gap: 32rpx;
+  gap: 20rpx;
 }
 .modal-btn {
   flex: 1;
   height: 72rpx;
   line-height: 72rpx;
   border-radius: 12rpx;
-  font-size: 28rpx;
   border: none;
 }
 .cancel {
@@ -346,7 +575,16 @@ export default {
   color: #333;
 }
 .retry {
-  background: #6c5ce7;
+  background: var(--purple);
   color: #fff;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

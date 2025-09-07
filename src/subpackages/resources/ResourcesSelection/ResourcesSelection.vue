@@ -311,6 +311,14 @@ export default {
         }
       } else {
         const imageUrl = this.selectedItem.img;
+        // 保存所选衣物的分类，供后续页面（TryOnContainer / TwoDimComment）展示
+        try {
+          const cat = this.selectedItem && (this.selectedItem.categoryName || this.selectedItem.parentName || this.selectedItem.typeName || '');
+          if (this.pageType === 'top') uni.setStorageSync('topGarmentCategory', cat);
+          else if (this.pageType === 'bottom') uni.setStorageSync('bottomGarmentCategory', cat);
+        } catch (e) {
+          console.warn('保存分类失败', e);
+        }
         const url = `/subpackages/confirm/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(imageUrl)}&type=${this.pageType}`;
         uni.navigateTo({ url });
         this.closePopup();

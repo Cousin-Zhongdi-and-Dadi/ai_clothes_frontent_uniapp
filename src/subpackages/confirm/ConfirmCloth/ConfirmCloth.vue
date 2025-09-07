@@ -1,39 +1,48 @@
 <template>
-  <view class="container">
-    <view class="image-container">
-      <image
-        v-if="imageUrl"
-        :src="imageUrl"
-        mode="aspectFit"
-        class="photo"
-      />
+  <view class="page">
+    <!-- 中间卡片：紫色边框、图片、右上圆形重选、开始搭配按钮 -->
+    <view class="confirm-card">
+      <view class="card-inner">
+        <view class="image-wrap">
+          <image
+            v-if="imageUrl"
+            :src="imageUrl"
+            mode="aspectFit"
+            class="card-image"
+          />
+          <button
+            class="reselect-btn"
+            @click="onReselect"
+          >重选</button>
+        </view>
+
+        <button
+          class="start-btn"
+          @click="startFitting"
+        >开始搭配</button>
+      </view>
     </view>
 
-    <view class="button-group">
-      <button
-        class="retry-btn"
-        @click="onReselect"
-      >重新挑选</button>
-      <!-- 仅当为上装时，显示“选择下装”按钮 -->
-      <button
-        v-if="type === 'top'"
-        class="secondary-btn"
-        @click="onSelectBottom"
-      >
-        选择下装
-      </button>
-      <button
-        class="confirm-btn"
-        @click="startFitting"
-      >开始搭配</button>
+    <!-- 底部卡片：其他搭配选项 -->
+    <view class="other-card">
+      <view class="other-title">其他搭配选项</view>
+      <view class="thumb-row">
+        <view
+          class="thumb"
+          v-for="n in 2"
+          :key="n"
+        >
+          <image
+            :src="imageUrl || '/static/example_pictures/sample1.jpg'"
+            mode="aspectFit"
+          />
+        </view>
+      </view>
     </view>
   </view>
 </template>
 
 <script>
-import request from '@/utils/request.js';
-import apiConfig from '@/utils/api.js';
-
 export default {
   data() {
     return {
@@ -46,6 +55,7 @@ export default {
       this.imageUrl = decodeURIComponent(options.imageUrl);
       this.type = options.type;
       const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+      // 保存到本地供 TryOnContainer 使用
       uni.setStorageSync(key, this.imageUrl);
     } else {
       console.error('未接收到图片URL或类型');
@@ -56,180 +66,150 @@ export default {
     onReselect() {
       uni.navigateBack();
     },
-    onSelectBottom() {
-      uni.navigateTo({
-        url: '/subpackages/upload/UploadWhole/UploadWhole'
-      });
-    },
-    async startFitting() {
-      const personImageUrl = uni.getStorageSync('personImageUrl');
-      let topGarmentUrl = uni.getStorageSync('topGarmentUrl');
-      let bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || '';
-      if (!personImageUrl) {
-        uni.showToast({ title: '缺少人物图片', icon: 'none' });
-        setTimeout(() => {
-          uni.redirectTo({
-            url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay'
-          });
-        }, 1200);
-        return;
-      }
-      if (!topGarmentUrl) {
-        uni.showToast({ title: '上装未上传', icon: 'none' });
-        setTimeout(() => {
-          uni.redirectTo({
-            url: '/subpackages/upload/UploadWhole/UploadWhole'
-          });
-        }, 1200);
-        return;
-      }
-      uni.showLoading({ title: '正在上传衣物图片...' });
-      try {
-        if (!/^https?:\/\//.test(topGarmentUrl)) {
-          topGarmentUrl = await new Promise((resolve, reject) => {
-            uni.uploadFile({
-              url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
-              filePath: topGarmentUrl,
-              name: 'file',
-              formData: {},
-              success: (res) => {
-                try {
-                  const result = JSON.parse(res.data);
-                  if (result.code === 200 && result.data) {
-                    uni.setStorageSync('topGarmentUrl', result.data);
-                    resolve(result.data);
-                  } else {
-                    uni.showToast({ title: result.message || '上传失败', icon: 'none' });
-                    reject(result);
-                  }
-                } catch (e) {
-                  uni.showToast({ title: '服务器响应解析失败', icon: 'none' });
-                  reject(e);
-                }
-              },
-              fail: (err) => {
-                uni.showToast({ title: '上传失败，请重试', icon: 'none' });
-                reject(err);
-              }
-            });
-          });
-        }
-        if (bottomGarmentUrl && !/^https?:\/\//.test(bottomGarmentUrl)) {
-          bottomGarmentUrl = await new Promise((resolve, reject) => {
-            uni.uploadFile({
-              url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
-              filePath: bottomGarmentUrl,
-              name: 'file',
-              formData: {},
-              success: (res) => {
-                try {
-                  const result = JSON.parse(res.data);
-                  if (result.code === 200 && result.data) {
-                    uni.setStorageSync('bottomGarmentUrl', result.data);
-                    resolve(result.data);
-                  } else {
-                    uni.showToast({ title: result.message || '下装上传失败', icon: 'none' });
-                    reject(result);
-                  }
-                } catch (e) {
-                  uni.showToast({ title: '服务器响应解析失败', icon: 'none' });
-                  reject(e);
-                }
-              },
-              fail: (err) => {
-                uni.showToast({ title: '下装上传失败，请重试', icon: 'none' });
-                reject(err);
-              }
-            });
-          });
-        }
-        uni.showLoading({ title: '正在生成搭配...' });
-        const res = await request({
-          url: `${apiConfig.BASE_URL}/fitting_2d/submit_task`,
-          method: 'GET',
-          data: {
-            personImageUrl: uni.getStorageSync('personImageUrl'),
-            topGarmentUrl: uni.getStorageSync('topGarmentUrl'),
-            bottomGarmentUrl: uni.getStorageSync('bottomGarmentUrl') || ''
-          }
-        });
-        uni.removeStorageSync('personImageUrl');
-        uni.removeStorageSync('topGarmentUrl');
-        uni.removeStorageSync('bottomGarmentUrl');
-        uni.hideLoading();
-        if (res) {
-          uni.redirectTo({
-            url: `/subpackages/twodim/TwoDimComment/TwoDimComment?taskId=${res}`
-          });
-        } else {
-          uni.showToast({ title: '任务提交失败', icon: 'none' });
-        }
-      } catch (error) {
-        uni.hideLoading();
-        uni.showToast({ title: '网络错误，请重试', icon: 'none' });
-        console.error('提交试衣任务失败:', error);
-      }
+    // 这里不再提交试衣任务，仅保存并返回，实际提交在 TryOnContainer 的“一键试穿”中完成
+    startFitting() {
+      const key = this.type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+      uni.setStorageSync(key, this.imageUrl);
+      uni.showToast({ title: '已保存', icon: 'success' });
+      setTimeout(() => {
+        uni.switchTab({ url: '/pages/TryOnContainer/TryOnContainer' });
+      }, 600);
     }
   }
 }
 </script>
 
 <style scoped>
-.container {
+.page {
   min-height: 100vh;
-  background: #fafafa;
+  background: #faf9ff;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 80rpx;
 }
-.image-container {
-  width: 440rpx;
-  height: 560rpx;
-  margin-bottom: 80rpx;
+
+.nav {
+  width: 100%;
+  height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border-radius: 12rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
-}
-.photo {
-  width: 100%;
-  height: 100%;
-  border-radius: 12rpx;
-}
-.button-group {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 20rpx;
-  padding: 0 20rpx;
+  position: relative;
+  padding-top: 20rpx;
   box-sizing: border-box;
 }
-.retry-btn,
-.confirm-btn,
-.secondary-btn {
-  flex: 1;
-  max-width: 280rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-  border-radius: 44rpx;
-  font-size: 30rpx;
+.nav-back {
+  position: absolute;
+  left: 18rpx;
+  top: 26rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: transparent;
   border: none;
-  font-weight: 500;
-  margin: 0;
-}
-.retry-btn {
-  background: #f0f0f0;
-  color: #333;
-}
-.secondary-btn {
-  background: #e0dffc;
+  font-size: 36rpx;
   color: #6c5ce7;
 }
-.confirm-btn {
+.nav-title {
+  font-size: 32rpx;
+  color: #6c5ce7;
+  font-weight: 700;
+}
+
+.confirm-card {
+  width: 75%;
+  max-width: 760rpx;
+  margin-top: 12rpx;
+  background: transparent;
+}
+.card-inner {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 24rpx 20rpx 24rpx;
+  box-sizing: border-box;
+  border: 4rpx solid #6c5ce7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 800rpx;
+}
+.image-wrap {
+  width: 100%;
+  /* 加大高度以支持纵向展示 */
+  height: 640rpx;
+  border-radius: 12rpx;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.card-image {
+  /* 优先填满高度以显示纵向比例的衣物 */
+  max-height: 96%;
+  max-width: 92%;
+  object-fit: contain;
+}
+.reselect-btn {
+  position: absolute;
+  right: 18rpx;
+  top: 18rpx;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 36rpx;
+  background: rgba(108, 92, 231, 0.08);
+  color: #6c5ce7;
+  border: none;
+  font-size: 28rpx;
+}
+.start-btn {
+  width: 80%;
+  height: 80rpx;
+  margin-top: 22rpx;
+  border-radius: 44rpx;
   background: #6c5ce7;
   color: #fff;
+  border: none;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.other-card {
+  width: 92%;
+  margin-top: 36rpx;
+  background: #f6f3ff;
+  border-radius: 22rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.other-title {
+  color: #b9aef9;
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+}
+.thumb-row {
+  width: 100%;
+  display: flex;
+  gap: 18rpx;
+  justify-content: space-between;
+}
+.thumb {
+  flex: 1;
+  height: 320rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.thumb image {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
 }
 </style>

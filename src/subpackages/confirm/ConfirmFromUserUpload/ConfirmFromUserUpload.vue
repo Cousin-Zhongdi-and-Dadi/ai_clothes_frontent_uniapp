@@ -99,7 +99,8 @@
 </template>
 
 <script>
-import request, { uploadFile } from '@/utils/request.js';
+import request from '@/utils/request.js';
+import uploadFile from '@/utils/upload.js';
 import apiConfig from '@/utils/api.js';
 
 export default {

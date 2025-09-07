@@ -2,36 +2,73 @@
   <view class="page">
     <view class="card-wrap">
       <view class="left-cards">
-        <view class="small-card">
+        <!-- 上装预览 -->
+        <view
+          class="small-card"
+          @click.stop="onTopCardClick"
+        >
           <image
+            v-if="topThumb"
             class="thumb"
-            src="/static/example_pictures/sample1.jpg"
+            :src="topThumb"
             mode="aspectFill"
           ></image>
+          <view
+            v-else
+            class="thumb placeholder"
+            @click.stop="onTopCardClick"
+          >
+            <text class="placeholder-text">点击上传</text>
+          </view>
           <button
+            v-if="topThumb"
             class="small-btn"
             @click.stop.prevent="chooseUpper"
           >重选</button>
         </view>
-        <view class="small-card">
+        <!-- 下装预览 -->
+        <view
+          class="small-card"
+          @click.stop="onBottomCardClick"
+        >
           <image
+            v-if="bottomThumb"
             class="thumb"
-            src="/static/example_pictures/sample2.jpg"
+            :src="bottomThumb"
             mode="aspectFill"
           ></image>
+          <view
+            v-else
+            class="thumb placeholder"
+            @click.stop="onBottomCardClick"
+          >
+            <text class="placeholder-text">点击上传</text>
+          </view>
           <button
+            v-if="bottomThumb"
             class="small-btn"
             @click.stop.prevent="chooseLower"
           >重选</button>
         </view>
       </view>
 
-      <view class="right-card">
+      <view
+        class="right-card"
+        @click.stop="onModelCardClick"
+      >
         <image
+          v-if="personImageUrl"
           class="model"
-          src="/static/example_pictures/sample2.jpg"
+          :src="personImageUrl"
           mode="aspectFit"
         ></image>
+        <view
+          v-else
+          class="model placeholder"
+          @click.stop="onModelCardClick"
+        >
+          <text class="placeholder-text">点击上传</text>
+        </view>
         <view class="model-tools">
           <!-- 预留 3D/空间 文本及 icon 位置 -->
           <image
@@ -41,6 +78,7 @@
           />
         </view>
         <button
+          v-if="personImageUrl"
           class="small-btn"
           @click.stop.prevent="uploadModel"
         >重选</button>
@@ -96,6 +134,10 @@
 </template>
 
 <script>
+import request from '@/utils/request.js';
+import apiConfig from '@/utils/api.js';
+import uploadFile from '@/utils/upload.js';
+
 export default {
   name: 'TryOnContainer',
   data() {
@@ -104,7 +146,20 @@ export default {
         { img: '/static/example_pictures/sample1.jpg', title: '罗宾汉 ROBINHOOD 美式' },
         { img: '/static/example_pictures/sample2.jpg', title: 'PAUI COSTELLOE 罗·科' }
       ]
+      ,
+      topThumb: '',
+      bottomThumb: '',
+      personImageUrl: ''
     }
+  },
+  onShow() {
+    // 每次页面显示时从 storage 读取最新的上/下装图片
+    const top = uni.getStorageSync('topGarmentUrl');
+    const bottom = uni.getStorageSync('bottomGarmentUrl');
+    const person = uni.getStorageSync('personImageUrl');
+    if (top) this.topThumb = top;
+    if (bottom) this.bottomThumb = bottom;
+    if (person) this.personImageUrl = person;
   },
   methods: {
     /***** 原有导航方法 *****/
@@ -118,10 +173,112 @@ export default {
       uni.navigateTo({ url: '/subpackages/chat/ServiceChat/ServiceChat' });
     },
 
-    /***** 一键试穿占位 *****/
-    onTryOn() {
-      console.log('一键试穿 被点击')
-      uni.showToast({ title: '正在尝试...', icon: 'none' })
+    // 卡片点击：若无图片则触发上传；若有图片则不响应（重选按钮负责替换）
+    onTopCardClick() {
+      if (!this.topThumb) {
+        // 仅允许从素材库选择上装，直接跳转到素材选择页
+        this.selectFromResources('top');
+      }
+    },
+    onBottomCardClick() {
+      if (!this.bottomThumb) {
+        // 仅允许从素材库选择下装，直接跳转到素材选择页
+        this.selectFromResources('bottom');
+      }
+    },
+
+    // 模特卡片点击：若无模特图则触发上传；若已存在则禁用卡片点击（使用重选按钮替换）
+    onModelCardClick() {
+      if (!this.personImageUrl) {
+        this.uploadOptions('model');
+      }
+    },
+
+    // 显示上传选项（相册/拍照）
+    uploadOptions(type) {
+      uni.showActionSheet({
+        itemList: ['相册上传', '拍照上传'],
+        success: (res) => {
+          const idx = res.tapIndex;
+          if (idx === 0) {
+            uni.navigateTo({ url: `/subpackages/resources/ResourcesSelection/ResourcesSelection?type=${type}&source=TryOnContainer` });
+          } else if (idx === 1) {
+            this.uploadFromAlbum(type);
+          } else if (idx === 2) {
+            this.uploadFromCamera(type);
+          }
+        }
+      });
+    },
+
+    /***** 一键试穿：检查、上传并提交试衣任务 *****/
+    async onTryOn() {
+      // 从 storage 中读取三张图片
+      const personImageUrl = uni.getStorageSync('personImageUrl');
+      let topGarmentUrl = uni.getStorageSync('topGarmentUrl');
+      let bottomGarmentUrl = uni.getStorageSync('bottomGarmentUrl') || '';
+
+      // 检查缺失项并提示
+  const missing = [];
+  if (!personImageUrl) missing.push('人物照片');
+  if (!topGarmentUrl) missing.push('上装');
+  // 下装为可选：若不存在，仍然可以提交
+  if (missing.length) {
+        uni.showToast({ title: `缺少：${missing.join('、')}`, icon: 'none' });
+        return;
+      }
+
+      uni.showLoading({ title: '正在提交试衣...' });
+      try {
+        // 上传上装/下装（如果是本地临时路径），使用统一的 upload util
+        if (!/^https?:\/\//.test(topGarmentUrl)) {
+          const uploaded = await uploadFile({
+            url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
+            filePath: topGarmentUrl,
+            name: 'file'
+          });
+          // normalize: prefer string URL
+          const uploadedUrl = typeof uploaded === 'string' ? uploaded : (uploaded && (uploaded.url || uploaded.fileUrl || uploaded.path || uploaded.src || uploaded.file || uploaded.avatarUrl));
+          topGarmentUrl = uploadedUrl || uploaded;
+          uni.setStorageSync('topGarmentUrl', topGarmentUrl);
+        }
+        if (bottomGarmentUrl && !/^https?:\/\//.test(bottomGarmentUrl)) {
+          const uploaded = await uploadFile({
+            url: `${apiConfig.BASE_URL}/fitting_2d/submit_images`,
+            filePath: bottomGarmentUrl,
+            name: 'file'
+          });
+          const uploadedUrl = typeof uploaded === 'string' ? uploaded : (uploaded && (uploaded.url || uploaded.fileUrl || uploaded.path || uploaded.src || uploaded.file || uploaded.avatarUrl));
+          bottomGarmentUrl = uploadedUrl || uploaded;
+          uni.setStorageSync('bottomGarmentUrl', bottomGarmentUrl);
+        }
+
+        // 提交任务（GET 接口，传入三个 URL）
+        const res = await request({
+          url: `${apiConfig.BASE_URL}/fitting_2d/submit_task`,
+          method: 'GET',
+          data: {
+            personImageUrl,
+            topGarmentUrl,
+            bottomGarmentUrl: bottomGarmentUrl || ''
+          }
+        });
+
+        uni.removeStorageSync('personImageUrl');
+        uni.removeStorageSync('topGarmentUrl');
+        uni.removeStorageSync('bottomGarmentUrl');
+        uni.hideLoading();
+
+        if (res) {
+          uni.redirectTo({ url: `/subpackages/twodim/TwoDimComment/TwoDimComment?taskId=${res}` });
+        } else {
+          uni.showToast({ title: '任务提交失败', icon: 'none' });
+        }
+      } catch (err) {
+        uni.hideLoading();
+        uni.showToast({ title: '提交失败，请重试', icon: 'none' });
+        console.error('一键试穿提交错误:', err);
+      }
     },
 
     /***** 上/下装 & 模特 选择/上传 流程（从 UploadWhole / TwoDimDisplay 合并） *****/
@@ -154,7 +311,19 @@ export default {
         sourceType: source,
         success: (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          uni.navigateTo({ url: `/subpackages/confirm/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}&type=${type}` });
+          // 立即展示缩略图并保存到 storage，ConfirmCloth 页面也会覆盖一次
+          const key = type === 'top' ? 'topGarmentUrl' : (type === 'bottom' ? 'bottomGarmentUrl' : 'personImageUrl');
+          uni.setStorageSync(key, tempFilePath);
+          if (type === 'top') this.topThumb = tempFilePath;
+          else if (type === 'bottom') this.bottomThumb = tempFilePath;
+          else if (type === 'model') this.personImageUrl = tempFilePath;
+
+          if (type === 'top' || type === 'bottom') {
+            uni.navigateTo({ url: `/subpackages/confirm/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}&type=${type}` });
+          } else if (type === 'model') {
+            // model 走 ConfirmModel 流程以确认并上传模特图片
+            this.navigateToConfirmModel(tempFilePath);
+          }
         },
         fail: (err) => {
           if (err.errMsg !== 'chooseImage:fail cancel') {
@@ -250,6 +419,17 @@ export default {
   border-radius: 16rpx;
   display: block;
 }
+.thumb.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  color: #9b7ef6;
+}
+.placeholder-text {
+  color: #9b7ef6;
+  font-size: 28rpx;
+}
 .small-btn {
   position: absolute;
   right: 20rpx;
@@ -283,6 +463,15 @@ export default {
   width: 100%;
   height: 400rpx;
   display: block;
+}
+/* 模特占位样式：居中显示占位文字，背景和左侧缩略卡片一致 */
+.model.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  color: #9b7ef6;
+  border-radius: 12rpx;
 }
 .model-tools {
   position: absolute;

@@ -82,10 +82,29 @@ export default function uploadFile(options) {
                         extractedUrl = data;
                     } else if (data && typeof data === 'object') {
                         // common fields that may contain URL
-                        extractedUrl = data.avatarUrl || data.url || data.fileUrl || data.path || data.src || data.file || undefined;
+                        extractedUrl = data.avatarUrl || data.url || data.fileUrl || data.file_url || data.path || data.src || data.file || data.result || undefined;
+                        // sometimes backend nests useful url in data.data or data.result
+                        if (!extractedUrl) {
+                            if (typeof data.data === 'string') extractedUrl = data.data;
+                            else if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'string') extractedUrl = data[0];
+                            else if (data.data && typeof data.data === 'object') {
+                                // try nested common keys
+                                extractedUrl = data.data.url || data.data.fileUrl || data.data.path || data.data.src || data.data.avatarUrl || undefined;
+                            }
+                        }
+                    } else if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'string') {
+                        extractedUrl = data[0];
                     }
-                    // If we could extract a URL-like string, return it; otherwise return raw data object
-                    resolve(extractedUrl !== undefined ? extractedUrl : data);
+
+                    // ensure returned primitive when possible
+                    if (extractedUrl !== undefined && extractedUrl !== null) {
+                        // coerce non-string primitives to string
+                        if (typeof extractedUrl !== 'string') extractedUrl = String(extractedUrl);
+                        resolve(extractedUrl);
+                    } else {
+                        // fallback: return raw data object (may be useful) if no URL-like field found
+                        resolve(data);
+                    }
                 } else {
                     const errorMessage = (responseData && responseData.message) || '上传失败';
                     uni.showToast({

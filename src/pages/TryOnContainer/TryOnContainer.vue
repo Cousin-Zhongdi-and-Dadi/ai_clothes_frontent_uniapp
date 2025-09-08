@@ -201,10 +201,8 @@ export default {
         success: (res) => {
           const idx = res.tapIndex;
           if (idx === 0) {
-            uni.navigateTo({ url: `/subpackages/resources/ResourcesSelection/ResourcesSelection?type=${type}&source=TryOnContainer` });
-          } else if (idx === 1) {
             this.uploadFromAlbum(type);
-          } else if (idx === 2) {
+          } else if (idx === 1) {
             this.uploadFromCamera(type);
           }
         }
@@ -311,18 +309,21 @@ export default {
         sourceType: source,
         success: (res) => {
           const tempFilePath = res.tempFilePaths[0];
-          // 立即展示缩略图并保存到 storage，ConfirmCloth 页面也会覆盖一次
-          const key = type === 'top' ? 'topGarmentUrl' : (type === 'bottom' ? 'bottomGarmentUrl' : 'personImageUrl');
-          uni.setStorageSync(key, tempFilePath);
-          if (type === 'top') this.topThumb = tempFilePath;
-          else if (type === 'bottom') this.bottomThumb = tempFilePath;
-          else if (type === 'model') this.personImageUrl = tempFilePath;
-
+          // 对上/下装：立即展示缩略图并保存到 storage，ConfirmCloth 页面也会覆盖一次
           if (type === 'top' || type === 'bottom') {
+            const key = type === 'top' ? 'topGarmentUrl' : 'bottomGarmentUrl';
+            uni.setStorageSync(key, tempFilePath);
+            if (type === 'top') this.topThumb = tempFilePath;
+            else this.bottomThumb = tempFilePath;
             uni.navigateTo({ url: `/subpackages/confirm/ConfirmCloth/ConfirmCloth?imageUrl=${encodeURIComponent(tempFilePath)}&type=${type}` });
-          } else if (type === 'model') {
-            // model 走 ConfirmModel 流程以确认并上传模特图片
+            return;
+          }
+
+          // 对模特（model）类型：不要在本页立即写 storage 或展示临时图，
+          // 让 ConfirmModel 在用户确认并上传成功后写入 'personImageUrl' 并 navigateBack
+          if (type === 'model') {
             this.navigateToConfirmModel(tempFilePath);
+            return;
           }
         },
         fail: (err) => {

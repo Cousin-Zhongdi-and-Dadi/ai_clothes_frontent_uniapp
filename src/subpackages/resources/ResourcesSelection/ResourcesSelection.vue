@@ -313,7 +313,20 @@ export default {
         const imageUrl = this.selectedItem.img;
         // 保存所选衣物的分类，供后续页面（TryOnContainer / TwoDimComment）展示
         try {
-          const cat = this.selectedItem && (this.selectedItem.categoryName || this.selectedItem.parentName || this.selectedItem.typeName || '');
+          // 优先从当前的子分类 tab（subcategory-tabs）读取分类名称，因为后端返回的商品对象不包含分类字段
+          let cat = '';
+          try {
+            const activeTab = Array.isArray(this.tabs) ? this.tabs.find(t => t.id === this.activeTabId) : null;
+            if (activeTab && (activeTab.categoryName || activeTab.name)) {
+              cat = activeTab.categoryName || activeTab.name;
+            }
+          } catch (innerErr) {
+            // ignore and fallback
+          }
+          // 回退：如果没有从 tab 获取到分类，则尝试从 selectedItem 中提取常见字段
+          if (!cat && this.selectedItem) {
+            cat = this.selectedItem.categoryName || this.selectedItem.category || this.selectedItem.parentName || this.selectedItem.typeName || '';
+          }
           if (this.pageType === 'top') uni.setStorageSync('topGarmentCategory', cat);
           else if (this.pageType === 'bottom') uni.setStorageSync('bottomGarmentCategory', cat);
         } catch (e) {
@@ -328,44 +341,44 @@ export default {
   computed: {
     // 计算标题显示的字号（受最大/最小字号限制），以及最终要显示的文字（可能会截断）
     titleFontSize() {
-  const title = (this.selectedItem && this.selectedItem.title) ? String(this.selectedItem.title) : '商品名称';
-  // 容器宽度应与 CSS 中的 max-width 对齐（以 rpx 估算）
-  // popup-card 宽度为 86% 屏幕，header-overlay 左右内边距设置为 left:48 right:48，
-  // 因此可用宽度近似为 86% * screenWidth - 96rpx. 使用 500rpx 作为典型可用宽度。
-  const containerWidth = 500;
-  const baseFontSize = 48;
-  const minFontSize = 24;
-  const maxFontSize = 48;
-  const avgCharWidthRatio = 0.65; // 提高估算，避免过多换行
-  const maxLines = 2;
+      const title = (this.selectedItem && this.selectedItem.title) ? String(this.selectedItem.title) : '商品名称';
+      // 容器宽度应与 CSS 中的 max-width 对齐（以 rpx 估算）
+      // popup-card 宽度为 86% 屏幕，header-overlay 左右内边距设置为 left:48 right:48，
+      // 因此可用宽度近似为 86% * screenWidth - 96rpx. 使用 500rpx 作为典型可用宽度。
+      const containerWidth = 500;
+      const baseFontSize = 48;
+      const minFontSize = 24;
+      const maxFontSize = 48;
+      const avgCharWidthRatio = 0.65; // 提高估算，避免过多换行
+      const maxLines = 2;
 
-  const charWidth = minFontSize * avgCharWidthRatio;
-  const maxChars = Math.floor(containerWidth / charWidth) * maxLines;
-  if (!title || title.length === 0) return maxFontSize + 'rpx';
-  if (title.length <= maxChars) {
-    // 可以尝试用更大字号
-    const scale = maxChars / title.length;
-    let newSize = Math.round(maxFontSize * scale);
-    newSize = Math.max(minFontSize, Math.min(maxFontSize, newSize));
-    return newSize + 'rpx';
-  } else {
-    // 优先缩小到最小字号
-    return minFontSize + 'rpx';
-  }
-    },
+      const charWidth = minFontSize * avgCharWidthRatio;
+      const maxChars = Math.floor(containerWidth / charWidth) * maxLines;
+      if (!title || title.length === 0) return maxFontSize + 'rpx';
+      if (title.length <= maxChars) {
+        // 可以尝试用更大字号
+        const scale = maxChars / title.length;
+        let newSize = Math.round(maxFontSize * scale);
+        newSize = Math.max(minFontSize, Math.min(maxFontSize, newSize));
+        return newSize + 'rpx';
+      } else {
+        // 优先缩小到最小字号
+        return minFontSize + 'rpx';
+      }
+        },
     titleDisplay() {
-  const title = (this.selectedItem && this.selectedItem.title) ? String(this.selectedItem.title) : '商品名称';
-  const containerWidth = 500;
-  const minFontSize = 48;
-  const avgCharWidthRatio = 0.65;
-  const maxLines = 2;
-  const charWidth = minFontSize * avgCharWidthRatio;
-  const maxChars = Math.floor(containerWidth / charWidth) * maxLines;
-  if (!title || title.length === 0) return '商品名称';
-  // 优先显示两行，不截断，让 CSS 处理溢出
-  return title;
-    }
-  },
+      const title = (this.selectedItem && this.selectedItem.title) ? String(this.selectedItem.title) : '商品名称';
+      const containerWidth = 500;
+      const minFontSize = 48;
+      const avgCharWidthRatio = 0.65;
+      const maxLines = 2;
+      const charWidth = minFontSize * avgCharWidthRatio;
+      const maxChars = Math.floor(containerWidth / charWidth) * maxLines;
+      if (!title || title.length === 0) return '商品名称';
+      // 优先显示两行，不截断，让 CSS 处理溢出
+        return title;
+      }
+    },
     onUnload() {
     if (this.source === 'AiMatch') {
       uni.$off && uni.$off('ai-match-image-selected');

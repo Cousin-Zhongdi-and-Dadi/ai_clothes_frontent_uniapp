@@ -155,7 +155,7 @@ export default {
   position: absolute;
   right: 18rpx;
   top: 18rpx;
-  width: 72rpx;
+  width: 120rpx;
   height: 72rpx;
   border-radius: 36rpx;
   background: rgba(108, 92, 231, 0.08);

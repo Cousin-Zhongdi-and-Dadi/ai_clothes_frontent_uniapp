@@ -146,7 +146,15 @@ export default {
     };
   },
   onLoad(options) {
-    if (options.taskId) {
+    // 先尝试同步读取上/下装分类，避免因网络或其他异步导致标签为空
+    try {
+      this.topGarmentCategory = uni.getStorageSync('topGarmentCategory') || '';
+      this.bottomGarmentCategory = uni.getStorageSync('bottomGarmentCategory') || '';
+    } catch (e) {
+      console.warn('初始化读取分类失败', e);
+    }
+
+    if (options && options.taskId) {
       this.taskId = options.taskId;
       this.startPolling();
     } else {
@@ -274,7 +282,7 @@ export default {
      * Restart the AI outfit process
      */
     restartProcess() {
-      uni.redirectTo({
+      uni.switchTab({
         url: '/pages/TryOnContainer/TryOnContainer'
       });
     }

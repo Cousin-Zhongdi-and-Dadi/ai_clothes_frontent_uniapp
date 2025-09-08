@@ -2,7 +2,7 @@
   <view class="page-root">
     <!-- result card -->
     <view class="result-card">
-      <!-- 右上角评分图标占位 -->
+      <!-- 右上角评分图标占位（静态图片恢复，用于视觉占位） -->
       <image
         class="result-icon"
         src="/static/icon/ai评价/y.png"
@@ -43,17 +43,6 @@
         </view>
       </view>
       <view class="right">
-        <view class="rating">
-          <view class="stars">
-            <text class="star active">★</text>
-            <text class="star active">★</text>
-            <text class="star active">★</text>
-            <text class="star active">★</text>
-            <text class="star">☆</text>
-          </view>
-          <text class="score">4.0</text>
-        </view>
-
         <view class="tags two-line">
           <view class="tag-row">
             <view class="pill">上衣</view>
@@ -67,10 +56,23 @@
             <view
               v-if="bottomGarmentCategory"
               class="attr"
-            >{{ bottomGarmentCategory }}</view>
+            >{{ bottomGarmentCategory || "无下装" }}</view>
           </view>
         </view>
       </view>
+    </view>
+    <!-- rating placed at top-right of card -->
+    <view class="rating-top-right">
+      <view class="stars">
+        <image
+          v-for="n in 5"
+          :key="n"
+          :src="n < litCount ? '/static/icon/ai评价/评分星星有色.png' : '/static/icon/ai评价/评分星星无色.png'"
+          class="star-icon"
+          mode="widthFix"
+        />
+      </view>
+      <text class="score">{{ rating.toFixed(1) }}</text>
     </view>
 
     <!-- recommendation box -->
@@ -139,6 +141,8 @@ export default {
   topGarmentCategory: '',
   bottomGarmentCategory: '',
       isLoading: true,
+  rating: 4, // 改为数字 4，避免字符串解析问题
+      litCount: 4, // 新增：手动计算的点亮星星数，默认 4
       pollingTimer: null,
       pollingCount: 0,
       maxPollingCount: 40,
@@ -162,6 +166,8 @@ export default {
       this.isLoading = false;
       this.description = '页面加载错误，缺少任务ID。';
     }
+    // 新增：初始化 litCount
+    this.litCount = Math.floor(Number(this.rating)) || 4;
   },
   onUnload() {
     if (this.pollingTimer) {
@@ -215,6 +221,13 @@ export default {
           this.isLoading = false;
           this.outfitImageUrl = res.imageUrl;
           this.description = res.description;
+          // 后端暂未实现 rating，测试期间强制设置为 4 分
+          try {
+            this.rating = 4; // 确保是数字
+            this.litCount = Math.floor(Number(this.rating)) || 4; // 新增：手动更新 litCount
+          } catch (e) {
+            console.warn('设置测试 rating 失败', e);
+          }
           this.showRetryModal = false;
           // 同步读取上/下装分类，以便展示
           try {
@@ -419,8 +432,29 @@ export default {
   z-index: 10;
 }
 
+/* rating placed at top-right of result-card */
+.rating-top-right {
+  position: absolute;
+  right: 30rpx;
+  top: 30rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6rpx 10rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.rating-top-right .score {
+  font-size: 24rpx;
+  color: var(--muted);
+}
+
 /* 给右侧内容留出空间，避免被右上角图标遮挡 */
 .right {
+  padding-top: 40rpx;
   padding-right: 80rpx;
 }
 
@@ -439,12 +473,10 @@ export default {
   display: flex;
   gap: 6rpx;
 }
-.star {
-  font-size: 28rpx;
-  color: #ddd;
-}
-.star.active {
-  color: var(--purple);
+.star-icon {
+  width: 28rpx;
+  height: 28rpx;
+  display: block;
 }
 .score {
   font-size: 28rpx;

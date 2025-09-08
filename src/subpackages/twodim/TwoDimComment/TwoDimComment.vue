@@ -36,10 +36,16 @@
             class="replace-btn"
             @click="restartProcess"
           >更换</button>
-          <button
+          <view
             class="fav-btn"
             @click="addToFavorites"
-          >❤</button>
+          >
+            <image
+              src="/static/icon/ai评价/收藏按钮.png"
+              style="width:40rpx;height:40rpx;display:block;"
+              mode="widthFix"
+            />
+          </view>
         </view>
       </view>
       <view class="right">
@@ -400,27 +406,10 @@ export default {
 }
 .fav-btn {
   position: absolute;
-  right: 12rpx;
+  right: 0rpx;
   top: 12rpx;
   width: 56rpx;
   height: 56rpx;
-  line-height: 56rpx;
-  text-align: center;
-  font-size: 28rpx;
-  color: var(--purple);
-  border: none;
-
-  /* 新增：去掉原生按钮的灰色背景和圆角 */
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  appearance: none;
-  -webkit-appearance: none;
-  /* 如果希望完全用图标/文字代替 button，也可改为 display:flex 保持垂直居中 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* 右上角评分图标 */

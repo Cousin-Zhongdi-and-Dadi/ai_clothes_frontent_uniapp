@@ -286,7 +286,7 @@ export default {
   background: #f0f0f0;
   color: #333;
   font-size: 26rpx;
-  border: 1px solid #eee;
+  border: 1rpx solid #eee;
 }
 .robot-btn:active {
   background: #e0e0e0;

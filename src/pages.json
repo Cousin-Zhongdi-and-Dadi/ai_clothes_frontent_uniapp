@@ -16,6 +16,11 @@
       "path": "pages/UserInfoEntry/UserInfoEntry",
       "style": { "navigationBarTitleText": "个人中心" }
     }
+    ,
+    {
+      "path": "pages/ServiceChat/ServiceChat",
+      "style": { "navigationBarTitleText": "对话式推荐", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } }
+    }
   ],
   "subPackages": [
     {
@@ -44,12 +49,6 @@
       "root": "subpackages/shop",
       "pages": [
         { "path": "GoodsDetail/GoodsDetail", "style": { "navigationBarTitleText": "详情" } }
-      ]
-    },
-    {
-      "root": "subpackages/chat",
-      "pages": [
-        { "path": "ServiceChat/ServiceChat", "style": { "navigationBarTitleText": "对话式推荐", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } }
       ]
     },
     {
@@ -91,6 +90,12 @@
         "backgroundColor": "#fff",
         "borderStyle": "black",
         "list": [
+            {
+                "pagePath": "pages/ServiceChat/ServiceChat",
+                "iconPath": "static/icon/icon-09.png",
+                "selectedIconPath": "static/icon/icon-10.png",
+                "text": "总素材库"
+            },
             {
                 "pagePath": "pages/Shop/Shop",
                 "iconPath": "static/icon/icon-05.png",

@@ -4,9 +4,11 @@
     <view class="closet-header">
       <image
         class="header-bg"
-        src="/static/icon/我的衣橱/Group_62.png"
+        src="/static/icon/我的衣橱/头图.png"
         mode="widthFix"
       />
+      <text class="header-title">我的衣橱</text>
+      <text class="header-sub">My wardrobe</text>
     </view>
 
     <!-- 分类图标导航栏 -->
@@ -79,13 +81,7 @@
           <!-- 商品列表使用网格布局 -->
           <view class="grid-container">
             <!-- 上传按钮 -->
-            <view
-              class="add-card"
-              @click="handleAdd"
-            >
-              <view class="add-icon-plus">+</view>
-              <text class="add-text">上传到我的衣橱</text>
-            </view>
+            <!-- 上传按钮 已移至页面右下角悬浮按钮 -->
             <!-- 商品列表 -->
             <view
               v-for="item in closetItems"
@@ -98,7 +94,7 @@
                 <image
                   :src="item.image"
                   class="goods-image"
-                  mode="aspectFill"
+                  mode="widthFix"
                 />
               </view>
               <text class="goods-name">{{ item.name }}</text>
@@ -165,6 +161,15 @@
         </view>
       </view>
     </view>
+
+    <!-- 右下角悬浮上传按钮 -->
+    <view
+      class="floating-add"
+      @click="handleAdd"
+    >
+      <view class="plus">+</view>
+    </view>
+
   </view>
 </template>
 
@@ -477,6 +482,7 @@ export default {
   flex-direction: column;
   background-color: #fff;
   min-height: 100%;
+  position: relative; /* 使 header-title/header-sub 能相对于页面定位 */
 }
 .main-content {
   display: flex;
@@ -548,30 +554,32 @@ export default {
 }
 .image-wrapper {
   width: 100%;
-  height: 0;
-  padding-bottom: 100%; /* 保持正方形占位 */
+  height: auto; /* 由图片高度决定，按宽度自适应 */
   position: relative;
   border-radius: 12rpx;
   overflow: hidden;
   background-color: #eee; /* 占位背景色 */
 }
 .goods-image {
-  position: absolute;
-  left: 0;
-  top: 0;
+  display: block;
   width: 100%;
-  height: 100%;
-  /* mode="aspectFill" 已在 template 设置，object-fit 作为保底 */
-  object-fit: cover;
-  border-radius: 0; /* 圆角由 wrapper 控制，避免重复裁切差异 */
+  height: auto;
+  object-fit: contain; /* 按宽度适配，保留完整图片 */
+  border-radius: 12rpx;
 }
 .sub-item {
   background: transparent;
   padding: 8rpx 14rpx;
   border-radius: 20rpx;
-  color: #333;
-  cursor: pointer;
+  width: 100%;
+  height: 100%;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56rpx;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -580,6 +588,11 @@ export default {
 .sub-item .sub-name {
   font-size: 22rpx;
   color: #666;
+  white-space: nowrap; /* 强制单行 */
+  overflow: hidden; /* 溢出隐藏 */
+  text-overflow: ellipsis; /* 超出显示省略号 */
+  display: block;
+  max-width: 100%;
 }
 .sub-item.active .sub-name {
   color: #222;
@@ -725,14 +738,24 @@ export default {
 }
 .sub-item {
   background: rgba(0, 0, 0, 0.03);
-  padding: 10rpx 18rpx;
+  padding: 10rpx 20rpx; /* 左右内边距各加10rpx，总宽度增加20rpx */
   border-radius: 20rpx;
   color: #333;
   cursor: pointer;
+  max-width: 140rpx;
+  min-width: 140rpx;
+  height: 50rpx;
+  box-sizing: border-box;
+  text-align: center;
 }
 .sub-item .sub-name {
   font-size: 22rpx;
   color: #666;
+  white-space: nowrap; /* 强制单行 */
+  overflow: hidden; /* 溢出隐藏 */
+  text-overflow: ellipsis; /* 超出显示省略号 */
+  display: block;
+  max-width: 100%;
 }
 .sub-item.active {
   background: #fff;
@@ -797,4 +820,44 @@ export default {
 
 /* 若需要为未选中和选中增加阴影或边框，可在此处扩展 */
 /* .category-tab { box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.06); } */
+/* 悬浮上传按钮 */
+.floating-add {
+  position: fixed;
+  right: 28rpx;
+  bottom: 28rpx;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  background: #b6acff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c5ce7;
+  box-shadow: 0 12rpx 30rpx rgba(108, 92, 231, 0.28);
+  z-index: 999;
+}
+.floating-add .plus {
+  font-size: 100rpx;
+  line-height: 1;
+  font-weight: 1000;
+  transform: translateY(-5rpx);
+}
+
+.header-title {
+  position: absolute;
+  top: 60rpx;
+  left: 40rpx;
+  font-size: 80rpx;
+  z-index: 30;
+  color: #fff;
+  font-weight: 1000;
+}
+.header-sub {
+  position: absolute;
+  top: 160rpx;
+  left: 40rpx;
+  font-size: 40rpx;
+  z-index: 30;
+  color: #fff;
+}
 </style>

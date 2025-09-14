@@ -1,13 +1,5 @@
 <template>
-  <view
-    v-if="visible"
-    class="recommendation-fullscreen-mask"
-  >
-    <view
-      class="close-btn"
-      @click="$emit('close')"
-    >×</view>
-    <text class="title">今日推荐</text>
+  <view class="recommendation-page">
     <view
       class="card-stack"
       ref="cardStack"
@@ -41,6 +33,10 @@
         class="status-view"
       >
         <text>{{ emptyMessage }}</text>
+        <button
+          class="retry-btn"
+          @click="resetTodayProcessed"
+        >重看</button>
       </view>
     </view>
   </view>
@@ -53,30 +49,22 @@ import apiConfig from '@/utils/api.js';
 
 export default {
   components: { DisplayCard },
-  props: {
-    visible: {
-      type: Boolean,
-      default: false
-    }
-  },
   data() {
     return {
       cards: [],
       isLoading: true,
-      emptyMessage: '今日推荐已看完',
+      emptyMessage: '看完啦',
       isGuest: false
     };
   },
-  watch: {
-    visible(val) {
-      if (val) {
-        this.loadInitialStack();
-      }
-    }
-  },
-  created() {
+  // page lifecycle: load when page is shown
+  onLoad() {
     const token = uni.getStorageSync('token');
     this.isGuest = !token;
+    this.loadInitialStack();
+  },
+  onShow() {
+    // refresh each time page becomes visible
     this.loadInitialStack();
   },
   methods: {
@@ -138,6 +126,15 @@ export default {
       if (!map[today].includes(id)) map[today].push(id);
       uni.setStorageSync('recommendation_processed_map', map);
     },
+    // 清除当天已处理 ID，并重新加载推荐
+    resetTodayProcessed() {
+      const today = this.getTodayStr();
+      let map = uni.getStorageSync('recommendation_processed_map') || {};
+      map[today] = [];
+      uni.setStorageSync('recommendation_processed_map', map);
+      // 重新加载卡片
+      this.loadInitialStack();
+    },
     handleSwipeLeft(index) {
       if (index === 0) {
         const likedCard = this.cards[0];
@@ -177,60 +174,63 @@ export default {
         }
       }
     }
+    ,
+    close() {
+      // navigate back to previous page
+      try {
+        uni.navigateBack();
+      } catch (e) {
+        // fallback: redirect to home
+        uni.reLaunch({ url: '/pages/index/index' });
+      }
+    }
   }
 };
 </script>
 
 <style scoped>
-.recommendation-fullscreen-mask {
-  position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(120, 120, 120, 0.5); /* 项目通用灰色半透明 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.recommendation-page {
+  min-height: 100vh;
+  background: #faf7ff;
+  padding: 36rpx;
+  box-sizing: border-box;
 }
-.close-btn {
-  position: absolute;
-  right: 40rpx;
-  top: 40rpx;
-  font-size: 60rpx;
-  color: #fff;
-  z-index: 10;
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 50%;
+.header {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 24rpx;
+}
+.back-btn {
   width: 80rpx;
   height: 80rpx;
+  border-radius: 40rpx;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 40rpx;
+  margin-right: 16rpx;
 }
 .card-stack {
-  width: 100vw;
-  min-height: 800rpx;
-  height: 800rpx;
+  width: 100%;
+  min-height: 600rpx;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  padding-bottom: 60rpx;
 }
 .display_card {
   position: absolute;
   left: 50%;
   top: 50%;
-  /* 堆叠效果：每张卡片向下偏移并缩小一点 */
-  /* index 由 v-for 传入，建议在 :style 里动态设置 */
-  /* 这里仅保留基础样式，具体堆叠效果在 :style 里实现 */
   transform: translate(-50%, -50%);
   z-index: 10;
-  width: 90vw;
-  height: 800rpx;
+  width: 90%;
+  max-width: 720rpx;
+  height: 700rpx;
   transition: transform 0.3s, box-shadow 0.3s;
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
 }
@@ -241,10 +241,15 @@ export default {
   filter: brightness(0.96);
 }
 .status-view {
-  color: #fff;
+  color: #6b6b8a; /* 深色，确保在浅背景可见 */
   font-size: 32rpx;
   text-align: center;
   z-index: 1; /* 状态提示层级低于卡片 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
 }
 .card-image {
   width: 100%;
@@ -252,16 +257,21 @@ export default {
   object-fit: cover;
 }
 .title {
-  position: absolute;
-  top: 150rpx;
-  left: 50%;
-  transform: translateX(-50%);
   font-size: 36rpx;
   font-weight: bold;
-  color: #fff;
+  color: #3b2b6c;
   text-align: center;
   z-index: 20;
-  width: 80vw;
-  pointer-events: none;
+  width: 100%;
+}
+
+.retry-btn {
+  background: #fff;
+  color: #333;
+  padding: 10rpx 40rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #eee;
+  font-size: 28rpx;
+  width: 200rpx;
 }
 </style>

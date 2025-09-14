@@ -82,6 +82,13 @@
       "pages": [
         { "path": "OuterShop/OuterShop", "style": { "navigationBarTitleText": "外部商店" } }
       ]
+    },
+    {
+      "root": "subpackages/recommendation",
+      "pages": [
+        { "path": "Recommendation/Recommendation", "style": { "navigationBarTitleText": "每日推荐" } },
+        { "path": "RecommendationWelcome/RecommendationWelcome", "style": { "navigationBarTitleText": "每日推荐" } }
+      ]
     }
   ],
     "tabBar": {
@@ -94,7 +101,7 @@
                 "pagePath": "pages/ServiceChat/ServiceChat",
                 "iconPath": "static/icon/icon-09.png",
                 "selectedIconPath": "static/icon/icon-10.png",
-                "text": "总素材库"
+                "text": "首页"
             },
             {
                 "pagePath": "pages/Shop/Shop",

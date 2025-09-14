@@ -38,23 +38,15 @@
     >
       <text class="bottom-status-text">到底了</text>
     </view>
-    <recommendation-icon @show-recommendation="showRecommendation = true" />
-    <recommendation
-      :visible="showRecommendation"
-      @close="showRecommendation = false"
-    />
   </view>
 </template>
 
 <script>
 import request from '@/utils/request.js';
 import apiConfig from '@/utils/api.js';
-import Recommendation from '@/components/Recommendation/Recommendation.vue';
-import RecommendationIcon from '@/components/RecommendationIcon/RecommendationIcon.vue';
 
 export default {
   name: 'ShopPage',
-  components: { Recommendation, RecommendationIcon },
   data() {
     return {
       tabs: [],
@@ -64,18 +56,12 @@ export default {
       pageSize: 10,
       hasMore: true,
       isLoading: false,
-      showRecommendation: false
     };
   },
-    async onLoad() {
-    // 判断是否今日首次进入
-    const today = new Date().toISOString().slice(0, 10);
-    const lastShow = uni.getStorageSync('recommendation_popup_last_show');
-    if (lastShow !== today) {
-      this.showRecommendation = true;
-      uni.setStorageSync('recommendation_popup_last_show', today);
-    }
-    await this.fetchCategories();     this.refresh();   },
+  async onLoad() {
+    await this.fetchCategories();
+    this.refresh();
+  },
   onReachBottom() {
     this.fetchGoods(true);
   },

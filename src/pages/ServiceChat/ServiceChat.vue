@@ -76,8 +76,30 @@
       </view>
     </scroll-view>
 
-    <!-- 底部输入栏 -->
-    <view class="chat-input-bar">
+    <!-- 如果没有消息，则将输入框放置在页面中央 -->
+    <view
+      v-if="messages.length === 0"
+      class="center-input-wrapper"
+    >
+      <input
+        class="chat-input center"
+        placeholder="请输入内容"
+        v-model="userInput"
+        @confirm="sendMessage"
+        :disabled="isSending"
+      />
+      <button
+        class="send-btn center"
+        @click="sendMessage"
+        :disabled="isSending || !userInput"
+      >发送</button>
+    </view>
+
+    <!-- 有消息时置底输入栏 -->
+    <view
+      v-else
+      class="chat-input-bar"
+    >
       <input
         class="chat-input"
         placeholder="请输入内容"
@@ -114,7 +136,6 @@ export default {
     // 进入页面时清空消息记录
     uni.removeStorageSync('service-chat-messages');
     this.messages = [];
-    this.getWelcomeMessage();
   },
   onUnload() {
     // 离开页面时清空消息记录
@@ -122,13 +143,7 @@ export default {
     this.messages = [];
   },
   methods: {
-    async getWelcomeMessage() {
-      this.messages.push({
-        type: 'robot',
-        content: '欢迎来到对话式推荐，请问有什么可以帮助您的？',
-        time: new Date().toISOString(),
-      });
-    },
+    // 注意：已移除欢迎消息。首次打开且无消息时，输入框显示在页面中央；发送第一条消息后会恢复到底部。
 
     async sendMessage() {
       if (!this.userInput.trim() || this.isSending) return;
@@ -143,7 +158,10 @@ export default {
       });
       this.userInput = '';
       this.saveMessages();
-      this.scrollToBottom();
+      // 首次发送后需要让页面从“居中输入”切换到底部输入栏，稍作延迟以确保渲染
+      this.$nextTick(() => {
+        setTimeout(() => this.scrollToBottom(), 50);
+      });
 
       try {
         const data = await request({
@@ -218,9 +236,17 @@ export default {
     // 新增：markdown转nodes方法
     renderMarkdown(md) {
       if (!md) return [];
-      // marked.default 兼容不同打包环境
-      const html = (marked.default || marked).parse(md);
-      return html;
+      // 尝试使用 marked 转换为 html，如果未引入 marked，则直接返回原始字符串
+      try {
+        // marked 可能未全局引入
+        const markedLib = (typeof marked !== 'undefined') ? (marked.default || marked) : null;
+        if (markedLib && typeof markedLib.parse === 'function') {
+          return markedLib.parse(md);
+        }
+      } catch (e) {
+        // ignore
+      }
+      return md;
     }
   }
 };
@@ -238,7 +264,40 @@ export default {
   padding: 24rpx 0;
   overflow-y: auto;
   box-sizing: border-box;
-  padding-bottom: 200rpx; /* 新增，值略大于输入栏高度，适配安全区 */
+  padding-bottom: 200rpx; /* 值略大于输入栏高度，适配安全区 */
+}
+
+/* 居中输入区域：当没有消息时显示 */
+.center-input-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}
+.chat-input.center {
+  width: 60%;
+  height: 72rpx;
+}
+.chat-input.center::placeholder {
+  color: #9aa0a6;
+}
+.chat-input.center {
+  background: #ffffff;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.06);
+  padding: 0 28rpx;
+}
+.send-btn.center {
+  height: 72rpx;
+  line-height: 72rpx;
+  padding: 0 32rpx;
 }
 .chat-row-wrapper {
   margin-bottom: 32rpx;
@@ -331,11 +390,15 @@ export default {
 .chat-input {
   flex: 1;
   height: 72rpx;
-  border: none;
-  background: #f7f7f7;
+  border: 1rpx solid rgba(0, 0, 0, 0.06);
+  background: #ffffff; /* 更明显的底色 */
   border-radius: 36rpx;
   padding: 0 32rpx;
   font-size: 28rpx;
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.06);
+}
+.chat-input::placeholder {
+  color: #9aa0a6;
 }
 .send-btn {
   margin-left: 16rpx;

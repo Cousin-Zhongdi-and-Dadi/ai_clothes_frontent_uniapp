@@ -18,7 +18,7 @@
             class="thumb placeholder"
             @click.stop="onTopCardClick"
           >
-            <text class="placeholder-text">点击上传</text>
+            <text class="placeholder-text">点击上传上装</text>
           </view>
           <button
             v-if="topThumb"
@@ -42,7 +42,7 @@
             class="thumb placeholder"
             @click.stop="onBottomCardClick"
           >
-            <text class="placeholder-text">点击上传</text>
+            <text class="placeholder-text">点击上传下装</text>
           </view>
           <button
             v-if="bottomThumb"
@@ -67,7 +67,8 @@
           class="model placeholder"
           @click.stop="onModelCardClick"
         >
-          <text class="placeholder-text">点击上传</text>
+          <text class="placeholder-text">点击上传模特</text>
+          <text class="placeholder-text">（清晰的人物全身照）</text>
         </view>
         <view class="model-tools">
           <!-- 预留 3D/空间 文本及 icon 位置 -->
@@ -99,20 +100,26 @@
       >
         <image
           class="ai-full"
-          src="/static/icon/试衣搭配/ai单品推荐.png"
+          src="/static/icon/试衣搭配/功能卡片.png"
           mode="aspectFill"
         />
+        <text class="ai-title single-recommendation">AI单品推荐</text>
+        <text class="ai-desc single-recommendation">任选一件上衣或下装，可自动搭配成完整服装</text>
+        <text class="ai-footer single-recommendation">AI助手</text>
       </view>
 
       <view
         class="ai-card"
-        @click="goToChat"
+        @click="goToDailyRecommendation"
       >
         <image
           class="ai-full"
-          src="/static/icon/试衣搭配/ai评分建议.png"
+          src="/static/icon/试衣搭配/功能卡片.png"
           mode="aspectFill"
         />
+        <text class="ai-title daily-recommendation">每日推荐</text>
+        <text class="ai-desc daily-recommendation">为您推荐今日搭配</text>
+        <text class="ai-footer daily-recommendation">AI助手</text>
       </view>
     </view>
 
@@ -169,8 +176,8 @@ export default {
     goTo2D() {
       uni.navigateTo({ url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay' });
     },
-    goToChat() {
-      uni.navigateTo({ url: '/subpackages/chat/ServiceChat/ServiceChat' });
+    goToDailyRecommendation() {
+      uni.navigateTo({ url: '/subpackages/recommendation/RecommendationWelcome/RecommendationWelcome' });
     },
 
     // 卡片点击：若无图片则触发上传；若有图片则不响应（重选按钮负责替换）
@@ -381,6 +388,7 @@ export default {
   padding: 36rpx;
   background: #f7f7fb;
   min-height: 100vh;
+  position: relative; /* make page the positioning context for absolute elements */
 }
 .title {
   color: #9b7ef6;
@@ -427,10 +435,6 @@ export default {
   background: #fafafa;
   color: #9b7ef6;
 }
-.placeholder-text {
-  color: #9b7ef6;
-  font-size: 28rpx;
-}
 .small-btn {
   position: absolute;
   right: 20rpx;
@@ -465,11 +469,12 @@ export default {
   height: 400rpx;
   display: block;
 }
-/* 模特占位样式：居中显示占位文字，背景和左侧缩略卡片一致 */
 .model.placeholder {
   display: flex;
+  flex-direction: column; /* 改为纵向排列 */
   align-items: center;
   justify-content: center;
+  gap: 8rpx; /* 可选，控制两行间距 */
   background: #fafafa;
   color: #9b7ef6;
   border-radius: 12rpx;
@@ -527,17 +532,64 @@ export default {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 24rpx;
 }
 .ai-title {
   font-weight: 700;
   color: #3b2b6c;
 }
 .ai-desc {
-  font-size: 24rpx;
+  font-size: 20rpx;
   color: #7a6f9a;
-  margin-top: 12rpx;
 }
+.ai-footer {
+  font-size: 20rpx;
+  color: #fff;
+}
+.ai-title.single-recommendation {
+  position: absolute;
+  top: 800rpx; /* adjust as needed to match design */
+  left: 50rpx; /* place relative to page left padding */
+  z-index: 20;
+  margin: 0; /* reset any inherited margin */
+}
+.ai-desc.single-recommendation {
+  position: absolute;
+  top: 840rpx; /* adjust as needed */
+  left: 50rpx;
+  width: 26%; /* limit width to avoid overflow */
+  z-index: 20;
+  margin: 0;
+}
+.ai-footer.single-recommendation {
+  position: absolute;
+  top: 897rpx; /* adjust as needed to match design */
+  left: 60rpx; /* place relative to page left padding */
+  z-index: 20;
+  margin: 0; /* reset any inherited margin */
+}
+.ai-title.daily-recommendation {
+  position: absolute;
+  top: 800rpx; /* adjust as needed to match design */
+  left: 410rpx; /* place relative to page left padding */
+  z-index: 20;
+  margin: 0; /* reset any inherited margin */
+}
+.ai-desc.daily-recommendation {
+  position: absolute;
+  top: 840rpx; /* adjust as needed */
+  left: 410rpx;
+  width: 26%; /* limit width to avoid overflow */
+  z-index: 20;
+  margin: 0;
+}
+.ai-footer.daily-recommendation {
+  position: absolute;
+  top: 897rpx; /* adjust as needed to match design */
+  left: 410rpx; /* place relative to page left padding */
+  z-index: 20;
+  margin: 0; /* reset any inherited margin */
+}
+
 .product-list {
   display: flex;
   flex-wrap: wrap;
@@ -564,5 +616,11 @@ export default {
 }
 .icon-3d {
   width: 100rpx;
+}
+.placeholder-text {
+  color: #9b7ef6;
+  font-size: 28rpx;
+  text-align: center;
+  line-height: 1.4;
 }
 </style>

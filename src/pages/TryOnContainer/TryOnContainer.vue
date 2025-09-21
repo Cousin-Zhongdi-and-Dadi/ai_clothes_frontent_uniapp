@@ -177,7 +177,7 @@ export default {
       uni.navigateTo({ url: '/subpackages/twodim/TwoDimDisplay/TwoDimDisplay' });
     },
     goToDailyRecommendation() {
-      uni.navigateTo({ url: '/subpackages/recommendation/RecommendationWelcome/RecommendationWelcome' });
+      uni.navigateTo({ url: '/subpackages/recommendation/Recommendation/Recommendation' });
     },
 
     // 卡片点击：若无图片则触发上传；若有图片则不响应（重选按钮负责替换）

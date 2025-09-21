@@ -26,16 +26,16 @@
         <!-- 右侧：商品占位/预览 -->
         <view
           class="product-box"
-          @click="() => { /* 保留位：可触发选择商品 */ }"
+          @click="() => { /* 右侧显示最佳推荐占位，点击暂无行为 */ }"
         >
           <view
-            v-if="!productId"
+            v-if="!bestProduct"
             class="product-placeholder"
-          >商品占位</view>
+          >最佳推荐占位</view>
           <view
             v-else
             class="product-selected"
-          >已选择商品</view>
+          >已生成推荐</view>
         </view>
       </view>
 
@@ -44,7 +44,7 @@
         <textarea
           v-model="desc"
           class="desc-single"
-          placeholder="请输入关于单品信息文字描述"
+          placeholder="请输入你的搭配需求（可包含预算、风格、场景等关键词）"
           maxlength="10000"
         ></textarea>
       </view>
@@ -122,28 +122,21 @@ export default {
   data() {
     return {
       imageUrl: '',
-      scenes: [
-        { label: '运动', value: 'sports' },
-        { label: '日常', value: 'casual' }
-      ],
-      selectedScene: '',
       desc: '',
       showDialog: false,
-      productId: null,
       showPreview: false, // 控制大图预览
 
       // 集成后的推荐数据
-      bestProduct: null, // 最佳推荐的商品详情对象
-      otherRecommendations: [], // 次佳推荐数组（按优先级）
-      isProcessing: false
+      bestProduct: null, // 最佳推荐（来自 /chat 的 recommendations[0]）
+      otherRecommendations: [], // 其他推荐
+      isProcessing: false,
+      sessionId: ''
     };
   },
   onLoad(options) {
     // 保持页面进入时状态干净
     this.imageUrl = '';
-    this.selectedScene = '';
     this.desc = '';
-    this.productId = null;
     this.showPreview = false;
     this.bestProduct = null;
     this.otherRecommendations = [];
@@ -151,32 +144,45 @@ export default {
   onShow() {
     // 先解绑，防止重复绑定
     uni.$off && uni.$off('ai-match-image-selected');
-    uni.$off && uni.$off('ai-match-product-selected');
     // 重新绑定（保留原有事件通道）
     uni.$on && uni.$on('ai-match-image-selected', (imgUrl) => {
       this.imageUrl = imgUrl;
     });
-    uni.$on && uni.$on('ai-match-product-selected', (productId) => {
-      this.productId = productId;
-    });
 
     // 关键：优先读取缓存
     const img = uni.getStorageSync('ai-match-image');
-    const pid = uni.getStorageSync('ai-match-product');
     if (img) {
       this.imageUrl = img;
       uni.removeStorageSync('ai-match-image');
     }
-    if (pid) {
-      this.productId = pid;
-      uni.removeStorageSync('ai-match-product');
-    }
+
+    // 读取已存在的会话ID（若有）
+    const sid = uni.getStorageSync('ai_session_id');
+    if (sid) this.sessionId = sid;
   },
   onHide() {
     uni.$off && uni.$off('ai-match-image-selected');
-    uni.$off && uni.$off('ai-match-product-selected');
   },
   methods: {
+    // 确保会话存在
+    async ensureSession() {
+      if (this.sessionId) return this.sessionId;
+      try {
+        const res = await request({
+          url: `${api.TEST_URL}/api/v1/sessions`,
+          method: 'POST',
+          data: {}
+        });
+        if (res && res.session_id) {
+          this.sessionId = res.session_id;
+          uni.setStorageSync('ai_session_id', this.sessionId);
+          return this.sessionId;
+        }
+      } catch (e) {
+        // request 已有统一提示
+      }
+      throw new Error('会话创建失败');
+    },
     showUploadDialog() {
       this.showDialog = true;
     },
@@ -193,81 +199,72 @@ export default {
       });
     },
 
-    // 点击“开始搭配”后：调用 AI 推荐服务，拿到推荐结果后在当前页处理并展示（将最佳设置到右侧，占位变为已选择；次佳写入 otherRecommendations）
+    // 点击“开始搭配”后：调用 AI 多智能体聊天接口，期望路由到 recommendation 智能体
     async onAiRecommend() {
-      if (!this.productId) {
-        uni.showToast({ title: '请先选择商品', icon: 'none' });
-        return;
+      // 温和提示：图片需公网可达
+      if (this.imageUrl && !/^https?:\/\//i.test(this.imageUrl)) {
+        uni.showToast({ title: '提示：图片需公网可访问，已仅用文本请求', icon: 'none' });
       }
-      if (!this.selectedScene) {
-        uni.showToast({ title: '请选择场景', icon: 'none' });
-        return;
-      }
-
-      const requestBody = {
-        product_id: this.productId,
-        scene: this.selectedScene,
-        desc: this.desc
-      };
 
       uni.showLoading({ title: 'AI推荐中...' });
       this.isProcessing = true;
       try {
-        const data = await request({
-          url: 'https://remotely-one-javelin.ngrok-free.app/api/recommend_best_item',
-          method: 'POST',
-          data: requestBody,
-          header: {
-            'content-type': 'application/json'
-          }
-        });
+        // 确保会话
+        await this.ensureSession();
 
-        // 处理返回的数据：兼容几种常见结构
-        // 优先解析为 { product_id, candidates: [...] }
-        let candidateIds = [];
-        if (data) {
-          if (Array.isArray(data.candidates) && data.candidates.length) {
-            candidateIds = data.candidates.slice();
-          } else if (data.product_id) {
-            candidateIds = [data.product_id];
-            // 如果后端把更多候选放在 data.other 或 data.recommendations，也尝试取出
-            if (Array.isArray(data.recommendations)) {
-              candidateIds = candidateIds.concat(data.recommendations.filter(Boolean));
-            }
-          } else if (Array.isArray(data) && data.length) {
-            // 有时后端直接返回 id 数组
-            candidateIds = data.slice();
-          }
+        // 组装聊天请求体（意图为单品推荐）
+        const payload = {
+          session_id: this.sessionId,
+          text: `单品推荐：${this.desc || '请根据我的需求给出单品推荐'}`,
+          prompt: this.desc || '',
+        };
+        if (this.imageUrl && /^https?:\/\//i.test(this.imageUrl)) {
+          payload.image = { image_url: this.imageUrl };
         }
 
-        if (!candidateIds.length) {
-          uni.showToast({ title: '未返回推荐结果', icon: 'none' });
-          uni.hideLoading();
-          this.isProcessing = false;
+        const chatData = await request({
+          url: `${api.TEST_URL}/api/v1/chat`,
+          method: 'POST',
+          data: payload,
+          header: { 'content-type': 'application/json' }
+        });
+
+        // chatData 直接为响应 data 字段
+        if (!chatData) {
+          uni.showToast({ title: '服务无响应数据', icon: 'none' });
           return;
         }
 
-        // 最佳推荐为第一个 id
-        const bestId = candidateIds[0];
-        this.productId = bestId; // 切换右侧占位的显示状态（template 中会显示已选择）
-
-        // 获取并保存最佳商品详情（用于后续可能的 UI 展示）
-        const bestDetail = await this.fetchProductDetail(bestId);
-        this.bestProduct = bestDetail || null;
-
-        // 其余次佳推荐
-        this.otherRecommendations = [];
-        for (let i = 1; i < candidateIds.length; i++) {
-          try {
-            const d = await this.fetchProductDetail(candidateIds[i]);
-            if (d) this.otherRecommendations.push(d);
-          } catch (e) {
-            // 单条错误不影响整体
-            console.warn('fetchRecommendationDetail error', e);
-          }
+        // 需要更多信息
+        if (chatData.needs_more_info) {
+          const msg = chatData.message || '需要更多信息以完成推荐';
+          uni.showToast({ title: msg, icon: 'none', duration: 3500 });
+          return;
         }
 
-        uni.hideLoading();
+        if (chatData.agent_type !== 'recommendation') {
+          // 非预期类型，做温和提示
+          if (chatData.agent_type === 'default' && chatData.result && chatData.result.answer) {
+            uni.showToast({ title: '收到通用回答', icon: 'none' });
+          } else if (chatData.agent_type === 'scoring') {
+            uni.showToast({ title: '当前返回为试衣评分', icon: 'none' });
+          } else {
+            uni.showToast({ title: '返回类型与预期不符', icon: 'none' });
+          }
+          return;
+        }
+
+        const result = chatData.result || {};
+        const recs = Array.isArray(result.recommendations) ? result.recommendations : [];
+        if (!recs.length) {
+          uni.showToast({ title: '未返回推荐结果', icon: 'none' });
+          return;
+        }
+
+        // 设置最佳与其他
+        this.bestProduct = recs[0] || null;
+        this.otherRecommendations = recs.slice(1);
+
         uni.showToast({ title: '推荐完成', icon: 'success' });
 
         // 保留兼容：触发全局事件（如果其他页面监听）
@@ -277,42 +274,13 @@ export default {
         });
       } catch (e) {
         // request.js 里可能已统一提示，确保 loading 隐藏
-        uni.hideLoading();
         console.error('onAiRecommend error', e);
       } finally {
+        uni.hideLoading();
         this.isProcessing = false;
       }
     },
-
-    // 根据商品 id 拉取商品详情（复用 AiMatchResult 中的逻辑）
-    async fetchProductDetail(productId) {
-      if (!productId) return null;
-      try {
-        const res = await request({
-          url: `${api.BASE_URL}/mall/getProductDetail/${productId}`,
-          method: 'GET'
-        });
-
-        const detail = {
-          id: productId,
-          productName: res.productName || '',
-          tags: res.scene || '',
-          description: res.description || '',
-          brand: res.brand || '',
-          price: res.price ?? null,
-          imageUrl: Array.isArray(res.imageUrl) ? (res.imageUrl[0] || '') : (res.imageUrl || '')
-        };
-
-        return detail;
-      } catch (e) {
-        console.warn('fetchProductDetail failed for', productId, e);
-        return null;
-      }
-    },
-
-    onSceneChange(e) {
-      this.selectedScene = e.detail.value;
-    }
+    
   }
 };
 </script>

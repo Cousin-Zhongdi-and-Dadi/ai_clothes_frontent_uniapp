@@ -1,277 +1,365 @@
 <template>
-  <view class="recommendation-page">
-    <view
-      class="card-stack"
-      ref="cardStack"
-    >
-      <display-card
-        v-for="(card, index) in cards"
-        :key="card.id"
-        :ref="`card-${index}`"
-        class="display_card"
-        :frontImage="card.frontImage"
-        :backText="card.backText"
-        :style="{
-          transform: `translate(-50%, -50%) scale(${1 - index * 0.05}) translateY(${index * 100}rpx)`,
-
-          zIndex: cards.length - index
-        }"
-        :canInteract="index === 0"
-        @swipeLeft="handleSwipeLeft(index)"
-        @swipeRight="handleSwipeRight(index)"
-        @click="handleCardClick(index)"
+  <view class="page">
+    <view class="card-wrap">
+      <!-- 底图 -->
+      <image
+        class="page-bg"
+        src="/static/icon/每日推荐/底图.png"
+        mode="widthFix"
       />
-      <view
-        v-if="isLoading"
-        class="status-view"
-      >
-        <view class="loading-animation"></view>
-        <text>正在加载今日推荐...</text>
-      </view>
-      <view
-        v-else-if="cards.length === 0"
-        class="status-view"
-      >
-        <text>{{ emptyMessage }}</text>
-        <button
-          class="retry-btn"
-          @click="resetTodayProcessed"
-        >重看</button>
+
+      <!-- 卡片容器背景图（覆盖 card-decoration 的视觉） -->
+      <image
+        class="card-bg"
+        src="/static/icon/每日推荐/卡片.png"
+        mode="widthFix"
+      />
+
+      <view class="card">
+        <view class="card-header">
+          <view>
+            <text class="title">精彩推荐</text>
+            <text class="subtitle">开启个性化穿搭</text>
+          </view>
+          <!-- 右上角星星：使用两种状态图片，点击会切换并 emit 状态 -->
+          <image
+            :src="currentStarSrc"
+            mode="widthFix"
+            class="star-btn"
+            @click="handleStarClick"
+          />
+        </view>
+
+        <view
+          v-if="!isFinished"
+          class="main-image-wrap"
+        >
+          <image
+            :src="mainImageSrc"
+            class="main-image"
+            mode="aspectFill"
+          />
+        </view>
+
+        <image
+          v-if="!isFinished"
+          :src="arrowSrc"
+          class="arrow-btn"
+          mode="widthFix"
+          @click="handleArrowClick"
+        />
+
+        <view
+          v-else
+          class="finished-wrap"
+          style="text-align:center;"
+        >
+          <text class="finished-text">已经看完啦！</text>
+          <button
+            class="restart-btn"
+            @click="handleRestart"
+          >重看</button>
+        </view>
       </view>
     </view>
   </view>
 </template>
 
 <script>
-import DisplayCard from '@/components/DisplayCard/DisplayCard.vue';
-import request from '@/utils/request.js';
-import apiConfig from '@/utils/api.js';
-
 export default {
-  components: { DisplayCard },
+  name: 'Recommendation',
+  props: {
+    // 主展示图片路径数组（外部传入）
+    mainImageList: {
+      type: Array,
+      default: () => [
+        '/static/example_pictures/sample1.jpg',
+        '/static/example_pictures/sample2.jpg'
+      ]
+    },
+    // 右上角星星图片路径（空/有色），提供默认值
+    starEmptySrc: {
+      type: String,
+      default: '/static/icon/ai评价/评分星星无色.png'
+    },
+    starFilledSrc: {
+      type: String,
+      default: '/static/icon/ai评价/评分星星有色.png'
+    },
+    // 右下角箭头/按钮图片（默认使用“按钮.png”）
+    arrowSrc: {
+      type: String,
+      default: '/static/icon/每日推荐/按钮.png'
+    },
+    // 可选：当点击星星时，若提供为页面路径（uni-app 路径），组件会尝试跳转
+    starAction: {
+      type: String,
+      default: ''
+    },
+    // 可选：当点击箭头时，若提供为页面路径（uni-app 路径），组件会尝试跳转
+    arrowAction: {
+      type: String,
+      default: ''
+    },
+    // 可选初始是否已收藏/已点星
+    starInitiallyFilled: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
-      cards: [],
-      isLoading: true,
-      emptyMessage: '看完啦',
-      isGuest: false
-    };
+      starFilled: this.starInitiallyFilled,
+      currentImageIndex: 0,
+      isFinished: false
+    }
   },
-  // page lifecycle: load when page is shown
-  onLoad() {
-    const token = uni.getStorageSync('token');
-    this.isGuest = !token;
-    this.loadInitialStack();
-  },
-  onShow() {
-    // refresh each time page becomes visible
-    this.loadInitialStack();
+  computed: {
+    currentStarSrc() {
+      return this.starFilled ? this.starFilledSrc : this.starEmptySrc
+    },
+    mainImageSrc() {
+      // 当前展示图片
+      if (Array.isArray(this.mainImageList) && this.mainImageList.length > 0) {
+        return this.mainImageList[this.currentImageIndex]
+      }
+      // 兼容旧用法
+      return '/static/example_pictures/sample2.jpg'
+    }
   },
   methods: {
-    async loadInitialStack() {
-      this.isLoading = true;
-      const processedIds = this.getProcessedIds();
-      if (this.isGuest) {
-        console.log('游客模式加载静态卡片', this.cards)
-        this.cards = [
-          {
-            id: 1,
-            frontImage: '/static/example_pictures/sample1.jpg',
-            backText: '示例推荐1'
-          },
-          {
-            id: 2,
-            frontImage: '/static/example_pictures/sample2.jpg',
-            backText: '示例推荐2'
-          }
-        ].filter(card => !processedIds.includes(card.id));
-        this.isLoading = false;
-        this.emptyMessage = '游客模式下仅展示部分静态推荐';
-        return;
-      }
-      try {
-        const res = await request({
-          url: `${apiConfig.BASE_URL}/dailyRecommendation/getRecommendation`,
-          method: 'GET',
-        });
-        let dataArr = Array.isArray(res) ? res : res.data;
-        let newCards = (dataArr || []).filter(card => card && !processedIds.includes(card.id))
-          .map(card => ({
-            frontImage: card.imageGif,
-            backText: card.description || '',
-            id: card.id
-          }));
-        this.cards = newCards;
-      } catch (error) {
-        this.cards = [];
-      } finally {
-        this.isLoading = false;
-        if (this.cards.length === 0) {
-          this.emptyMessage = '今日推荐已看完';
+    handleStarClick() {
+      // 切换本地状态并 emit 新状态
+      this.starFilled = !this.starFilled
+      this.$emit('star-click', { filled: this.starFilled })
+
+      // 如果传入了跳转路径，尝试 navigateTo
+      if (this.starAction) {
+        try {
+          uni.navigateTo({ url: this.starAction })
+        } catch (e) {
+          console.warn('navigateTo failed for starAction', this.starAction, e)
         }
       }
     },
-    getTodayStr() {
-      return new Date().toISOString().slice(0, 10);
-    },
-    getProcessedIds() {
-      const today = this.getTodayStr();
-      const map = uni.getStorageSync('recommendation_processed_map') || {};
-      return map[today] || [];
-    },
-    addProcessedId(id) {
-      const today = this.getTodayStr();
-      let map = uni.getStorageSync('recommendation_processed_map') || {};
-      if (!map[today]) map[today] = [];
-      if (!map[today].includes(id)) map[today].push(id);
-      uni.setStorageSync('recommendation_processed_map', map);
-    },
-    // 清除当天已处理 ID，并重新加载推荐
-    resetTodayProcessed() {
-      const today = this.getTodayStr();
-      let map = uni.getStorageSync('recommendation_processed_map') || {};
-      map[today] = [];
-      uni.setStorageSync('recommendation_processed_map', map);
-      // 重新加载卡片
-      this.loadInitialStack();
-    },
-    handleSwipeLeft(index) {
-      if (index === 0) {
-        const likedCard = this.cards[0];
-        if (!likedCard) return;
-        if (this.isGuest) {
-          uni.showToast({
-            title: '请登录后收藏',
-            icon: 'none'
-          });
+    handleArrowClick() {
+      // 切换到下一张图片
+      if (Array.isArray(this.mainImageList) && this.mainImageList.length > 0) {
+        if (this.currentImageIndex < this.mainImageList.length - 1) {
+          this.currentImageIndex++
         } else {
-          this.addProcessedId(likedCard.id);
-          // 这里可以添加收藏逻辑
-        }
-        this.cards.shift();
-        this.$nextTick(() => this.resetCardPosition());
-      }
-    },
-    handleSwipeRight(index) {
-      if (index === 0) {
-        const card = this.cards[0];
-        if (card) this.addProcessedId(card.id);
-        this.cards.shift();
-        this.$nextTick(() => this.resetCardPosition());
-      }
-    },
-    handleCardClick(index) {
-      // 可选：弹出详情或其它操作
-    },
-    resetCardPosition() {
-      // 只对当前可交互的卡片（index 0）重置
-      if (this.cards.length > 0) {
-        const cardRef = this.$refs[`card-0`];
-        // 兼容 v-for 反回数组的情况
-        const cardInstance = Array.isArray(cardRef) ? cardRef[0] : cardRef;
-        if (cardInstance && typeof cardInstance.updateTransformX === 'function') {
-          cardInstance.updateTransformX(0);
+          // 已到最后一张，显示提示
+          this.isFinished = true
         }
       }
-    }
-    ,
-    close() {
-      // navigate back to previous page
-      try {
-        uni.navigateBack();
-      } catch (e) {
-        // fallback: redirect to home
-        uni.reLaunch({ url: '/pages/index/index' });
+      this.$emit('arrow-click', { currentIndex: this.currentImageIndex, finished: this.isFinished })
+
+      if (this.arrowAction) {
+        try {
+          uni.navigateTo({ url: this.arrowAction })
+        } catch (e) {
+          console.warn('navigateTo failed for arrowAction', this.arrowAction, e)
+        }
       }
+    },
+    handleRestart() {
+      this.currentImageIndex = 0
+      this.isFinished = false
+      this.$emit('restart')
     }
   }
-};
+}
 </script>
 
-<style scoped>
-.recommendation-page {
+<style lang="scss" scoped>
+.page {
+  padding: 0;
+  background: #f7f5fb;
   min-height: 100vh;
-  background: #faf7ff;
-  padding: 36rpx;
-  box-sizing: border-box;
-}
-.header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  position: relative;
-  margin-bottom: 24rpx;
-}
-.back-btn {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 40rpx;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40rpx;
-  margin-right: 16rpx;
-}
-.card-stack {
-  width: 100%;
-  min-height: 600rpx;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  padding-bottom: 60rpx;
-}
-.display_card {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  width: 90%;
-  max-width: 720rpx;
-  height: 700rpx;
-  transition: transform 0.3s, box-shadow 0.3s;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
 }
 
-/* 让下方卡片边缘可见 */
-.display_card:not(:first-child) {
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-  filter: brightness(0.96);
+.card-wrap {
+  position: absolute;
+  left: 0;
+  width: 100vw;
+  max-width: 650rpx;
+  display: flex;
+  justify-content: center;
 }
-.status-view {
-  color: #6b6b8a; /* 深色，确保在浅背景可见 */
+/* 已看完提示整体居中样式 */
+.finished-wrap {
+  position: relative;
+  top: 250rpx;
+  min-height: 500rpx;
+  height: 60vh;
+  width: 100%;
+}
+
+/* 可选：如需左上角圆形装饰可用伪元素或box-shadow模拟 */
+
+.card {
+  position: relative;
+  padding: 60rpx 60rpx 60rpx 60rpx;
+  width: 100%;
+  max-width: 650rpx;
+  box-sizing: border-box;
+  z-index: 2;
+  margin-top: 120rpx; /* 留出顶部空间给背景图 */
+  margin-left: 100rpx;
+}
+
+/* 背景图片应当在 card 下面，所以放在 card-wrap 层级的绝对定位，z-index 低于 .card */
+.page-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.card-bg {
+  position: absolute;
+  left: 60rpx;
+  top: 100rpx;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.title {
+  font-size: 72rpx;
+  font-weight: 900;
+  color: #1a1a1a;
+  line-height: 1.1;
+}
+.subtitle {
+  display: block;
+  margin-top: 8rpx;
+  color: #222;
+  font-size: 28rpx;
+  font-weight: 400;
+}
+
+.star-btn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  margin-left: 0;
+  margin-top: 20rpx;
+  position: absolute;
+  right: 20rpx;
+  top: 100rpx;
+}
+.star-placeholder {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: #fff7ff;
+  color: #7b4bd6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  position: absolute;
+  right: 36rpx;
+  top: 36rpx;
+}
+
+.main-image-wrap {
+  margin-top: 32rpx;
+  display: flex;
+  justify-content: center;
+}
+.main-image {
+  width: 100%;
+  height: 700rpx;
+  border-radius: 24rpx;
+  background: #eee;
+  object-fit: cover;
+}
+
+.arrow-btn {
+  position: absolute;
+  right: -60rpx;
+  bottom: -40rpx;
+  width: 200rpx;
+  height: 200rpx;
+  z-index: 3;
+}
+/* 已看完提示样式 */
+.finished-text {
+  font-size: 40rpx;
+  color: #6c2ee8;
+  margin-bottom: 32rpx;
+  display: block;
+}
+.restart-btn {
+  margin-top: 24rpx;
+  background: linear-gradient(90deg, #caa7ff, #7b4bd6);
+  color: #fff;
+  border-radius: 16rpx;
   font-size: 32rpx;
-  text-align: center;
-  z-index: 1; /* 状态提示层级低于卡片 */
+  padding: 16rpx 48rpx;
+  border: none;
+}
+.arrow-placeholder {
+  position: absolute;
+  right: -24rpx;
+  bottom: -24rpx;
+  width: 80rpx;
+  height: 80rpx;
+  background: linear-gradient(135deg, #caa7ff, #7b4bd6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  transform: rotate(20deg);
+  box-shadow: 0 8rpx 24rpx rgba(140, 96, 199, 0.18);
+  z-index: 3;
+}
+
+.bottom-bar {
+  margin-top: 48rpx;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24rpx;
+  padding-bottom: 24rpx;
 }
-.card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.bottom-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #3b2b6c;
-  text-align: center;
-  z-index: 20;
-  width: 100%;
+.grid-icon {
+  font-size: 64rpx;
+  color: #6c2ee8;
+  margin-right: 18rpx;
 }
-
-.retry-btn {
-  background: #fff;
-  color: #333;
-  padding: 10rpx 40rpx;
-  border-radius: 12rpx;
-  border: 1rpx solid #eee;
-  font-size: 28rpx;
-  width: 200rpx;
+.bottom-text {
+  color: #6c2ee8;
+  font-weight: 600;
+  font-size: 32rpx;
+}
+.underline {
+  width: 70vw;
+  max-width: 600rpx;
+  height: 8rpx;
+  background: linear-gradient(
+    90deg,
+    rgba(108, 46, 232, 0.9),
+    rgba(180, 150, 255, 0.6)
+  );
+  border-radius: 4rpx;
+  margin-top: 12rpx;
 }
 </style>

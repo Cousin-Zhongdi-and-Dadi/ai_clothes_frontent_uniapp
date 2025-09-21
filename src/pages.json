@@ -86,8 +86,7 @@
     {
       "root": "subpackages/recommendation",
       "pages": [
-        { "path": "Recommendation/Recommendation", "style": { "navigationBarTitleText": "每日推荐" } },
-        { "path": "RecommendationWelcome/RecommendationWelcome", "style": { "navigationBarTitleText": "每日推荐" } }
+        { "path": "Recommendation/Recommendation", "style": { "navigationBarTitleText": "每日推荐" } }
       ]
     }
   ],

@@ -276,11 +276,37 @@ export default {
     async confirmSelection() {
       if (!this.selectedItem) return;
       if (this.source === 'AiMatch') {
-        // 临时存储
-        uni.setStorageSync('ai-match-image', this.selectedItem.img);
-        uni.setStorageSync('ai-match-product', this.selectedItem.id);
-        uni.$emit && uni.$emit('ai-match-product-selected', this.selectedItem.id);
-        uni.$emit && uni.$emit('ai-match-image-selected', this.selectedItem.img);
+        // 为 AiMatch 获取更可靠的图片链接：先查详情再回写
+        uni.showLoading({ title: '获取图片中...' });
+        let finalImage = this.selectedItem.img || '';
+        try {
+          if (this.selectedItem && this.selectedItem.id) {
+            const detail = await request({
+              url: `${apiConfig.BASE_URL}/mall/getProductDetail/${this.selectedItem.id}`,
+              method: 'GET'
+            });
+            if (detail) {
+              // 优先从 imageUrl 数组取第一张；其次 imageUrl 字段；再退回 imageGif；最后用列表图
+              if (Array.isArray(detail.imageUrl) && detail.imageUrl.length) {
+                finalImage = detail.imageUrl[0] || finalImage;
+              } else if (typeof detail.imageUrl === 'string' && detail.imageUrl) {
+                finalImage = detail.imageUrl;
+              } else if (detail.imageGif) {
+                finalImage = detail.imageGif;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('获取商品详情失败，使用列表图片作为回退', err);
+        } finally {
+          uni.hideLoading();
+        }
+
+        // 写入缓存并通知 AiMatch 页面
+        if (finalImage) {
+          uni.setStorageSync('ai-match-image', finalImage);
+          uni.$emit && uni.$emit('ai-match-image-selected', finalImage);
+        }
         uni.navigateBack();
         return;
       }

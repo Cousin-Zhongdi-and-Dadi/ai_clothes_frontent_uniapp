@@ -40,28 +40,6 @@
                 @click="goToGoodsDetail(item.productId)"
               />
             </view>
-            <view
-              class="robot-btn-list"
-              v-if="msg.buttons && msg.buttons.length > 0"
-            >
-              <view
-                v-for="(btn, bidx) in msg.buttons"
-                :key="bidx"
-                class="robot-btn"
-                @click="handleQuickReply(btn)"
-              >{{ btn }}</view>
-            </view>
-            <view
-              class="robot-tip"
-              v-if="msg.tip"
-            >
-              <text
-                v-for="(line, lidx) in msg.tip.split('\n')"
-                :key="lidx"
-              >
-                {{ line }}<br v-if="lidx !== msg.tip.split('\n').length - 1" />
-              </text>
-            </view>
           </view>
         </view>
         <!-- 用户消息 -->
@@ -130,20 +108,52 @@ export default {
       scrollTop: 0,
       robotAvatarSrc: '/static/icon/icon-04.png',
       userAvatarSrc: '',
+      sessionId: null,
     };
   },
   created() {
     // 进入页面时清空消息记录
     uni.removeStorageSync('service-chat-messages');
     this.messages = [];
+    this.createSession();
   },
   onUnload() {
     // 离开页面时清空消息记录
     uni.removeStorageSync('service-chat-messages');
     this.messages = [];
+    this.endSession();
   },
   methods: {
     // 注意：已移除欢迎消息。首次打开且无消息时，输入框显示在页面中央；发送第一条消息后会恢复到底部。
+
+    async createSession() {
+      try {
+        const sessionData = await request({
+          url: `${apiConfig.TEST_URL}/api/v1/sessions`,
+          method: 'POST',
+          data: {}
+        });
+        // request.js 成功时返回 res.data，所以这里直接使用
+        if (sessionData && sessionData.session_id) {
+          this.sessionId = sessionData.session_id;
+        }
+      } catch (error) {
+        console.error('Create session failed:', error);
+      }
+    },
+
+    async endSession() {
+      if (this.sessionId) {
+        try {
+          await request({
+            url: `${apiConfig.TEST_URL}/api/v1/sessions/${this.sessionId}`,
+            method: 'DELETE'
+          });
+        } catch (error) {
+          console.error('End session failed:', error);
+        }
+      }
+    },
 
     async sendMessage() {
       if (!this.userInput.trim() || this.isSending) return;
@@ -165,44 +175,49 @@ export default {
 
       try {
         const data = await request({
-          url: 'https://bee-touched-mink.ngrok-free.app/recommend',
+          url: `${apiConfig.TEST_URL}/api/v1/chat`,
           method: 'POST',
-          data: { question: userMessageContent },
+          data: {
+            session_id: this.sessionId,
+            text: userMessageContent
+          },
           header: {
             'Content-Type': 'application/json'
-          }
+          },
+          // 大模型响应时间可能较长，显式设置 90s 超时
+          timeout: 90000
         });
 
-        let productImages = [];
-        if (Array.isArray(data.indexes) && data.indexes.length > 0) {
-          const api = require('@/utils/api.js').default;
-          const detailPromises = data.indexes.map(productId =>
-            request({
-              url: `${api.BASE_URL}/mall/getProductDetail/${productId}`,
-              method: 'GET'
-            }).then(res => {
-              let img = '';
-              if (res && res.imageUrl) {
-                img = Array.isArray(res.imageUrl) ? res.imageUrl[0] : res.imageUrl;
-              }
-              return {
-                productId,
-                imageUrl: img
-              };
-            }).catch(() => ({
-              productId,
-              imageUrl: ''
-            }))
-          );
-          productImages = await Promise.all(detailPromises);
+        // request.js 成功时返回 res.data，所以 data 就是后端返回的 data 对象
+        const responseData = data;
+
+        let robotMsg = {
+          type: 'robot',
+          content: '',
+          productImages: [],
+          buttons: [],
+          tip: ''
+        };
+
+        if (responseData.needs_more_info) {
+          robotMsg.content = responseData.message || '需要更多信息';
+          robotMsg.buttons = responseData.missing_info ? responseData.missing_info.map(info => `提供${info}`) : [];
+        } else {
+          if (responseData.agent_type === 'scoring') {
+            const result = responseData.result;
+            robotMsg.content = `**总体评分：${result.overall_score}**\n\n${result.comments}\n\n**各维度评分：**\n${Object.entries(result.dimension_scores).map(([key, value]) => `- ${key}: ${value}`).join('\n')}\n\n**改进建议：**\n${result.suggestions.map(s => `- ${s}`).join('\n')}`;
+          } else if (responseData.agent_type === 'recommendation') {
+            const result = responseData.result;
+            robotMsg.content = `${result.reasoning}\n\n**推荐单品：**\n${result.recommendations.map(rec => `- ${rec.item_type}: ${rec.description} (${rec.style}, ${rec.price_range}) - ${rec.matching_reason}`).join('\n')}`;
+            // 注意：新API没有productId，所以productImages为空
+          } else if (responseData.agent_type === 'default') {
+            robotMsg.content = responseData.result.answer;
+          } else {
+            robotMsg.content = '未知响应类型';
+          }
         }
 
-        this.messages.push({
-          type: 'robot',
-          content: data.answer || '暂无回复',
-          indexes: data.indexes || [],
-          productImages
-        });
+        this.messages.push(robotMsg);
         this.saveMessages();
       } catch (error) {
         this.messages.push({

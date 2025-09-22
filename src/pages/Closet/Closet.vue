@@ -283,12 +283,15 @@ export default {
     getMockClosetItems(categoryId) {
       if (categoryId === 1) {
         return [
-          { id: 101, image: '/static/example_pictures/sample1.jpg', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
-          { id: 102, image: '/static/example_pictures/sample2.jpg', name: 'FORHUG街头上衣', desc: '游客模式样例' }
+          { id: 101, image: '/static/example_pictures/adidas originals Parachute 复古运动三条纹梭织降落伞舒适柔软复古运动休闲裤 女款 黑色.webp', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
+          { id: 102, image: '/static/example_pictures/alo yoga Suit Up TROUSER 宽松柔软轻薄弹力高腰常规版直筒西装裤 女款.webp', name: 'FORHUG街头上衣', desc: '游客模式样例' },
+          { id: 101, image: '/static/example_pictures/FORUYES 贴布绣碎花简约百搭短袖 落肩袖T恤 女款.webp', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
+          { id: 102, image: '/static/example_pictures/Polo Ralph Lauren Logo刺绣纯色V领休闲短袖 T恤 女款 粉色.webp', name: 'FORHUG街头上衣', desc: '游客模式样例' }
         ];
       } else if (categoryId === 2) {
         return [
-          { id: 201, image: '/static/example_pictures/sample1.jpg', name: '阿迪达斯街头裤子', desc: '游客模式样例' }
+          { id: 201, image: '/static/example_pictures/FORUYES 贴布绣碎花简约百搭短袖 落肩袖T恤 女款.webp', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
+          { id: 202, image: '/static/example_pictures/Polo Ralph Lauren Logo刺绣纯色V领休闲短袖 T恤 女款 粉色.webp', name: 'FORHUG街头上衣', desc: '游客模式样例' }
         ];
       }
       return [];

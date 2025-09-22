@@ -59,18 +59,29 @@
       v-if="messages.length === 0"
       class="center-input-wrapper"
     >
-      <input
-        class="chat-input center"
-        placeholder="请输入内容"
-        v-model="userInput"
-        @confirm="sendMessage"
-        :disabled="isSending"
-      />
-      <button
-        class="send-btn center"
-        @click="sendMessage"
-        :disabled="isSending || !userInput"
-      >发送</button>
+      <view class="robot-intro">
+        <image
+          class="robot-avatar-intro"
+          :src="robotAvatarSrc"
+        />
+        <text class="slogan">让每个时常成为你的T台</text>
+        <text class="intro-desc">今天天气不错，你想怎样搭配穿搭？不如来让我帮帮你吧！</text>
+      </view>
+      <!-- 将输入和按钮放在同一行 -->
+      <view class="center-input-row">
+        <input
+          class="chat-input center"
+          placeholder="今天的穿搭推荐……"
+          v-model="userInput"
+          @confirm="sendMessage"
+          :disabled="isSending"
+        />
+        <button
+          class="send-btn center"
+          @click="sendMessage"
+          :disabled="isSending || !userInput"
+        >发送</button>
+      </view>
     </view>
 
     <!-- 有消息时置底输入栏 -->
@@ -207,11 +218,26 @@ export default {
             const result = responseData.result;
             robotMsg.content = `**总体评分：${result.overall_score}**\n\n${result.comments}\n\n**各维度评分：**\n${Object.entries(result.dimension_scores).map(([key, value]) => `- ${key}: ${value}`).join('\n')}\n\n**改进建议：**\n${result.suggestions.map(s => `- ${s}`).join('\n')}`;
           } else if (responseData.agent_type === 'recommendation') {
-            const result = responseData.result;
-            robotMsg.content = `${result.reasoning}\n\n**推荐单品：**\n${result.recommendations.map(rec => `- ${rec.item_type}: ${rec.description} (${rec.style}, ${rec.price_range}) - ${rec.matching_reason}`).join('\n')}`;
-            // 注意：新API没有productId，所以productImages为空
+            const result = responseData.result || {};
+            // 使用更新后的推荐结构：recommendations 中包含 product_id, product_name, description, image_gif, category_id, brand, price, scene, matching_reason
+            const recs = Array.isArray(result.recommendations) ? result.recommendations : [];
+            robotMsg.content = `${result.reasoning || ''}\n\n**推荐单品：**\n${recs.map(rec => {
+              const name = rec.product_name || rec.product_id || '商品';
+              const brand = rec.brand ? `品牌：${rec.brand}` : '';
+              const price = (typeof rec.price !== 'undefined') ? `价格：¥${rec.price}` : '';
+              const scene = rec.scene ? `风格：${rec.scene}` : '';
+              const reason = rec.matching_reason ? `推荐理由：${rec.matching_reason}` : '';
+              const desc = rec.description ? `${rec.description}` : '';
+              return `- ${name} ${brand} ${price} ${scene}\n  ${desc}\n  ${reason}`.trim();
+            }).join('\n\n')}`;
+
+            // 将可用的图片加入 productImages，供模板展示并支持跳转
+            robotMsg.productImages = recs.map(rec => ({
+              productId: rec.product_id || rec.productId || '',
+              imageUrl: rec.image_gif || rec.image || ''
+            })).filter(i => i.imageUrl);
           } else if (responseData.agent_type === 'default') {
-            robotMsg.content = responseData.result.answer;
+            robotMsg.content = (responseData.result && responseData.result.answer) ? responseData.result.answer : (responseData.result || responseData.message || '');
           } else {
             robotMsg.content = '未知响应类型';
           }
@@ -243,8 +269,12 @@ export default {
     },
 
     goToGoodsDetail(productId) {
+      if (!productId) {
+        uni.showToast({ title: '未提供商品ID，无法跳转', icon: 'none' });
+        return;
+      }
       uni.navigateTo({
-        url: `/subpackages/shop/GoodsDetail/GoodsDetail?id=${productId}`
+        url: `/subpackages/shop/GoodsDetail/GoodsDetail?id=${encodeURIComponent(productId)}`
       });
     },
 
@@ -290,29 +320,65 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   gap: 24rpx;
   padding: 0 24rpx;
   box-sizing: border-box;
 }
-.chat-input.center {
-  width: 60%;
-  height: 72rpx;
+.robot-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+.robot-avatar-intro {
+  width: 120rpx;
+  height: 120rpx;
+  background: #fff;
+  object-fit: contain;
+  padding: 8rpx;
+  box-sizing: border-box;
+}
+.slogan {
+  font-size: 32rpx;
+  color: #666;
+  text-align: center;
+}
+.intro-desc {
+  font-size: 26rpx;
+  color: #8a8f95;
+  text-align: center;
+  max-width: 80%;
+  line-height: 36rpx;
 }
 .chat-input.center::placeholder {
   color: #9aa0a6;
 }
 .chat-input.center {
+  width: 60%;
+  height: 72rpx;
   background: #ffffff;
-  border: 1rpx solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.06);
   padding: 0 28rpx;
 }
-.send-btn.center {
+/* 新增：居中输入行，使输入框和按钮水平排列 */
+.center-input-row {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* 整个行居中 */
+  align-items: center;
+  gap: 16rpx;
+}
+.center-input-row .chat-input.center {
+  flex: 1;
+}
+.center-input-row .send-btn.center {
   height: 72rpx;
   line-height: 72rpx;
-  padding: 0 32rpx;
+  font-size: 28rpx;
+  padding: 0 40rpx;
+  border-radius: 36rpx;
 }
 .chat-row-wrapper {
   margin-bottom: 32rpx;

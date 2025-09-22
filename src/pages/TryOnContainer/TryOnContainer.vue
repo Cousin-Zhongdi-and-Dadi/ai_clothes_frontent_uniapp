@@ -150,8 +150,10 @@ export default {
   data() {
     return {
       products: [
-        { img: '/static/example_pictures/sample1.jpg', title: '罗宾汉 ROBINHOOD 美式' },
-        { img: '/static/example_pictures/sample2.jpg', title: 'PAUI COSTELLOE 罗·科' }
+        { img: '/static/example_pictures/adidas originals Parachute 复古运动三条纹梭织降落伞舒适柔软复古运动休闲裤 女款 黑色.webp', title: '罗宾汉 ROBINHOOD 美式' },
+        { img: '/static/example_pictures/alo yoga Suit Up TROUSER 宽松柔软轻薄弹力高腰常规版直筒西装裤 女款.webp', title: 'PAUI COSTELLOE 罗·科' },
+        { img: '/static/example_pictures/FORUYES 贴布绣碎花简约百搭短袖 落肩袖T恤 女款.webp', title: '罗宾汉 ROBINHOOD 美式' },
+        { img: '/static/example_pictures/Polo Ralph Lauren Logo刺绣纯色V领休闲短袖 T恤 女款 粉色.webp', title: 'PAUI COSTELLOE 罗·科' },
       ]
       ,
       topThumb: '',

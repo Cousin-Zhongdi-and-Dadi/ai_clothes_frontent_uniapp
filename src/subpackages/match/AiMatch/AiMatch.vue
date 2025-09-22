@@ -63,7 +63,7 @@
         <view class="thumbs">
           <view
             class="thumb"
-            v-for="(img, idx) in ['/static/example_pictures/sample1.jpg','/static/example_pictures/sample2.jpg']"
+            v-for="(img, idx) in ['/static/example_pictures/adidas originals Parachute 复古运动三条纹梭织降落伞舒适柔软复古运动休闲裤 女款 黑色.webp','/static/example_pictures/alo yoga Suit Up TROUSER 宽松柔软轻薄弹力高腰常规版直筒西装裤 女款.webp']"
             :key="idx"
           >
             <image

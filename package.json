@@ -81,6 +81,7 @@
     "vuex": "^3.2.0"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@dcloudio/types": "^3.3.2",
     "@dcloudio/uni-automator": "2.0.2-alpha-4070620250731001",
     "@dcloudio/uni-cli-i18n": "2.0.2-alpha-4070620250731001",

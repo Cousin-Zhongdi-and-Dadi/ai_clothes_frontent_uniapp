@@ -20,7 +20,7 @@
         :class="{ active: activeCategory === category.id }"
         @click="selectCategory(category.id)"
       >
-       <image
+        <image
           class="category-icon"
           :src="activeCategory === category.id && category.activeIcon ? category.activeIcon : category.icon"
           mode="aspectFit"
@@ -283,15 +283,15 @@ export default {
     getMockClosetItems(categoryId) {
       if (categoryId === 1) {
         return [
-          { id: 101, image: '/static/example_pictures/adidas originals Parachute 复古运动三条纹梭织降落伞舒适柔软复古运动休闲裤 女款 黑色.webp', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
-          { id: 102, image: '/static/example_pictures/alo yoga Suit Up TROUSER 宽松柔软轻薄弹力高腰常规版直筒西装裤 女款.webp', name: 'FORHUG街头上衣', desc: '游客模式样例' },
-          { id: 101, image: '/static/example_pictures/FORUYES 贴布绣碎花简约百搭短袖 落肩袖T恤 女款.webp', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
-          { id: 102, image: '/static/example_pictures/Polo Ralph Lauren Logo刺绣纯色V领休闲短袖 T恤 女款 粉色.webp', name: 'FORHUG街头上衣', desc: '游客模式样例' }
+          { id: 101, image: 'https://file.style3d.com/website/Company/77e73047-045e-477f-8fbb-81341ffc79c9/resource/product/models/20250718104837_6337_GAP%20%E5%AD%97%E6%AF%8D%E5%8D%B0%E8%8A%B1%E5%9C%86%E9%A2%86%E5%A5%97%E5%A4%B4%E7%9B%B4%E7%AD%92%E7%9F%AD%E8%A2%96T%E6%81%A4%20%E7%94%B7%E5%A5%B3%E5%90%8C%E6%AC%BE/thumb.png', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
+          { id: 102, image: 'https://dabang-1301469943.cos.ap-guangzhou.myqcloud.com/mall/products/output%20%282%29.jpeg', name: 'FORHUG街头上衣', desc: '游客模式样例' },
+          { id: 101, image: 'https://dabang-1301469943.cos.ap-guangzhou.myqcloud.com/mall/products/output%20%282%29.jpeg', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
+          { id: 102, image: 'https://file.style3d.com/website/Company/77e73047-045e-477f-8fbb-81341ffc79c9/resource/product/models/20250718104837_6337_GAP%20%E5%AD%97%E6%AF%8D%E5%8D%B0%E8%8A%B1%E5%9C%86%E9%A2%86%E5%A5%97%E5%A4%B4%E7%9B%B4%E7%AD%92%E7%9F%AD%E8%A2%96T%E6%81%A4%20%E7%94%B7%E5%A5%B3%E5%90%8C%E6%AC%BE/thumb.png', name: 'FORHUG街头上衣', desc: '游客模式样例' }
         ];
       } else if (categoryId === 2) {
         return [
-          { id: 201, image: '/static/example_pictures/FORUYES 贴布绣碎花简约百搭短袖 落肩袖T恤 女款.webp', name: '鸿星尔克潮流上衣', desc: '游客模式样例' },
-          { id: 202, image: '/static/example_pictures/Polo Ralph Lauren Logo刺绣纯色V领休闲短袖 T恤 女款 粉色.webp', name: 'FORHUG街头上衣', desc: '游客模式样例' }
+          { id: 201, image: 'https://file.style3d.com/website/Company/77e73047-045e-477f-8fbb-81341ffc79c9/resource/product/models/20250718103812_6138_361%C2%B0%20%E7%BA%AF%E8%89%B2%E9%80%9F%E5%B9%B2%E9%80%8F%E6%B0%94%E5%86%B0%E4%B8%9D%E6%88%B7%E5%A4%96%E8%BF%90%E5%8A%A8%E7%9B%B4%E7%AD%92%E5%B9%B3%E5%8F%A3%E8%BF%90%E5%8A%A8%E8%A3%A4%E4%BC%91%E9%97%B2%E8%A3%A4%20%E7%94%B7%E5%A5%B3%E5%90%8C%E6%AC%BE/thumb.png', name: '鸿星尔克潮流裤子', desc: '游客模式样例' },
+          { id: 202, image: 'https://file.style3d.com/website/Company/77e73047-045e-477f-8fbb-81341ffc79c9/resource/product/models/20250718104921_5538_%E9%B8%BF%E6%98%9F%E5%B0%94%E5%85%8B%20%E7%BB%BC%E8%AE%AD%E7%B3%BB%E5%88%97%20%E5%90%B8%E6%B9%BF%E6%8E%92%E6%B1%97Logo%E7%BA%AF%E8%89%B2%E5%AE%BD%E6%9D%BE%E9%80%9F%E5%B9%B2%E9%80%8F%E6%B0%94%E8%B7%91%E6%AD%A5%E5%81%A5%E8%BA%AB%E8%AE%AD%E7%BB%83%E7%9B%B4%E7%AD%92%E4%BA%94%E5%88%86%E4%BC%91%E9%97%B2%E7%9F%AD%E8%A3%A4%20%E7%94%B7%E5%A5%B3%E5%90%8C%E6%AC%BE%20%E6%AD%A3%E9%BB%91/thumb.png', name: 'FORHUG街头裤子', desc: '游客模式样例' }
         ];
       }
       return [];
@@ -457,6 +457,12 @@ export default {
       }
     },
     handleAdd() {
+      uni.showModal({
+        title: '游客模式',
+        content: '请登录以使用上传功能。',
+        showCancel: false
+      });
+      return;
       this.showModal = true;
     },
     closeModal() {
@@ -744,7 +750,7 @@ export default {
 }
 .sub-item {
   /* background: rgba(0, 0, 0, 0.03); */
-  display:inline-flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
@@ -753,7 +759,7 @@ export default {
   color: #333;
   cursor: pointer;
   /* max-width: 220rpx; */
-  
+
   height: 50rpx;
   box-sizing: border-box;
 }
@@ -812,7 +818,7 @@ export default {
   margin-right: 20rpx;
   margin-left: 10rpx;
 }
-.category-tab:first-child.active{
+.category-tab:first-child.active {
   margin-left: 5rpx;
   margin-right: 20rpx;
 }

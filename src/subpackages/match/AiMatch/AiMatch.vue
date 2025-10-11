@@ -29,13 +29,17 @@
           @click="() => { /* 右侧显示最佳推荐占位，点击暂无行为 */ }"
         >
           <view
-            v-if="!bestProduct"
-            class="product-placeholder"
-          >最佳推荐占位</view>
-          <view
+            v-if="!bestProduct || !recommendationImage"
+            class="upload-placeholder"
+          >
+            <view class="product-placeholder">点击“开始搭配”<br>查看推荐</view>
+          </view>
+          <image
             v-else
-            class="product-selected"
-          >已生成推荐</view>
+            :src="recommendationImage"
+            class="uploaded-image"
+            mode="aspectFit"
+          />
         </view>
       </view>
 
@@ -54,25 +58,42 @@
         class="start-btn"
         @click="onAiRecommend"
       >开始搭配</button>
+
+      <!-- 新增：响应文本区域 -->
+      <view
+        v-if="recommendationText"
+        class="response-text-area"
+      >
+        <towxml :nodes="$towxmlFun(recommendationText, 'markdown')" />
+      </view>
     </view>
 
     <!-- 其他搭配选项 -->
-    <view class="other-section">
+    <view
+      v-if="imagesOthers && imagesOthers.length"
+      class="other-section"
+    >
       <view class="other-title">其他搭配选项</view>
       <view class="other-card">
-        <view class="thumbs">
-          <view
-            class="thumb"
-            v-for="(img, idx) in ['/static/example_pictures/adidas originals Parachute 复古运动三条纹梭织降落伞舒适柔软复古运动休闲裤 女款 黑色.webp','/static/example_pictures/alo yoga Suit Up TROUSER 宽松柔软轻薄弹力高腰常规版直筒西装裤 女款.webp']"
-            :key="idx"
-          >
-            <image
-              :src="img"
-              class="thumb-image"
-              mode="aspectFit"
-            />
+        <scroll-view
+          scroll-x="true"
+          class="other-scroll"
+          show-scrollbar="false"
+        >
+          <view class="other-row">
+            <view
+              class="hthumb"
+              v-for="(o, i) in imagesOthers"
+              :key="o.product_id || i"
+            >
+              <image
+                :src="o.image_gif || o.image_url"
+                class="hthumb-image"
+                mode="aspectFit"
+              />
+            </view>
           </view>
-        </view>
+        </scroll-view>
       </view>
     </view>
 
@@ -129,9 +150,19 @@ export default {
       // 集成后的推荐数据
       bestProduct: null, // 最佳推荐（来自 /chat 的 recommendations[0]）
       otherRecommendations: [], // 其他推荐
+      recommendationText: '', // 自然语言格式的推荐结果（显示在白色响应区域）
+      recommendationReasoning: '', // 推荐理由（也会追加到响应区域）
+      recommendationImage: '', // 由大模型返回的图片，优先用于右侧显示
       isProcessing: false,
       sessionId: ''
     };
+  },
+  computed: {
+    // 仅保留有图片的其他推荐项
+    imagesOthers() {
+      const list = Array.isArray(this.otherRecommendations) ? this.otherRecommendations : [];
+      return list.filter(o => o && (o.image_gif || o.image_url));
+    }
   },
   onLoad(options) {
     // 保持页面进入时状态干净
@@ -140,6 +171,9 @@ export default {
     this.showPreview = false;
     this.bestProduct = null;
     this.otherRecommendations = [];
+    this.recommendationText = '';
+    this.recommendationReasoning = '';
+    this.recommendationImage = '';
   },
   onShow() {
     // 先解绑，防止重复绑定
@@ -166,10 +200,9 @@ export default {
   methods: {
     // 确保会话存在
     async ensureSession() {
-      if (this.sessionId) return this.sessionId;
       try {
         const res = await request({
-          url: `${api.TEST_URL}/api/v1/sessions`,
+          url: `${api.BASE_URL}/api/v1/sessions`,
           method: 'POST',
           data: {}
         });
@@ -223,7 +256,7 @@ export default {
         }
 
         const chatData = await request({
-          url: `${api.TEST_URL}/api/v1/chat`,
+          url: `${api.BASE_URL}/api/v1/chat`,
           method: 'POST',
           data: payload,
           header: { 'content-type': 'application/json' }
@@ -264,6 +297,37 @@ export default {
         // 设置最佳与其他
         this.bestProduct = recs[0] || null;
         this.otherRecommendations = recs.slice(1);
+
+        // 合并大模型返回的文本和额外信息到响应文本区域
+        let mainText = result.text || '';
+        if (result.reasoning) {
+          mainText = mainText ? mainText + '\n\n' + result.reasoning : result.reasoning;
+        }
+
+        // 追加最佳商品基本信息到文本区域（不在右侧显示）
+        if (this.bestProduct) {
+          const parts = [];
+          if (this.bestProduct.product_name) parts.push(`商品：${this.bestProduct.product_name}`);
+          if (this.bestProduct.price) parts.push(`价格：¥${this.bestProduct.price}`);
+          if (this.bestProduct.brand) parts.push(`品牌：${this.bestProduct.brand}`);
+          if (parts.length) mainText += (mainText ? '\n\n' : '') + parts.join(' | ');
+        }
+
+        // 列出其他推荐的简短摘要（最多三条）
+        if (this.otherRecommendations && this.otherRecommendations.length) {
+          const othersSummary = this.otherRecommendations.slice(0, 3).map((o, i) => {
+            const name = o.product_name || `推荐${i + 2}`;
+            const price = o.price ? ` ¥${o.price}` : '';
+            return `${name}${price}`;
+          }).join(' ; ');
+          if (othersSummary) mainText += '\n\n其他推荐：' + othersSummary;
+        }
+
+        this.recommendationText = mainText;
+        this.recommendationReasoning = result.reasoning || '';
+
+        // 推荐图片优先使用 result.image / result.image_url，再降级到 bestProduct 的 image_gif/image_url
+        this.recommendationImage = result.image || result.image_url || (this.bestProduct && (this.bestProduct.image_gif || this.bestProduct.image_url)) || '';
 
         uni.showToast({ title: '推荐完成', icon: 'success' });
 
@@ -343,6 +407,9 @@ export default {
 .upload-box {
   border: 2rpx dashed #dcd6f8;
 }
+.product-box {
+  border: 2rpx dashed #dcd6f8;
+}
 .upload-placeholder {
   display: flex;
   align-items: center;
@@ -374,10 +441,37 @@ export default {
 .product-placeholder {
   color: #bbb;
   font-size: 26rpx;
+  text-align: center;
 }
-.product-selected {
-  color: #333;
+/* 右侧已与 upload-box 对齐展示，不再需要额外的 product-selected/product-info/product-image 布局 */
+.product-details {
+  flex: 1;
+}
+.product-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 5rpx;
+}
+.product-price {
+  font-size: 24rpx;
+  color: #e74c3c;
+  margin-bottom: 5rpx;
+}
+.product-brand {
+  font-size: 24rpx;
+  color: #666;
+}
+.recommendation-reasoning {
   font-size: 26rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+.recommendation-text {
+  font-size: 24rpx;
+  color: #555;
+  line-height: 1.4;
+  margin-top: 10rpx;
 }
 
 /* 描述行 */
@@ -412,6 +506,22 @@ export default {
   margin-top: 6rpx;
 }
 
+/* 新增：响应文本区域 */
+.response-text-area {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 18rpx;
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  min-height: 100rpx; /* 最小高度 */
+  max-height: none; /* 允许扩展 */
+}
+
 /* 其他搭配选项 */
 .other-section {
   margin-top: 18rpx;
@@ -427,30 +537,32 @@ export default {
   border-radius: 16rpx;
   padding: 20rpx;
 }
-.thumbs {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4%;
+/* 横向滚动 */
+.other-scroll {
+  white-space: nowrap;
+  width: 100%;
 }
-.thumb {
-  width: 48%;
-  height: 200rpx;
-  margin-bottom: 12rpx;
+.other-row {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 16rpx;
+}
+.hthumb {
+  width: 260rpx;
+  height: 360rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 8rpx;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border-radius: 12rpx;
-  padding: 6rpx;
-  box-sizing: border-box;
-  height: 400rpx;
 }
-.thumb-image {
+.hthumb-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8rpx;
 }
 

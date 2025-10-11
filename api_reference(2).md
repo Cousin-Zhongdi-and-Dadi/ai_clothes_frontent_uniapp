@@ -66,10 +66,22 @@ DELETE /sessions/{session_id}
 
 **响应**
 
+成功响应：
 ```json
 {
   "code": 200,
   "message": "会话已结束",
+  "data": {
+    "session_id": "string"
+  }
+}
+```
+
+会话不存在时的响应：
+```json
+{
+  "code": 404,
+  "message": "会话不存在或已结束",
   "data": {
     "session_id": "string"
   }
@@ -162,7 +174,8 @@ POST /chat
       "matching_reason": "匹配理由" // AI生成的匹配理由
     }
   ],
-  "reasoning": "整体搭配理念和建议" // 推荐理由
+  "reasoning": "整体搭配理念和建议", // 推荐理由
+  "text": "自然语言格式的推荐结果，按商品分点输出，包含所有字段信息" // 新增自然语言描述
 }
 ```
 

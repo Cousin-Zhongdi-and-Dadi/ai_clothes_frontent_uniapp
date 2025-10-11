@@ -20,9 +20,9 @@
         :class="{ active: activeCategory === category.id }"
         @click="selectCategory(category.id)"
       >
-        <image
+       <image
           class="category-icon"
-          :src="category.icon"
+          :src="activeCategory === category.id && category.activeIcon ? category.activeIcon : category.icon"
           mode="aspectFit"
         />
         <text class="category-name">{{ category.name }}</text>
@@ -274,10 +274,10 @@ export default {
     },
     getMockCategories() {
       return [
-        { id: 1, name: '上衣', icon: '/static/icon/我的衣橱/上衣.png' },
-        { id: 2, name: '下装', icon: '/static/icon/我的衣橱/下装.png' },
-        { id: 3, name: '裙子', icon: '/static/icon/我的衣橱/收藏.png' },
-        { id: 4, name: '其他', icon: '/static/icon/我的衣橱/其他.png' }
+        { id: 1, name: '上衣', icon: '/static/icon/我的衣橱/上衣.png', activeIcon: '/static/icon/我的衣橱/上衣2.png' },
+        { id: 2, name: '下装', icon: '/static/icon/我的衣橱/下装.png', activeIcon: '/static/icon/我的衣橱/下装2.png' },
+        { id: 3, name: '鞋子', icon: '/static/icon/我的衣橱/鞋子.png', activeIcon: '/static/icon/我的衣橱/鞋子2.png' },
+        { id: 4, name: '其他', icon: '/static/icon/我的衣橱/其他.png', activeIcon: '/static/icon/我的衣橱/其他2.png' }
       ];
     },
     getMockClosetItems(categoryId) {
@@ -483,7 +483,7 @@ export default {
   /* 不使用 100vh，避免包含状态栏/导航高度 */
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: #fafafa;
   min-height: 100%;
   position: relative; /* 使 header-title/header-sub 能相对于页面定位 */
 }
@@ -537,6 +537,7 @@ export default {
   width: 100%;
   box-sizing: border-box;
   padding: 10rpx;
+  background: #fff;
 }
 .add-card {
   display: flex;
@@ -561,7 +562,7 @@ export default {
   position: relative;
   border-radius: 12rpx;
   overflow: hidden;
-  background-color: #eee; /* 占位背景色 */
+  /* background-color: #eee; 占位背景色 */
 }
 .goods-image {
   display: block;
@@ -709,25 +710,27 @@ export default {
   align-items: center;
   /* 背景使用透明，单独的 tab 会有颜色块用于识别 */
   background: transparent;
-  padding: 10rpx 20rpx;
+  padding: 10rpx 35rpx;
   /* 上移，使其部分覆盖头图 */
-  margin-top: -100rpx;
-  margin-bottom: 10rpx;
+  margin-top: -110rpx;
+  /* margin-bottom: 10rpx; */
   overflow-x: auto;
   position: relative;
   z-index: 20; /* 确保在头图之上 */
   box-sizing: border-box;
   /* 微妙阴影以增强可读性和分层感 */
-  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.08); */
 }
 
 /* 副选单样式 */
 .subcategory-tabs {
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
+  /* background: rgba(255, 255, 255, 0.95); */
+  background: transparent;
   padding: 10rpx 8rpx;
   box-sizing: border-box;
-  margin-bottom: 6rpx;
+  margin-top: -10rpx;
+  /* margin-bottom: 6rpx; */
 }
 .sub-scroll {
   width: 100%;
@@ -736,51 +739,58 @@ export default {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 14rpx;
-  padding: 6rpx 10rpx;
+  gap: 5rpx;
+  padding: 6rpx 4rpx;
 }
 .sub-item {
-  background: rgba(0, 0, 0, 0.03);
-  padding: 10rpx 20rpx; /* 左右内边距各加10rpx，总宽度增加20rpx */
-  border-radius: 20rpx;
+  /* background: rgba(0, 0, 0, 0.03); */
+  display:inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5rpx 10rpx; /* 左右内边距各加10rpx，总宽度增加20rpx */
+  /* border-radius: 20rpx; */
   color: #333;
   cursor: pointer;
-  max-width: 140rpx;
-  min-width: 140rpx;
+  /* max-width: 220rpx; */
+  
   height: 50rpx;
   box-sizing: border-box;
-  text-align: center;
 }
 .sub-item .sub-name {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #666;
   white-space: nowrap; /* 强制单行 */
   overflow: hidden; /* 溢出隐藏 */
   text-overflow: ellipsis; /* 超出显示省略号 */
-  display: block;
-  max-width: 100%;
+  /* display: block;
+  max-width: 100%; */
 }
 .sub-item.active {
-  background: #fff;
-  box-shadow: 0 6rpx 14rpx rgba(0, 0, 0, 0.06);
+  /* background: #fff; */
+  /* box-shadow: 0 6rpx 14rpx rgba(0, 0, 0, 0.06); */
+  min-width: auto;
+  padding: 5rpx 20rpx;
 }
 .sub-item.active .sub-name {
   color: #222;
-  font-weight: 700;
+  font-weight: bold;
+  font-size: 32rpx;
 }
 .category-tab {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-right: 24rpx;
+  margin-right: 10rpx;
   /* 固定为正方形，宽高一致 */
   width: 120rpx;
   height: 120rpx;
   padding: 12rpx 12rpx;
-  border-radius: 28rpx; /* 圆角背景 */
-  background: #6c5ce7; /* 未选中时紫色背景 */
-  border: 6rpx solid rgba(255, 255, 255, 0.95); /* 白色边框 */
+  border-radius: 20rpx; /* 圆角背景 */
+  /*background: #6c5ce7;  未选中时紫色背景 */
+  background: #d5d5f8;
+  /* border: 6rpx solid rgba(255, 255, 255, 0.95); 白色边框 */
   cursor: pointer;
   /* 移除 min-width，使用固定尺寸保证正方形 */
   box-sizing: border-box;
@@ -796,14 +806,20 @@ export default {
 .category-tab.active {
   background: #000; /* 选中时黑色背景 */
   /* 激活态微妙阴影，增加层级感 */
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.12);
-  border: 6rpx solid rgba(255, 255, 255, 0.95);
-  transform: scale(1.06); /* 放大整个卡片，包括背景和文字 */
+  /* box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.12); */
+  border: 7rpx solid rgba(255, 255, 255, 0.95);
+  transform: scale(1.05); /* 放大整个卡片，包括背景和文字 */
+  margin-right: 20rpx;
+  margin-left: 10rpx;
 }
-
+.category-tab:first-child.active{
+  margin-left: 5rpx;
+  margin-right: 20rpx;
+}
 /* 未选中时整体略微缩小，突出激活项 */
 .category-tab:not(.active) {
-  transform: scale(0.94);
+  transform: scale(0.8);
+  margin-bottom: -20rpx;
 }
 .category-icon {
   width: 56rpx;
@@ -813,8 +829,9 @@ export default {
   transition: opacity 180ms ease;
 }
 .category-name {
-  font-size: 20rpx;
-  color: #fff; /* 文字在有色背景上为白色 */
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #000000; /* 文字在有色背景上为白色 */
 }
 .category-tab.active .category-name {
   font-weight: 700;
@@ -831,7 +848,7 @@ export default {
   width: 120rpx;
   height: 120rpx;
   border-radius: 60rpx;
-  background: #b6acff;
+  background: #d5d5f8;
   display: flex;
   align-items: center;
   justify-content: center;

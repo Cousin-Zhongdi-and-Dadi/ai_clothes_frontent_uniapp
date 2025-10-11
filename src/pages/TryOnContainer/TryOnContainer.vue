@@ -512,6 +512,7 @@ export default {
   text-align: center;
   font-size: 32rpx;
   border: none;
+  font-weight: bold;
 }
 .ai-row {
   display: flex;

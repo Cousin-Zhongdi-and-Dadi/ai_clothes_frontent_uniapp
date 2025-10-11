@@ -48,7 +48,7 @@
         <textarea
           v-model="desc"
           class="desc-single"
-          placeholder="请输入你的搭配需求（可包含预算、风格、场景等关键词）"
+          placeholder="请输入你的搭配需求（可包含预算、风格、场景等关键词）。如：我的预算是500元，我偏好的风格是运动。"
           maxlength="10000"
         ></textarea>
       </view>

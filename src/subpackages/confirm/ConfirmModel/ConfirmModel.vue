@@ -51,28 +51,31 @@ import uploadFile from '@/utils/upload.js';
 export default {
   data() {
     return {
-      imageUrl: '',            tempFilePath: '',        imageBase64: '',                     compressedFilePath: '' 
+      imageUrl: '',
+      tempFilePath: '',
+      imageBase64: '',
+      compressedFilePath: ''
     }
   },
   onLoad(options) {
-        if (options.tempFilePath) {
+    if (options.tempFilePath) {
       const filePath = decodeURIComponent(options.tempFilePath);
-      
-            this.tempFilePath = filePath;
-      this.compressedFilePath = filePath;       
-            this.displayImage(filePath);
+
+      this.tempFilePath = filePath;
+      this.displayImage(filePath);
+      this.compressImage(filePath); // Add this line
     }
   },
   methods: {
-        displayImage(filePath) {
+    displayImage(filePath) {
       this.imageUrl = filePath;
     },
-    
-        onRetry() {
+
+    onRetry() {
       uni.navigateBack();
     },
-    
-        async onConfirm() {
+
+    async onConfirm() {
       const filePath = this.compressedFilePath || this.tempFilePath;
       if (!filePath) {
         uni.showToast({ title: '没有可上传的图片', icon: 'none' });
@@ -89,20 +92,20 @@ export default {
         uni.showToast({ title: '上传成功！', icon: 'success' });
         const uploadedUrl = typeof uploaded === 'string' ? uploaded : (uploaded && (uploaded.url || uploaded.fileUrl || uploaded.path || uploaded.src || uploaded.file || uploaded.avatarUrl));
         const storeVal = uploadedUrl || uploaded;
-            // 将上传后的图片 URL/路径写入本地缓存，供 TryOnContainer 读取
-            uni.setStorageSync('personImageUrl', storeVal);
-            // 返回到上一个页面（通常是 TryOnContainer），触发其 onShow 以刷新展示
-            setTimeout(() => {
-              uni.navigateBack({ delta: 1 });
-            }, 600);
+        // 将上传后的图片 URL/路径写入本地缓存，供 TryOnContainer 读取
+        uni.setStorageSync('personImageUrl', storeVal);
+        // 返回到上一个页面（通常是 TryOnContainer），触发其 onShow 以刷新展示
+        setTimeout(() => {
+          uni.navigateBack({ delta: 1 });
+        }, 600);
       } catch (err) {
         uni.hideLoading();
         uni.showToast({ title: err && err.message ? err.message : '上传失败，请重试', icon: 'none' });
         console.error('上传失败:', err);
       }
     },
-    
-        fileToBase64(filePath) {
+
+    fileToBase64(filePath) {
       return new Promise((resolve, reject) => {
         uni.getFileSystemManager().readFile({
           filePath,
@@ -110,6 +113,21 @@ export default {
           success: (res) => resolve(res.data),
           fail: (err) => reject(err)
         });
+      });
+    },
+
+    // Add this method to compress the image
+    compressImage(filePath) {
+      uni.compressImage({
+        src: filePath,
+        quality: 50, // Adjust the quality as needed (0-100)
+        success: (res) => {
+          this.compressedFilePath = res.tempFilePath;
+        },
+        fail: (err) => {
+          console.error('图片压缩失败:', err);
+          this.compressedFilePath = filePath; // Use original file if compression fails
+        }
       });
     }
   }

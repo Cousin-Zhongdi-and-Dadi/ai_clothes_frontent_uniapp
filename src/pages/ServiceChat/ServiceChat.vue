@@ -55,6 +55,7 @@
         />
         <text class="slogan">让每个时常成为你的T台</text>
         <text class="intro-desc">今天天气不错，你想怎样搭配穿搭？不如来让我帮帮你吧！</text>
+        <text class="intro-desc">你可以这样问我：我需要一件白色上衣，我的预算是500元，我偏好的风格是运动。</text>
       </view>
       <!-- 将输入和按钮放在同一行 -->
       <view class="center-input-row">

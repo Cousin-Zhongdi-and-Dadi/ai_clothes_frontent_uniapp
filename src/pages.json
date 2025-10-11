@@ -35,7 +35,7 @@
     {
       "root": "subpackages/match",
       "pages": [
-        { "path": "AiMatch/AiMatch", "style": { "navigationBarTitleText": "上传单品" } },
+        { "path": "AiMatch/AiMatch", "style": { "navigationBarTitleText": "上传单品", "usingComponents": { "towxml": "/wxcomponents/towxml/towxml" } } },
         { "path": "AiMatchResult/AiMatchResult", "style": { "navigationBarTitleText": "推荐搭配单品" } }
       ]
     },

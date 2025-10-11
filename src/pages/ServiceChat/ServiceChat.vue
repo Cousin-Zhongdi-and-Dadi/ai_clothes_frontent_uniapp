@@ -24,20 +24,9 @@
           <view class="robot-msg">
             <!-- 修改：渲染markdown内容 -->
             <view class="robot-msg-title">
-              <towxml :nodes="$towxmlFun(msg.content, 'markdown')" />
-            </view>
-            <!-- 推荐商品图片展示 -->
-            <view
-              v-if="msg.productImages && msg.productImages.length"
-              class="robot-product-list"
-            >
-              <image
-                v-for="item in msg.productImages"
-                :key="item.productId"
-                :src="item.imageUrl"
-                class="robot-product-img"
-                mode="aspectFill"
-                @click="goToGoodsDetail(item.productId)"
+              <towxml
+                :nodes="$towxmlFun(msg.content, 'markdown')"
+                :events="towxmlEvents"
               />
             </view>
           </view>
@@ -120,6 +109,14 @@ export default {
       robotAvatarSrc: '/static/icon/icon-04.png',
       userAvatarSrc: '',
       sessionId: null,
+      towxmlEvents: {
+        linktap: (e) => {
+          const href = e.detail.href;
+          if (href) {
+            this.goToGoodsDetail(href);
+          }
+        }
+      }
     };
   },
   created() {
@@ -138,26 +135,52 @@ export default {
     // 注意：已移除欢迎消息。首次打开且无消息时，输入框显示在页面中央；发送第一条消息后会恢复到底部。
 
     async createSession() {
-      try {
-        const sessionData = await request({
-          url: `${apiConfig.TEST_URL}/api/v1/sessions`,
-          method: 'POST',
-          data: {}
-        });
-        // request.js 成功时返回 res.data，所以这里直接使用
-        if (sessionData && sessionData.session_id) {
-          this.sessionId = sessionData.session_id;
+      const url = `${apiConfig.BASE_URL}/api/v1/sessions`;
+      const maxRetries = 3;
+      const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.info(`[ServiceChat] createSession attempt ${attempt} -> ${url}`);
+          const sessionData = await request({
+            url,
+            method: 'POST',
+            data: {},
+            timeout: 90000
+          });
+
+          if (sessionData && sessionData.session_id) {
+            this.sessionId = sessionData.session_id;
+            console.info('[ServiceChat] session created:', this.sessionId);
+            return;
+          }
+
+          // 如果返回格式不对，抛出以进入重试逻辑
+          throw new Error('createSession: 响应中缺少 session_id: ' + JSON.stringify(sessionData));
+        } catch (error) {
+          console.error(`[ServiceChat] createSession failed (attempt ${attempt}):`, error);
+          // 重试间隔（指数退避）
+          if (attempt < maxRetries) {
+            await sleep(attempt * 1000);
+          }
         }
-      } catch (error) {
-        console.error('Create session failed:', error);
       }
+
+      // 多次重试仍失败：提示并使用本地回退 session（避免页面不可用）
+      uni.showToast({
+        title: '创建会话失败，已使用本地会话，某些功能可能受限',
+        icon: 'none',
+        duration: 3000
+      });
+      this.sessionId = `local-${Date.now()}`;
+      console.warn('[ServiceChat] fallback to local sessionId:', this.sessionId);
     },
 
     async endSession() {
       if (this.sessionId) {
         try {
           await request({
-            url: `${apiConfig.TEST_URL}/api/v1/sessions/${this.sessionId}`,
+            url: `${apiConfig.BASE_URL}/api/v1/sessions/${this.sessionId}`,
             method: 'DELETE'
           });
         } catch (error) {
@@ -186,7 +209,7 @@ export default {
 
       try {
         const data = await request({
-          url: `${apiConfig.TEST_URL}/api/v1/chat`,
+          url: `${apiConfig.BASE_URL}/api/v1/chat`,
           method: 'POST',
           data: {
             session_id: this.sessionId,
@@ -228,14 +251,9 @@ export default {
               const scene = rec.scene ? `风格：${rec.scene}` : '';
               const reason = rec.matching_reason ? `推荐理由：${rec.matching_reason}` : '';
               const desc = rec.description ? `${rec.description}` : '';
-              return `- ${name} ${brand} ${price} ${scene}\n  ${desc}\n  ${reason}`.trim();
+              const imageMd = rec.image_gif || rec.image ? `\n\n[![商品图片](${rec.image_gif || rec.image})](${rec.product_id || rec.productId})\n\n` : '';
+              return `- ${name} ${brand} ${price} ${scene}\n  ${desc}\n  ${reason}${imageMd}`.trim();
             }).join('\n\n')}`;
-
-            // 将可用的图片加入 productImages，供模板展示并支持跳转
-            robotMsg.productImages = recs.map(rec => ({
-              productId: rec.product_id || rec.productId || '',
-              imageUrl: rec.image_gif || rec.image || ''
-            })).filter(i => i.imageUrl);
           } else if (responseData.agent_type === 'default') {
             robotMsg.content = (responseData.result && responseData.result.answer) ? responseData.result.answer : (responseData.result || responseData.message || '');
           } else {
@@ -494,19 +512,5 @@ export default {
 .send-btn[disabled] {
   background-color: #ccc;
   color: #fff;
-}
-.robot-product-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
-  margin: 16rpx 0 0 0;
-}
-.robot-product-img {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 12rpx;
-  background: #f5f5f5;
-  object-fit: cover;
-  border: 1rpx solid #eee;
 }
 </style>

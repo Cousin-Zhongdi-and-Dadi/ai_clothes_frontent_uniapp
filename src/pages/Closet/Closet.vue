@@ -94,7 +94,7 @@
                 <image
                   :src="item.image"
                   class="goods-image"
-                  mode="widthFix"
+                  mode="aspectFit"
                 />
               </view>
               <text class="goods-name">{{ item.name }}</text>
@@ -542,8 +542,19 @@ export default {
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
-  padding: 10rpx;
+  padding: 15rpx;
+  justify-content: flex-start; 
+  align-items: center;
   background: #fff;
+  height: 400rpx;
+}
+.goods-name{
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-top: auto;
+  width: 100%;
+  text-align: left;
 }
 .add-card {
   display: flex;
@@ -563,19 +574,28 @@ export default {
   line-height: 1;
 }
 .image-wrapper {
-  width: 100%;
-  height: auto; /* 由图片高度决定，按宽度自适应 */
+  /* width: 100%;
+  height: auto; 
   position: relative;
   border-radius: 12rpx;
+  overflow: hidden; */
+   width: 100%;
+  height: 260rpx;               /* 固定图片区域高度 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  /* background-color: #eee; 占位背景色 */
 }
 .goods-image {
-  display: block;
+  /* display: block; */
+  /* max-width: 100%;
+  max-height: 100%; */
+  height: 100%;
   width: 100%;
-  height: auto;
-  object-fit: contain; /* 按宽度适配，保留完整图片 */
+  display: block;
+  /* object-fit: contain;  */
   border-radius: 12rpx;
+
 }
 .sub-item {
   background: transparent;
@@ -625,11 +645,13 @@ export default {
 .goods-desc {
   font-size: 22rpx;
   color: #999;
-  margin-top: 5rpx;
+  margin-top: 10rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  text-align: left;
+  margin-bottom: 10rpx;
 }
 
 .modal-overlay {

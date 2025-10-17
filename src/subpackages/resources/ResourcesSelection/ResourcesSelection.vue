@@ -445,31 +445,36 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 140rpx;
+  /* min-width: 140rpx; */
   height: 64rpx;
   padding: 0 22rpx;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 32rpx;
+  /* background: rgba(0, 0, 0, 0.03); */
+  /* border-radius: 32rpx; */
   color: #333;
   cursor: pointer;
   white-space: nowrap; /* prevent characters wrapping into vertical stack */
   box-sizing: border-box;
 }
 .sub-item .sub-name {
-  display: inline-block;
+  /* display: inline-block; */
   font-size: 26rpx;
   color: #666;
   line-height: 1;
   white-space: nowrap;
   text-align: center;
+  overflow: hidden; /* 溢出隐藏 */
+  text-overflow: ellipsis; /* 超出显示省略号 */
 }
 .sub-item.active {
-  background: #fff;
-  box-shadow: 0 6rpx 14rpx rgba(0, 0, 0, 0.06);
+  /* background: #fff; */
+  /* box-shadow: 0 6rpx 14rpx rgba(0, 0, 0, 0.06); */
+  min-width: auto;
+  padding: 5rpx 20rpx;
 }
 .sub-item.active .sub-name {
   color: #222;
-  font-weight: 700;
+  font-weight: bold;
+  font-size: 32rpx;
 }
 .sub-underline {
   position: absolute;
@@ -488,14 +493,14 @@ export default {
 }
 
 .container {
-  background: #fff;
+  background: #f0f0fa;
   min-height: 100vh;
   padding: 0 16rpx 16rpx 16rpx;
   box-sizing: border-box;
 }
 .tabs {
   display: flex;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0fa;
   margin-bottom: 24rpx;
   margin-top: 16rpx;
 
@@ -536,23 +541,37 @@ export default {
   border-bottom: 4rpx solid #6753e7;
 }
 .grid {
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
-  gap: 24rpx 0;
+  gap: 24rpx 0; */
+    width: 100%;
+  display: grid;
+  /* 响应式两列：每列占可用宽度的一半，保证每行两个商品 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6rpx;
+  box-sizing: border-box;
+  /* padding: 0 10rpx 20rpx 10rpx; */
 }
 .grid-item {
-  width: 48%;
+  /* width: 48%;
   margin-right: 4%;
   margin-bottom: 24rpx;
   background: #fafafa;
   border-radius: 16rpx;
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: 16rpx;
+  padding-bottom: 16rpx; */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10rpx;
+  background: #fff;
+  height: 350rpx;
 }
-.grid-item:nth-child(2n) {
+/* .grid-item:nth-child(2n) {
   margin-right: 0;
-}
+} */
 .item-img {
   width: 100%;
   height: 240rpx;
@@ -563,7 +582,7 @@ export default {
 .item-title {
   font-size: 26rpx;
   color: #222;
-  margin: 16rpx 12rpx 4rpx 12rpx;
+  margin: 16rpx 12rpx 5rpx 12rpx;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -572,7 +591,7 @@ export default {
 .item-desc {
   font-size: 22rpx;
   color: #888;
-  margin: 0 12rpx;
+  margin: 5rpx 12rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -646,7 +665,7 @@ export default {
   left: 18rpx;
   top: 12rpx;
   font-size: 36rpx;
-  color: #6c5ce7;
+  color: #653BD7;
   z-index: 4;
 }
 .popup-body {
@@ -698,10 +717,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14rpx;
+  /* margin-top: 10rpx; */
+  margin-bottom: 35rpx;
 }
 .meta-left {
-  color: #6c5ce7;
+  color: #653BD7;
   font-size: 28rpx;
 }
 .meta-right {
@@ -713,15 +733,16 @@ export default {
   background: #000;
   color: #fff;
   padding: 20rpx 0;
-  border-radius: 12rpx;
+  border-radius: 20rpx;
   font-size: 30rpx;
   margin-top: 20rpx;
+  margin-bottom: -10rpx;
   border: none;
 }
 
 /* Detail view */
 .popup-body.detail {
-  max-height: 600rpx;
+  max-height: 700rpx;
   overflow: auto;
 }
 .detail-header {
@@ -735,7 +756,7 @@ export default {
   font-weight: 700;
 }
 .detail-list {
-  padding: 10rpx 6rpx;
+  padding: 10rpx ;
 }
 .detail-row {
   display: flex;
@@ -752,33 +773,34 @@ export default {
   text-align: left;
 }
 .label {
-  color: #666;
+  color: #000;
   font-size: 32rpx;
   flex: 0 0 auto;
-  margin-right: 12rpx;
+  margin-right: 25rpx;
   white-space: nowrap;
+  font-weight: bold;
 }
 .value {
   color: #222;
   font-size: 32rpx;
   flex: 1 1 auto;
-  text-align: left;
+  text-align: bottom;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-decoration: underline wavy;
+  text-decoration: underline;
 }
 .detail-actions {
   display: block;
   width: 100%;
-  margin-top: 16rpx;
+  margin-top: 50rpx;
 }
 .edit-link {
   display: block;
   text-align: right;
-  color: #6c5ce7;
+  color: #653BD7;
   font-size: 26rpx;
-  margin-bottom: 12rpx;
+  margin-bottom: 20rpx;
 }
 .popup-close {
   position: absolute;

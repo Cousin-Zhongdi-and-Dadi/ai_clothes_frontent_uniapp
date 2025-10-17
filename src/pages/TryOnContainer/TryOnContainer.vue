@@ -434,17 +434,17 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fafafa;
-  color: #9b7ef6;
+  background: #f0f0fa;
+  color:#9F84E6;
 }
 .small-btn {
   position: absolute;
   right: 20rpx;
   bottom: 20rpx;
-  background: #f3f3ff;
+  background: #f0f0fa;
   border-radius: 28rpx;
   padding: 0 20rpx; /* horizontal padding only; height controls vertical size */
-  color: #6b6b8a;
+  color: #653BD7;
   border: none;
   z-index: 10;
   height: 56rpx;
@@ -594,22 +594,36 @@ export default {
 }
 
 .product-list {
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
-  gap: 20rpx;
-  margin-top: 24rpx;
+  gap: 8rpx;
+  margin-top: 24rpx; */
+  width: 100%;
+  display: grid;
+  /* 响应式两列：每列占可用宽度的一半，保证每行两个商品 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6rpx;
+  box-sizing: border-box;
+
 }
 .product {
-  width: 48%;
+  /* width: 48%;
   background: #fff;
-  border-radius: 16rpx;
   padding: 16rpx;
   box-sizing: border-box;
+  height: 350rpx; */
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10rpx;
+  background: #fff;
+  height: 350rpx;
 }
 .product-img {
   width: 100%;
   height: 240rpx;
-  border-radius: 12rpx;
+  /* border-radius: 12rpx; */
 }
 .product-title {
   display: block;

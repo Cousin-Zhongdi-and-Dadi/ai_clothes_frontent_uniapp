@@ -162,7 +162,7 @@ export default {
 
 <style scoped>
 .shop-page {
-  background: #fafafa;
+  background: #f0f0fa;
   min-height: 100vh;
   padding-bottom: 120rpx;
 }
@@ -180,7 +180,7 @@ export default {
   display: flex;
   flex-direction: row;
   background: #fff;
-  padding: 0 20rpx;
+  padding: 20rpx 20rpx;
   border-bottom: 1rpx solid #eee;
   overflow-x: auto;
   white-space: nowrap;
@@ -189,7 +189,7 @@ export default {
 }
 .tab {
   display: inline-block;
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #999;
   margin-right: 32rpx;
   padding: 0 8rpx;
@@ -199,9 +199,9 @@ export default {
   border-bottom: 4rpx solid transparent;
 }
 .tab.active {
-  color: #6753e7;
+  color: #653BD7;
   font-weight: bold;
-  border-bottom: 4rpx solid #6753e7;
+  border-bottom: 6rpx solid #653BD7;
 }
 .goods-list {
   display: flex;

@@ -82,7 +82,7 @@ export default {
 <style scoped>
 .page {
   min-height: 100vh;
-  background: #faf9ff;
+  /* background: #faf9ff; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -108,11 +108,11 @@ export default {
   background: transparent;
   border: none;
   font-size: 36rpx;
-  color: #6c5ce7;
+  color: #653BD7;
 }
 .nav-title {
   font-size: 32rpx;
-  color: #6c5ce7;
+  color: #653BD7;
   font-weight: 700;
 }
 
@@ -127,7 +127,7 @@ export default {
   border-radius: 20rpx;
   padding: 28rpx 24rpx 20rpx 24rpx;
   box-sizing: border-box;
-  border: 4rpx solid #6c5ce7;
+  border: 8rpx solid #653BD7;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -157,45 +157,49 @@ export default {
   top: 18rpx;
   width: 120rpx;
   height: 72rpx;
-  border-radius: 36rpx;
-  background: rgba(108, 92, 231, 0.08);
-  color: #6c5ce7;
+  border-radius: 20rpx;
+  background:#f0f0fa;
+  color: #653BD7;
   border: none;
   font-size: 28rpx;
+  font-weight: bold;
 }
 .start-btn {
   width: 80%;
   height: 80rpx;
   margin-top: 22rpx;
-  border-radius: 44rpx;
-  background: #6c5ce7;
+  border-radius: 20rpx;
+  background: #653BD7;
   color: #fff;
   border: none;
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: bold;
 }
 
 .other-card {
   width: 92%;
   margin-top: 36rpx;
-  background: #f6f3ff;
+  background: #f0f0fa;
   border-radius: 22rpx;
-  padding: 20rpx;
+  padding: 25rpx 20rpx;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  
 }
 .other-title {
-  color: #b9aef9;
+  color: #8968E2;
   font-size: 26rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 25rpx;
+  font-weight: bold;
 }
 .thumb-row {
   width: 100%;
   display: flex;
   gap: 18rpx;
   justify-content: space-between;
+  margin-bottom: 30rpx;
 }
 .thumb {
   flex: 1;

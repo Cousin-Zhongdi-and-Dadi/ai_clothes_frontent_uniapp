@@ -151,22 +151,27 @@ export default {
 }
 .retry-btn {
   width: 400rpx;
-  height: 64rpx;
-  background: #d8d8d8;
+  height: 76rpx;
+  align-content: center;
+  background: #D5D5FB;
   color: #fff;
-  border-radius: 12rpx;
+  border-radius: 20rpx;
   font-size: 28rpx;
   margin-bottom: 32rpx;
+  font-weight: bold;
   border: none;
+
 }
 .confirm-btn {
   width: 400rpx;
-  height: 64rpx;
-  background: #6c5ce7;
+  height: 76rpx;
+  background: #653BD7;
   color: #fff;
-  border-radius: 12rpx;
+  border-radius: 20rpx;
   font-size: 28rpx;
+   font-weight: bold;
   border: none;
+  align-content: center;
 }
 .preview-mask {
   position: fixed;

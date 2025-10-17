@@ -483,7 +483,7 @@ export default {
   /* 不使用 100vh，避免包含状态栏/导航高度 */
   display: flex;
   flex-direction: column;
-  background-color: #fafafa;
+  background-color: #f0f0fa;
   min-height: 100%;
   position: relative; /* 使 header-title/header-sub 能相对于页面定位 */
 }
@@ -508,7 +508,7 @@ export default {
 }
 .sidebar-item.active {
   background-color: #fff;
-  color: #6c5ce7;
+  color: #653bd7;
   font-weight: bold;
 }
 .content-grid {
@@ -527,7 +527,7 @@ export default {
   display: grid;
   /* 响应式两列：每列占可用宽度的一半，保证每行两个商品 */
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20rpx;
+  gap: 6rpx;
   box-sizing: border-box;
   padding: 0 10rpx 20rpx 10rpx;
 }
@@ -548,7 +548,7 @@ export default {
   border-radius: 16rpx;
   align-items: center;
   justify-content: center;
-  background-color: #fafafa;
+  background-color: #f0f0fa;
 }
 .add-icon-plus {
   font-size: 100rpx;
@@ -574,7 +574,7 @@ export default {
 .sub-item {
   background: transparent;
   padding: 8rpx 14rpx;
-  border-radius: 20rpx;
+  /* border-radius: 20rpx; */
   width: 100%;
   height: 100%;
   display: flex;
@@ -664,7 +664,7 @@ export default {
   align-items: center;
   justify-content: center;
   height: 90rpx;
-  background-color: #6c5ce7;
+  background-color: #653bd7;
   color: white;
   border-radius: 45rpx;
   font-size: 30rpx;
@@ -789,7 +789,7 @@ export default {
   padding: 12rpx 12rpx;
   border-radius: 20rpx; /* 圆角背景 */
   /*background: #6c5ce7;  未选中时紫色背景 */
-  background: #d5d5f8;
+  background: #d5d5fb;
   /* border: 6rpx solid rgba(255, 255, 255, 0.95); 白色边框 */
   cursor: pointer;
   /* 移除 min-width，使用固定尺寸保证正方形 */
@@ -848,11 +848,11 @@ export default {
   width: 120rpx;
   height: 120rpx;
   border-radius: 60rpx;
-  background: #d5d5f8;
+  background: #d5d5fb;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c5ce7;
+  color: #653bd7;
   box-shadow: 0 12rpx 30rpx rgba(108, 92, 231, 0.28);
   z-index: 999;
 }

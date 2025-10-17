@@ -163,6 +163,7 @@ export default {
     return {
       pageType: 'top',
       source: '',
+      loadAllCategories: false,
   isDetailVisible: false,
       tabs: [],
       activeTabId: null,
@@ -175,12 +176,17 @@ export default {
     };
   },
   onLoad(options) {
-    if (options.type === 'bottom') {
-      this.pageType = 'bottom';
-      this.parentId = 24;
+    if (options.source === 'AiMatch') {
+      this.loadAllCategories = true;
+      this.pageType = 'all'; // 或保持默认
     } else {
-      this.pageType = 'top';
-      this.parentId = 23;
+      if (options.type === 'bottom') {
+        this.pageType = 'bottom';
+        this.parentId = 24;
+      } else {
+        this.pageType = 'top';
+        this.parentId = 23;
+      }
     }
     if (options.source) {
       this.source = options.source;
@@ -191,14 +197,30 @@ export default {
     async fetchSubCategories() {
       this.isLoading = true;
       try {
-        const data = await request({
-          url: `${apiConfig.BASE_URL}/mall/getSubCategory`,
-          method: 'GET',
-          data: {
-            parentId: this.parentId
-          }
-        });
-        const categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
+        let categories = [];
+        if (this.loadAllCategories) {
+          // 加载上装和下装的所有子分类
+          const topData = await request({
+            url: `${apiConfig.BASE_URL}/mall/getSubCategory`,
+            method: 'GET',
+            data: { parentId: 23 }
+          });
+          const bottomData = await request({
+            url: `${apiConfig.BASE_URL}/mall/getSubCategory`,
+            method: 'GET',
+            data: { parentId: 24 }
+          });
+          categories = [...(Array.isArray(topData) ? topData : []), ...(Array.isArray(bottomData) ? bottomData : [])].sort((a, b) => a.sortOrder - b.sortOrder);
+        } else {
+          const data = await request({
+            url: `${apiConfig.BASE_URL}/mall/getSubCategory`,
+            method: 'GET',
+            data: {
+              parentId: this.parentId
+            }
+          });
+          categories = Array.isArray(data) ? data.sort((a, b) => a.sortOrder - b.sortOrder) : [];
+        }
         this.tabs = categories;
         if (this.tabs.length > 0) {
           this.activeTabId = this.tabs[0].id;
